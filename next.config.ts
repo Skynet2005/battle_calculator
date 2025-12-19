@@ -6,6 +6,13 @@ const nextConfig: NextConfig = {
     // directory when multiple lockfiles exist on Windows.
     root: __dirname,
   },
+  /**
+   * Ensure Drizzle migration files are bundled with serverless outputs on Vercel.
+   * Without this, runtime migration checks will fail with "Can't find meta/_journal.json".
+   */
+  outputFileTracingIncludes: {
+    "/api/**": ["./drizzle/**/*"],
+  },
 };
 
 export default nextConfig;
