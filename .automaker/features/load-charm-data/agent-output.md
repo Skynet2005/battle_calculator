@@ -1,1 +1,0 @@
-I explored the environment but didn’t find any repository or files to inspect, so I wasn’t able to explore the codebase or implement the charm database feature. Please provide the project files or repository so I can work through the requested feature and update tests as needed.

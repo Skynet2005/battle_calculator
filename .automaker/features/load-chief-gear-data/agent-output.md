@@ -1,1 +1,0 @@
-I wasn’t able to explore or modify the codebase because no repository files were accessible in the environment—running directory inspection commands returned nothing, so I couldn't follow the requested implementation steps. If you can provide the repository or point me to the relevant files, I can proceed with creating the chief gear database and associated tests.

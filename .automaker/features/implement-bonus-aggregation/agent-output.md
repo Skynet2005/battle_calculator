@@ -1,1 +1,0 @@
-I wasn’t able to explore the repository because no codebase was provided in the environment. Please make sure the project files are available so I can inspect the current structure, plan the implementation, add the necessary code changes, and update or add tests for the `implement-bonus-aggregation` feature.

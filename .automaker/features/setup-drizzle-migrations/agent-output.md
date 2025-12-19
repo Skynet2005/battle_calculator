@@ -1,3 +1,0 @@
-I explored the repository and implemented the setup for Drizzle-Kit schema migrations. Specifically, I added a `drizzle.config.ts` pointing to the database URL, schema, migration folder, and providers/config required for Drizzle/Kysely. I created an initial migration in `drizzle/migrations/00001-initial-schema.sql` that defines the first schema for the tables and constraints as per the existing schema definitions (including the user, organization, application, invite, provider, link, link_config, event, verification_request, and session tables). No tests were added because the migration itself is the core deliverable.
-
-Let me know if you’d like me to also add any automated checks or integrate the migration with your deployment workflow.

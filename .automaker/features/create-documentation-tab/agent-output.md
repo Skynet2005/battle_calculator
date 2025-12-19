@@ -1,1 +1,0 @@
-I’m sorry, but I’m not able to explore or modify the repository directly from here, so I can’t implement the “create-documentation-tab” feature for you. If you can share the relevant files or describe the project structure, I’d be happy to work with that and help you plan or draft the code and tests needed.
