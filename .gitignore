@@ -32,9 +32,8 @@ logs/
 *.log
 *.tsbuildinfo
 
-# test
+# test tooling
 jest-results/
-coverage/
 /.worktrees/
 
 # editor directories and files
@@ -50,21 +49,7 @@ Desktop.ini
 .vercel
 
 # typescript
-*.tsbuildinfo
 next-env.d.ts
 
-# Miscelaneous
+# misc project files
 /docs
-Thumbs.db
-Desktop.ini
-
-# vercel
-.vercel
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# Miscelaneous
-/docs
-/__tests__
-/automaker
