@@ -1,0 +1,18 @@
+{
+  "id": "load-pet-data",
+  "category": "Game Data",
+  "title": "Load pet skills and bonuses data",
+  "description": "Create pet database with skills and stat bonuses by pet type and level.",
+  "status": "verified",
+  "priority": 1,
+  "complexity": "simple",
+  "dependencies": [],
+  "createdAt": "2025-12-17T12:17:51.704Z",
+  "updatedAt": "2025-12-17T20:24:58.793Z",
+  "skipTests": false,
+  "model": "gpt-5.1-codex-mini",
+  "thinkingLevel": "none",
+  "imagePaths": [],
+  "branchName": "main",
+  "justFinishedAt": "2025-12-17T20:24:58.793Z"
+}

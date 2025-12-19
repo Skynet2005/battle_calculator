@@ -1,0 +1,21 @@
+{
+  "id": "implement-damage-calculation",
+  "category": "Core",
+  "title": "Implement damage calculation engine",
+  "description": "Build damage formula implementation with K constant, troop count exponent alpha, stat-based multipliers, and multiplicative damage modifier layers.",
+  "status": "verified",
+  "priority": 1,
+  "complexity": "moderate",
+  "dependencies": [
+    "create-combat-types",
+    "implement-stat-pipeline"
+  ],
+  "createdAt": "2025-12-17T12:17:51.709Z",
+  "updatedAt": "2025-12-17T20:06:52.656Z",
+  "skipTests": false,
+  "model": "gpt-5.1-codex-max",
+  "thinkingLevel": "none",
+  "imagePaths": [],
+  "branchName": "main",
+  "justFinishedAt": "2025-12-17T20:06:52.656Z"
+}

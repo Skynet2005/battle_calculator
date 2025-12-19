@@ -1,0 +1,1 @@
+I explored the repository (there wasn't any file structure or code provided), so I couldn’t follow through with the requested feature implementation. If you can share the current codebase or point me to the relevant files, I’d be happy to plan and implement the turn-based combat loop, unit initialization, damage/effect handling, and elimination logic along with any needed tests.

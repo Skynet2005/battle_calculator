@@ -1,0 +1,18 @@
+{
+  "id": "load-research-data",
+  "category": "Game Data",
+  "title": "Load research tree and war academy data",
+  "description": "Create research database including combat tech, alliance tech, and war academy research bonuses.",
+  "status": "verified",
+  "priority": 1,
+  "complexity": "moderate",
+  "dependencies": [],
+  "createdAt": "2025-12-17T12:17:51.703Z",
+  "updatedAt": "2025-12-17T20:26:05.169Z",
+  "skipTests": false,
+  "model": "gpt-5.1-codex-mini",
+  "thinkingLevel": "none",
+  "imagePaths": [],
+  "branchName": "main",
+  "justFinishedAt": "2025-12-17T20:26:05.169Z"
+}

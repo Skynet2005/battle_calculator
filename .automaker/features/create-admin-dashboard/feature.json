@@ -1,0 +1,21 @@
+{
+  "id": "create-admin-dashboard",
+  "category": "Admin",
+  "title": "Build admin user management dashboard",
+  "description": "Create admin interface for viewing users, managing roles, and database administration using Drizzle admin adapter.",
+  "status": "verified",
+  "priority": 2,
+  "complexity": "moderate",
+  "dependencies": [
+    "create-session-validation",
+    "load-hero-data"
+  ],
+  "createdAt": "2025-12-17T12:17:51.721Z",
+  "updatedAt": "2025-12-17T20:32:54.763Z",
+  "skipTests": false,
+  "model": "gpt-5.1-codex-max",
+  "thinkingLevel": "none",
+  "imagePaths": [],
+  "branchName": "main",
+  "justFinishedAt": "2025-12-17T20:32:54.763Z"
+}

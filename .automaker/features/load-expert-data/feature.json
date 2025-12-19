@@ -1,0 +1,18 @@
+{
+  "id": "load-expert-data",
+  "category": "Game Data",
+  "title": "Load expert bonus data",
+  "description": "Create expert database with bonus percentages per expert type and level.",
+  "status": "verified",
+  "priority": 1,
+  "complexity": "simple",
+  "dependencies": [],
+  "createdAt": "2025-12-17T12:17:51.702Z",
+  "updatedAt": "2025-12-17T20:18:30.207Z",
+  "skipTests": false,
+  "model": "gpt-5.1-codex-mini",
+  "thinkingLevel": "none",
+  "imagePaths": [],
+  "branchName": "main",
+  "justFinishedAt": "2025-12-17T20:18:30.207Z"
+}

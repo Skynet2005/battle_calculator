@@ -1,0 +1,21 @@
+{
+  "id": "load-hero-gear-data",
+  "category": "Game Data",
+  "title": "Load hero gear bonus data",
+  "description": "Create hero gear bonuses database with per-troop-type bonuses (Infantry/Lancer/Marksman), rarity levels, and stat modifiers.",
+  "status": "verified",
+  "priority": 1,
+  "complexity": "moderate",
+  "dependencies": [
+    "load-hero-data",
+    "load-troop-data"
+  ],
+  "createdAt": "2025-12-17T12:17:51.700Z",
+  "updatedAt": "2025-12-17T20:23:35.332Z",
+  "skipTests": false,
+  "model": "gpt-5.1-codex-mini",
+  "thinkingLevel": "none",
+  "imagePaths": [],
+  "branchName": "main",
+  "justFinishedAt": "2025-12-17T20:23:35.332Z"
+}

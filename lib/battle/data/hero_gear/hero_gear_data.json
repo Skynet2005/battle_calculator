@@ -1,0 +1,4032 @@
+{
+  "gear": {
+    "Marksman_Goggles": [
+      {
+        "level": 0,
+        "power": 2900.0,
+        "lethality": 3.8
+      },
+      {
+        "level": 1,
+        "power": 2900.0,
+        "lethality": 3.8
+      },
+      {
+        "level": 2,
+        "power": 3325.0,
+        "lethality": 4.26
+      },
+      {
+        "level": 3,
+        "power": 3775.0,
+        "lethality": 4.73
+      },
+      {
+        "level": 4,
+        "power": 4225.0,
+        "lethality": 5.2
+      },
+      {
+        "level": 5,
+        "power": 4700.0,
+        "lethality": 5.66
+      },
+      {
+        "level": 6,
+        "power": 5175.0,
+        "lethality": 6.13
+      },
+      {
+        "level": 7,
+        "power": 5675.0,
+        "lethality": 6.6
+      },
+      {
+        "level": 8,
+        "power": 6200.0,
+        "lethality": 7.06
+      },
+      {
+        "level": 9,
+        "power": 6750.0,
+        "lethality": 7.53
+      },
+      {
+        "level": 10,
+        "power": 7325.0,
+        "lethality": 8.0
+      },
+      {
+        "level": 11,
+        "power": 7900.0,
+        "lethality": 8.46
+      },
+      {
+        "level": 12,
+        "power": 8500.0,
+        "lethality": 8.93
+      },
+      {
+        "level": 13,
+        "power": 9125.0,
+        "lethality": 9.4
+      },
+      {
+        "level": 14,
+        "power": 9775.0,
+        "lethality": 9.86
+      },
+      {
+        "level": 15,
+        "power": 10425.0,
+        "lethality": 10.33
+      },
+      {
+        "level": 16,
+        "power": 11125.0,
+        "lethality": 10.8
+      },
+      {
+        "level": 17,
+        "power": 11825.0,
+        "lethality": 11.26
+      },
+      {
+        "level": 18,
+        "power": 12575.0,
+        "lethality": 11.73
+      },
+      {
+        "level": 19,
+        "power": 13325.0,
+        "lethality": 12.2
+      },
+      {
+        "level": 20,
+        "power": 14125.0,
+        "lethality": 12.66
+      },
+      {
+        "level": 21,
+        "power": 14925.0,
+        "lethality": 13.13
+      },
+      {
+        "level": 22,
+        "power": 15775.0,
+        "lethality": 13.6
+      },
+      {
+        "level": 23,
+        "power": 16625.0,
+        "lethality": 14.06
+      },
+      {
+        "level": 24,
+        "power": 17525.0,
+        "lethality": 14.53
+      },
+      {
+        "level": 25,
+        "power": 18450.0,
+        "lethality": 15.0
+      },
+      {
+        "level": 26,
+        "power": 19400.0,
+        "lethality": 15.46
+      },
+      {
+        "level": 27,
+        "power": 20400.0,
+        "lethality": 15.93
+      },
+      {
+        "level": 28,
+        "power": 21425.0,
+        "lethality": 16.4
+      },
+      {
+        "level": 29,
+        "power": 22475.0,
+        "lethality": 16.86
+      },
+      {
+        "level": 30,
+        "power": 23550.0,
+        "lethality": 17.33
+      },
+      {
+        "level": 31,
+        "power": 24675.0,
+        "lethality": 17.8
+      },
+      {
+        "level": 32,
+        "power": 25825.0,
+        "lethality": 18.26
+      },
+      {
+        "level": 33,
+        "power": 27000.0,
+        "lethality": 18.73
+      },
+      {
+        "level": 34,
+        "power": 28225.0,
+        "lethality": 19.2
+      },
+      {
+        "level": 35,
+        "power": 29500.0,
+        "lethality": 19.66
+      },
+      {
+        "level": 36,
+        "power": 30800.0,
+        "lethality": 20.13
+      },
+      {
+        "level": 37,
+        "power": 32150.0,
+        "lethality": 20.6
+      },
+      {
+        "level": 38,
+        "power": 33525.0,
+        "lethality": 21.06
+      },
+      {
+        "level": 39,
+        "power": 34950.0,
+        "lethality": 21.53
+      },
+      {
+        "level": 40,
+        "power": 36425.0,
+        "lethality": 22.0
+      },
+      {
+        "level": 41,
+        "power": 37950.0,
+        "lethality": 22.46
+      },
+      {
+        "level": 42,
+        "power": 39525.0,
+        "lethality": 22.93
+      },
+      {
+        "level": 43,
+        "power": 41125.0,
+        "lethality": 23.4
+      },
+      {
+        "level": 44,
+        "power": 42775.0,
+        "lethality": 23.86
+      },
+      {
+        "level": 45,
+        "power": 44500.0,
+        "lethality": 24.33
+      },
+      {
+        "level": 46,
+        "power": 46250.0,
+        "lethality": 24.8
+      },
+      {
+        "level": 47,
+        "power": 48075.0,
+        "lethality": 25.26
+      },
+      {
+        "level": 48,
+        "power": 49925.0,
+        "lethality": 25.73
+      },
+      {
+        "level": 49,
+        "power": 51850.0,
+        "lethality": 26.2
+      },
+      {
+        "level": 50,
+        "power": 53825.0,
+        "lethality": 26.66
+      },
+      {
+        "level": 51,
+        "power": 55875.0,
+        "lethality": 27.13
+      },
+      {
+        "level": 52,
+        "power": 57975.0,
+        "lethality": 27.6
+      },
+      {
+        "level": 53,
+        "power": 60125.0,
+        "lethality": 28.06
+      },
+      {
+        "level": 54,
+        "power": 62350.0,
+        "lethality": 28.53
+      },
+      {
+        "level": 55,
+        "power": 64625.0,
+        "lethality": 29.0
+      },
+      {
+        "level": 56,
+        "power": 67000.0,
+        "lethality": 29.46
+      },
+      {
+        "level": 57,
+        "power": 69400.0,
+        "lethality": 29.93
+      },
+      {
+        "level": 58,
+        "power": 71900.0,
+        "lethality": 30.4
+      },
+      {
+        "level": 59,
+        "power": 74475.0,
+        "lethality": 30.86
+      },
+      {
+        "level": 60,
+        "power": 77100.0,
+        "lethality": 31.33
+      },
+      {
+        "level": 61,
+        "power": 79825.0,
+        "lethality": 31.8
+      },
+      {
+        "level": 62,
+        "power": 82600.0,
+        "lethality": 32.26
+      },
+      {
+        "level": 63,
+        "power": 85475.0,
+        "lethality": 32.73
+      },
+      {
+        "level": 64,
+        "power": 88425.0,
+        "lethality": 33.2
+      },
+      {
+        "level": 65,
+        "power": 91475.0,
+        "lethality": 33.66
+      },
+      {
+        "level": 66,
+        "power": 94600.0,
+        "lethality": 34.13
+      },
+      {
+        "level": 67,
+        "power": 97800.0,
+        "lethality": 34.6
+      },
+      {
+        "level": 68,
+        "power": 101100.0,
+        "lethality": 35.06
+      },
+      {
+        "level": 69,
+        "power": 104500.0,
+        "lethality": 35.53
+      },
+      {
+        "level": 70,
+        "power": 108000.0,
+        "lethality": 36.0
+      },
+      {
+        "level": 71,
+        "power": 111575.0,
+        "lethality": 36.46
+      },
+      {
+        "level": 72,
+        "power": 115275.0,
+        "lethality": 36.93
+      },
+      {
+        "level": 73,
+        "power": 119050.0,
+        "lethality": 37.4
+      },
+      {
+        "level": 74,
+        "power": 122950.0,
+        "lethality": 37.86
+      },
+      {
+        "level": 75,
+        "power": 126950.0,
+        "lethality": 38.33
+      },
+      {
+        "level": 76,
+        "power": 131075.0,
+        "lethality": 38.8
+      },
+      {
+        "level": 77,
+        "power": 135300.0,
+        "lethality": 39.26
+      },
+      {
+        "level": 78,
+        "power": 139650.0,
+        "lethality": 39.73
+      },
+      {
+        "level": 79,
+        "power": 144100.0,
+        "lethality": 40.2
+      },
+      {
+        "level": 80,
+        "power": 148700.0,
+        "lethality": 40.66
+      },
+      {
+        "level": 81,
+        "power": 153425.0,
+        "lethality": 41.13
+      },
+      {
+        "level": 82,
+        "power": 158250.0,
+        "lethality": 41.6
+      },
+      {
+        "level": 83,
+        "power": 163225.0,
+        "lethality": 42.06
+      },
+      {
+        "level": 84,
+        "power": 168350.0,
+        "lethality": 42.53
+      },
+      {
+        "level": 85,
+        "power": 173600.0,
+        "lethality": 43.0
+      },
+      {
+        "level": 86,
+        "power": 179000.0,
+        "lethality": 43.46
+      },
+      {
+        "level": 87,
+        "power": 184525.0,
+        "lethality": 43.93
+      },
+      {
+        "level": 88,
+        "power": 190225.0,
+        "lethality": 44.4
+      },
+      {
+        "level": 89,
+        "power": 196075.0,
+        "lethality": 44.86
+      },
+      {
+        "level": 90,
+        "power": 202075.0,
+        "lethality": 45.33
+      },
+      {
+        "level": 91,
+        "power": 208225.0,
+        "lethality": 45.8
+      },
+      {
+        "level": 92,
+        "power": 214550.0,
+        "lethality": 46.26
+      },
+      {
+        "level": 93,
+        "power": 221050.0,
+        "lethality": 46.73
+      },
+      {
+        "level": 94,
+        "power": 227725.0,
+        "lethality": 47.2
+      },
+      {
+        "level": 95,
+        "power": 234575.0,
+        "lethality": 47.66
+      },
+      {
+        "level": 96,
+        "power": 241625.0,
+        "lethality": 48.13
+      },
+      {
+        "level": 97,
+        "power": 248825.0,
+        "lethality": 48.6
+      },
+      {
+        "level": 98,
+        "power": 256250.0,
+        "lethality": 49.06
+      },
+      {
+        "level": 99,
+        "power": 263850.0,
+        "lethality": 49.53
+      },
+      {
+        "level": 100,
+        "power": 271675.0,
+        "lethality": 50.0
+      },
+      {
+        "level": 101,
+        "power": 279500.0,
+        "lethality": 50.5
+      },
+      {
+        "level": 102,
+        "power": 287325.0,
+        "lethality": 51.0
+      },
+      {
+        "level": 103,
+        "power": 295150.0,
+        "lethality": 51.5
+      },
+      {
+        "level": 104,
+        "power": 302975.0,
+        "lethality": 52.0
+      },
+      {
+        "level": 105,
+        "power": 310800.0,
+        "lethality": 52.5
+      },
+      {
+        "level": 106,
+        "power": 318625.0,
+        "lethality": 53.0
+      },
+      {
+        "level": 107,
+        "power": 326450.0,
+        "lethality": 53.5
+      },
+      {
+        "level": 108,
+        "power": 334275.0,
+        "lethality": 54.0
+      },
+      {
+        "level": 109,
+        "power": 342100.0,
+        "lethality": 54.5
+      },
+      {
+        "level": 110,
+        "power": 349925.0,
+        "lethality": 55.0
+      },
+      {
+        "level": 111,
+        "power": 357750.0,
+        "lethality": 55.5
+      },
+      {
+        "level": 112,
+        "power": 365575.0,
+        "lethality": 56.0
+      },
+      {
+        "level": 113,
+        "power": 373400.0,
+        "lethality": 56.5
+      },
+      {
+        "level": 114,
+        "power": 381225.0,
+        "lethality": 57.0
+      },
+      {
+        "level": 115,
+        "power": 389050.0,
+        "lethality": 57.5
+      },
+      {
+        "level": 116,
+        "power": 396875.0,
+        "lethality": 58.0
+      },
+      {
+        "level": 117,
+        "power": 404700.0,
+        "lethality": 58.5
+      },
+      {
+        "level": 118,
+        "power": 412525.0,
+        "lethality": 59.0
+      },
+      {
+        "level": 119,
+        "power": 420350.0,
+        "lethality": 59.5
+      },
+      {
+        "level": 120,
+        "power": 523412.8571428571,
+        "lethality": 60.0
+      },
+      {
+        "level": 121,
+        "power": 531237.8696741854,
+        "lethality": 60.5
+      },
+      {
+        "level": 122,
+        "power": 539062.8822055138,
+        "lethality": 61.0
+      },
+      {
+        "level": 123,
+        "power": 546887.894736842,
+        "lethality": 61.5
+      },
+      {
+        "level": 124,
+        "power": 554712.9072681704,
+        "lethality": 62.0
+      },
+      {
+        "level": 125,
+        "power": 562537.9197994987,
+        "lethality": 62.5
+      },
+      {
+        "level": 126,
+        "power": 570362.932330827,
+        "lethality": 62.99999999999999
+      },
+      {
+        "level": 127,
+        "power": 578187.9448621554,
+        "lethality": 63.49999999999999
+      },
+      {
+        "level": 128,
+        "power": 586012.9573934837,
+        "lethality": 63.99999999999999
+      },
+      {
+        "level": 129,
+        "power": 593837.969924812,
+        "lethality": 64.5
+      },
+      {
+        "level": 130,
+        "power": 601662.9824561403,
+        "lethality": 65.0
+      },
+      {
+        "level": 131,
+        "power": 609487.9949874687,
+        "lethality": 65.49999999999999
+      },
+      {
+        "level": 132,
+        "power": 617313.007518797,
+        "lethality": 65.99999999999999
+      },
+      {
+        "level": 133,
+        "power": 625138.0200501253,
+        "lethality": 66.49999999999999
+      },
+      {
+        "level": 134,
+        "power": 632963.0325814537,
+        "lethality": 66.99999999999999
+      },
+      {
+        "level": 135,
+        "power": 640788.0451127819,
+        "lethality": 67.49999999999999
+      },
+      {
+        "level": 136,
+        "power": 648613.0576441103,
+        "lethality": 67.99999999999999
+      },
+      {
+        "level": 137,
+        "power": 656438.0701754387,
+        "lethality": 68.49999999999999
+      },
+      {
+        "level": 138,
+        "power": 664263.0827067669,
+        "lethality": 68.99999999999999
+      },
+      {
+        "level": 139,
+        "power": 672088.0952380953,
+        "lethality": 69.49999999999999
+      },
+      {
+        "level": 140,
+        "power": 683816.2958626073,
+        "lethality": 69.99999999999999
+      },
+      {
+        "level": 141,
+        "power": 695544.4964871195,
+        "lethality": 70.49999999999999
+      },
+      {
+        "level": 142,
+        "power": 707272.6971116315,
+        "lethality": 70.99999999999999
+      },
+      {
+        "level": 143,
+        "power": 719000.8977361437,
+        "lethality": 71.49999999999999
+      },
+      {
+        "level": 144,
+        "power": 730729.0983606557,
+        "lethality": 71.99999999999999
+      },
+      {
+        "level": 145,
+        "power": 742457.2989851679,
+        "lethality": 72.49999999999999
+      },
+      {
+        "level": 146,
+        "power": 754185.4996096799,
+        "lethality": 72.99999999999999
+      },
+      {
+        "level": 147,
+        "power": 765913.7002341921,
+        "lethality": 73.49999999999999
+      },
+      {
+        "level": 148,
+        "power": 777641.9008587041,
+        "lethality": 73.99999999999999
+      },
+      {
+        "level": 149,
+        "power": 789370.1014832163,
+        "lethality": 74.49999999999999
+      },
+      {
+        "level": 150,
+        "power": 801098.3021077283,
+        "lethality": 74.99999999999999
+      },
+      {
+        "level": 151,
+        "power": 812826.5027322404,
+        "lethality": 75.49999999999999
+      },
+      {
+        "level": 152,
+        "power": 824554.7033567525,
+        "lethality": 75.99999999999999
+      },
+      {
+        "level": 153,
+        "power": 836282.9039812647,
+        "lethality": 76.49999999999999
+      },
+      {
+        "level": 154,
+        "power": 848011.1046057767,
+        "lethality": 76.99999999999999
+      },
+      {
+        "level": 155,
+        "power": 859739.3052302888,
+        "lethality": 77.49999999999999
+      },
+      {
+        "level": 156,
+        "power": 871467.5058548009,
+        "lethality": 77.99999999999999
+      },
+      {
+        "level": 157,
+        "power": 883195.7064793131,
+        "lethality": 78.49999999999999
+      },
+      {
+        "level": 158,
+        "power": 894923.9071038251,
+        "lethality": 78.99999999999999
+      },
+      {
+        "level": 159,
+        "power": 906652.1077283372,
+        "lethality": 79.49999999999999
+      },
+      {
+        "level": 160,
+        "power": 918380.3083528493,
+        "lethality": 79.99999999999999
+      },
+      {
+        "level": 161,
+        "power": 930108.5089773614,
+        "lethality": 80.49999999999999
+      },
+      {
+        "level": 162,
+        "power": 941836.7096018735,
+        "lethality": 80.99999999999999
+      },
+      {
+        "level": 163,
+        "power": 953564.9102263856,
+        "lethality": 81.49999999999999
+      },
+      {
+        "level": 164,
+        "power": 965293.1108508976,
+        "lethality": 81.99999999999999
+      },
+      {
+        "level": 165,
+        "power": 977021.3114754098,
+        "lethality": 82.49999999999999
+      },
+      {
+        "level": 166,
+        "power": 988749.5120999219,
+        "lethality": 82.99999999999999
+      },
+      {
+        "level": 167,
+        "power": 1000477.712724434,
+        "lethality": 83.5
+      },
+      {
+        "level": 168,
+        "power": 1012205.913348946,
+        "lethality": 84.0
+      },
+      {
+        "level": 169,
+        "power": 1023934.113973458,
+        "lethality": 84.5
+      },
+      {
+        "level": 170,
+        "power": 1035662.31459797,
+        "lethality": 85.0
+      },
+      {
+        "level": 171,
+        "power": 1047390.515222482,
+        "lethality": 85.5
+      },
+      {
+        "level": 172,
+        "power": 1059118.715846994,
+        "lethality": 86.0
+      },
+      {
+        "level": 173,
+        "power": 1070846.916471506,
+        "lethality": 86.5
+      },
+      {
+        "level": 174,
+        "power": 1082575.117096019,
+        "lethality": 87.0
+      },
+      {
+        "level": 175,
+        "power": 1094303.317720531,
+        "lethality": 87.5
+      },
+      {
+        "level": 176,
+        "power": 1106031.518345043,
+        "lethality": 88.0
+      },
+      {
+        "level": 177,
+        "power": 1117759.718969555,
+        "lethality": 88.5
+      },
+      {
+        "level": 178,
+        "power": 1129487.919594067,
+        "lethality": 89.0
+      },
+      {
+        "level": 179,
+        "power": 1141216.120218579,
+        "lethality": 89.5
+      },
+      {
+        "level": 180,
+        "power": 1152944.320843091,
+        "lethality": 90.0
+      },
+      {
+        "level": 181,
+        "power": 1164672.521467603,
+        "lethality": 90.5
+      },
+      {
+        "level": 182,
+        "power": 1176400.722092115,
+        "lethality": 91.0
+      },
+      {
+        "level": 183,
+        "power": 1188128.922716628,
+        "lethality": 91.5
+      },
+      {
+        "level": 184,
+        "power": 1199857.12334114,
+        "lethality": 92.0
+      },
+      {
+        "level": 185,
+        "power": 1211585.323965652,
+        "lethality": 92.5
+      },
+      {
+        "level": 186,
+        "power": 1223313.524590164,
+        "lethality": 93.0
+      },
+      {
+        "level": 187,
+        "power": 1235041.725214676,
+        "lethality": 93.5
+      },
+      {
+        "level": 188,
+        "power": 1246769.925839188,
+        "lethality": 94.0
+      },
+      {
+        "level": 189,
+        "power": 1258498.1264637,
+        "lethality": 94.5
+      },
+      {
+        "level": 190,
+        "power": 1270226.327088212,
+        "lethality": 95.0
+      },
+      {
+        "level": 191,
+        "power": 1281954.527712724,
+        "lethality": 95.5
+      },
+      {
+        "level": 192,
+        "power": 1293682.728337236,
+        "lethality": 96.0
+      },
+      {
+        "level": 193,
+        "power": 1305410.928961748,
+        "lethality": 96.5
+      },
+      {
+        "level": 194,
+        "power": 1317139.129586261,
+        "lethality": 97.0
+      },
+      {
+        "level": 195,
+        "power": 1328867.330210773,
+        "lethality": 97.5
+      },
+      {
+        "level": 196,
+        "power": 1340595.530835285,
+        "lethality": 98.0
+      },
+      {
+        "level": 197,
+        "power": 1352323.731459797,
+        "lethality": 98.5
+      },
+      {
+        "level": 198,
+        "power": 1364051.932084309,
+        "lethality": 99.0
+      },
+      {
+        "level": 199,
+        "power": 1375780.132708821,
+        "lethality": 99.5
+      },
+      {
+        "level": 200,
+        "power": 1387508.333333333,
+        "lethality": 100.0
+      }
+    ],
+    "Marksman_Boot": [
+      {
+        "level": 0,
+        "power": 2900.0,
+        "lethality": 3.8
+      },
+      {
+        "level": 1,
+        "power": 2900.0,
+        "lethality": 3.8
+      },
+      {
+        "level": 2,
+        "power": 3325.0,
+        "lethality": 4.26
+      },
+      {
+        "level": 3,
+        "power": 3775.0,
+        "lethality": 4.73
+      },
+      {
+        "level": 4,
+        "power": 4225.0,
+        "lethality": 5.2
+      },
+      {
+        "level": 5,
+        "power": 4700.0,
+        "lethality": 5.66
+      },
+      {
+        "level": 6,
+        "power": 5175.0,
+        "lethality": 6.13
+      },
+      {
+        "level": 7,
+        "power": 5675.0,
+        "lethality": 6.6
+      },
+      {
+        "level": 8,
+        "power": 6200.0,
+        "lethality": 7.06
+      },
+      {
+        "level": 9,
+        "power": 6750.0,
+        "lethality": 7.53
+      },
+      {
+        "level": 10,
+        "power": 7325.0,
+        "lethality": 8.0
+      },
+      {
+        "level": 11,
+        "power": 7900.0,
+        "lethality": 8.46
+      },
+      {
+        "level": 12,
+        "power": 8500.0,
+        "lethality": 8.93
+      },
+      {
+        "level": 13,
+        "power": 9125.0,
+        "lethality": 9.4
+      },
+      {
+        "level": 14,
+        "power": 9775.0,
+        "lethality": 9.86
+      },
+      {
+        "level": 15,
+        "power": 10425.0,
+        "lethality": 10.33
+      },
+      {
+        "level": 16,
+        "power": 11125.0,
+        "lethality": 10.8
+      },
+      {
+        "level": 17,
+        "power": 11825.0,
+        "lethality": 11.26
+      },
+      {
+        "level": 18,
+        "power": 12575.0,
+        "lethality": 11.73
+      },
+      {
+        "level": 19,
+        "power": 13325.0,
+        "lethality": 12.2
+      },
+      {
+        "level": 20,
+        "power": 14125.0,
+        "lethality": 12.66
+      },
+      {
+        "level": 21,
+        "power": 14925.0,
+        "lethality": 13.13
+      },
+      {
+        "level": 22,
+        "power": 15775.0,
+        "lethality": 13.6
+      },
+      {
+        "level": 23,
+        "power": 16625.0,
+        "lethality": 14.06
+      },
+      {
+        "level": 24,
+        "power": 17525.0,
+        "lethality": 14.53
+      },
+      {
+        "level": 25,
+        "power": 18450.0,
+        "lethality": 15.0
+      },
+      {
+        "level": 26,
+        "power": 19400.0,
+        "lethality": 15.46
+      },
+      {
+        "level": 27,
+        "power": 20400.0,
+        "lethality": 15.93
+      },
+      {
+        "level": 28,
+        "power": 21425.0,
+        "lethality": 16.4
+      },
+      {
+        "level": 29,
+        "power": 22475.0,
+        "lethality": 16.86
+      },
+      {
+        "level": 30,
+        "power": 23550.0,
+        "lethality": 17.33
+      },
+      {
+        "level": 31,
+        "power": 24675.0,
+        "lethality": 17.8
+      },
+      {
+        "level": 32,
+        "power": 25825.0,
+        "lethality": 18.26
+      },
+      {
+        "level": 33,
+        "power": 27000.0,
+        "lethality": 18.73
+      },
+      {
+        "level": 34,
+        "power": 28225.0,
+        "lethality": 19.2
+      },
+      {
+        "level": 35,
+        "power": 29500.0,
+        "lethality": 19.66
+      },
+      {
+        "level": 36,
+        "power": 30800.0,
+        "lethality": 20.13
+      },
+      {
+        "level": 37,
+        "power": 32150.0,
+        "lethality": 20.6
+      },
+      {
+        "level": 38,
+        "power": 33525.0,
+        "lethality": 21.06
+      },
+      {
+        "level": 39,
+        "power": 34950.0,
+        "lethality": 21.53
+      },
+      {
+        "level": 40,
+        "power": 36425.0,
+        "lethality": 22.0
+      },
+      {
+        "level": 41,
+        "power": 37950.0,
+        "lethality": 22.46
+      },
+      {
+        "level": 42,
+        "power": 39525.0,
+        "lethality": 22.93
+      },
+      {
+        "level": 43,
+        "power": 41125.0,
+        "lethality": 23.4
+      },
+      {
+        "level": 44,
+        "power": 42775.0,
+        "lethality": 23.86
+      },
+      {
+        "level": 45,
+        "power": 44500.0,
+        "lethality": 24.33
+      },
+      {
+        "level": 46,
+        "power": 46250.0,
+        "lethality": 24.8
+      },
+      {
+        "level": 47,
+        "power": 48075.0,
+        "lethality": 25.26
+      },
+      {
+        "level": 48,
+        "power": 49925.0,
+        "lethality": 25.73
+      },
+      {
+        "level": 49,
+        "power": 51850.0,
+        "lethality": 26.2
+      },
+      {
+        "level": 50,
+        "power": 53825.0,
+        "lethality": 26.66
+      },
+      {
+        "level": 51,
+        "power": 55875.0,
+        "lethality": 27.13
+      },
+      {
+        "level": 52,
+        "power": 57975.0,
+        "lethality": 27.6
+      },
+      {
+        "level": 53,
+        "power": 60125.0,
+        "lethality": 28.06
+      },
+      {
+        "level": 54,
+        "power": 62350.0,
+        "lethality": 28.53
+      },
+      {
+        "level": 55,
+        "power": 64625.0,
+        "lethality": 29.0
+      },
+      {
+        "level": 56,
+        "power": 67000.0,
+        "lethality": 29.46
+      },
+      {
+        "level": 57,
+        "power": 69400.0,
+        "lethality": 29.93
+      },
+      {
+        "level": 58,
+        "power": 71900.0,
+        "lethality": 30.4
+      },
+      {
+        "level": 59,
+        "power": 74475.0,
+        "lethality": 30.86
+      },
+      {
+        "level": 60,
+        "power": 77100.0,
+        "lethality": 31.33
+      },
+      {
+        "level": 61,
+        "power": 79825.0,
+        "lethality": 31.8
+      },
+      {
+        "level": 62,
+        "power": 82600.0,
+        "lethality": 32.26
+      },
+      {
+        "level": 63,
+        "power": 85475.0,
+        "lethality": 32.73
+      },
+      {
+        "level": 64,
+        "power": 88425.0,
+        "lethality": 33.2
+      },
+      {
+        "level": 65,
+        "power": 91475.0,
+        "lethality": 33.66
+      },
+      {
+        "level": 66,
+        "power": 94600.0,
+        "lethality": 34.13
+      },
+      {
+        "level": 67,
+        "power": 97800.0,
+        "lethality": 34.6
+      },
+      {
+        "level": 68,
+        "power": 101100.0,
+        "lethality": 35.06
+      },
+      {
+        "level": 69,
+        "power": 104500.0,
+        "lethality": 35.53
+      },
+      {
+        "level": 70,
+        "power": 108000.0,
+        "lethality": 36.0
+      },
+      {
+        "level": 71,
+        "power": 111575.0,
+        "lethality": 36.46
+      },
+      {
+        "level": 72,
+        "power": 115275.0,
+        "lethality": 36.93
+      },
+      {
+        "level": 73,
+        "power": 119050.0,
+        "lethality": 37.4
+      },
+      {
+        "level": 74,
+        "power": 122950.0,
+        "lethality": 37.86
+      },
+      {
+        "level": 75,
+        "power": 126950.0,
+        "lethality": 38.33
+      },
+      {
+        "level": 76,
+        "power": 131075.0,
+        "lethality": 38.8
+      },
+      {
+        "level": 77,
+        "power": 135300.0,
+        "lethality": 39.26
+      },
+      {
+        "level": 78,
+        "power": 139650.0,
+        "lethality": 39.73
+      },
+      {
+        "level": 79,
+        "power": 144100.0,
+        "lethality": 40.2
+      },
+      {
+        "level": 80,
+        "power": 148700.0,
+        "lethality": 40.66
+      },
+      {
+        "level": 81,
+        "power": 153425.0,
+        "lethality": 41.13
+      },
+      {
+        "level": 82,
+        "power": 158250.0,
+        "lethality": 41.6
+      },
+      {
+        "level": 83,
+        "power": 163225.0,
+        "lethality": 42.06
+      },
+      {
+        "level": 84,
+        "power": 168350.0,
+        "lethality": 42.53
+      },
+      {
+        "level": 85,
+        "power": 173600.0,
+        "lethality": 43.0
+      },
+      {
+        "level": 86,
+        "power": 179000.0,
+        "lethality": 43.46
+      },
+      {
+        "level": 87,
+        "power": 184525.0,
+        "lethality": 43.93
+      },
+      {
+        "level": 88,
+        "power": 190225.0,
+        "lethality": 44.4
+      },
+      {
+        "level": 89,
+        "power": 196075.0,
+        "lethality": 44.86
+      },
+      {
+        "level": 90,
+        "power": 202075.0,
+        "lethality": 45.33
+      },
+      {
+        "level": 91,
+        "power": 208225.0,
+        "lethality": 45.8
+      },
+      {
+        "level": 92,
+        "power": 214550.0,
+        "lethality": 46.26
+      },
+      {
+        "level": 93,
+        "power": 221050.0,
+        "lethality": 46.73
+      },
+      {
+        "level": 94,
+        "power": 227725.0,
+        "lethality": 47.2
+      },
+      {
+        "level": 95,
+        "power": 234575.0,
+        "lethality": 47.66
+      },
+      {
+        "level": 96,
+        "power": 241625.0,
+        "lethality": 48.13
+      },
+      {
+        "level": 97,
+        "power": 248825.0,
+        "lethality": 48.6
+      },
+      {
+        "level": 98,
+        "power": 256250.0,
+        "lethality": 49.06
+      },
+      {
+        "level": 99,
+        "power": 263850.0,
+        "lethality": 49.53
+      },
+      {
+        "level": 100,
+        "power": 271675.0,
+        "lethality": 50.0
+      },
+      {
+        "level": 101,
+        "power": 279500.0,
+        "lethality": 50.5
+      },
+      {
+        "level": 102,
+        "power": 287325.0,
+        "lethality": 51.0
+      },
+      {
+        "level": 103,
+        "power": 295150.0,
+        "lethality": 51.5
+      },
+      {
+        "level": 104,
+        "power": 302975.0,
+        "lethality": 52.0
+      },
+      {
+        "level": 105,
+        "power": 310800.0,
+        "lethality": 52.5
+      },
+      {
+        "level": 106,
+        "power": 318625.0,
+        "lethality": 53.0
+      },
+      {
+        "level": 107,
+        "power": 326450.0,
+        "lethality": 53.5
+      },
+      {
+        "level": 108,
+        "power": 334275.0,
+        "lethality": 54.0
+      },
+      {
+        "level": 109,
+        "power": 342100.0,
+        "lethality": 54.5
+      },
+      {
+        "level": 110,
+        "power": 349925.0,
+        "lethality": 55.0
+      },
+      {
+        "level": 111,
+        "power": 357750.0,
+        "lethality": 55.5
+      },
+      {
+        "level": 112,
+        "power": 365575.0,
+        "lethality": 56.0
+      },
+      {
+        "level": 113,
+        "power": 373400.0,
+        "lethality": 56.5
+      },
+      {
+        "level": 114,
+        "power": 381225.0,
+        "lethality": 57.0
+      },
+      {
+        "level": 115,
+        "power": 389050.0,
+        "lethality": 57.5
+      },
+      {
+        "level": 116,
+        "power": 396875.0,
+        "lethality": 58.0
+      },
+      {
+        "level": 117,
+        "power": 404700.0,
+        "lethality": 58.5
+      },
+      {
+        "level": 118,
+        "power": 412525.0,
+        "lethality": 59.0
+      },
+      {
+        "level": 119,
+        "power": 420350.0,
+        "lethality": 59.5
+      },
+      {
+        "level": 120,
+        "power": 523412.8571428571,
+        "lethality": 60.0
+      },
+      {
+        "level": 121,
+        "power": 531237.8696741854,
+        "lethality": 60.5
+      },
+      {
+        "level": 122,
+        "power": 539062.8822055138,
+        "lethality": 61.0
+      },
+      {
+        "level": 123,
+        "power": 546887.894736842,
+        "lethality": 61.5
+      },
+      {
+        "level": 124,
+        "power": 554712.9072681704,
+        "lethality": 62.0
+      },
+      {
+        "level": 125,
+        "power": 562537.9197994987,
+        "lethality": 62.5
+      },
+      {
+        "level": 126,
+        "power": 570362.932330827,
+        "lethality": 62.99999999999999
+      },
+      {
+        "level": 127,
+        "power": 578187.9448621554,
+        "lethality": 63.49999999999999
+      },
+      {
+        "level": 128,
+        "power": 586012.9573934837,
+        "lethality": 63.99999999999999
+      },
+      {
+        "level": 129,
+        "power": 593837.969924812,
+        "lethality": 64.5
+      },
+      {
+        "level": 130,
+        "power": 601662.9824561403,
+        "lethality": 65.0
+      },
+      {
+        "level": 131,
+        "power": 609487.9949874687,
+        "lethality": 65.49999999999999
+      },
+      {
+        "level": 132,
+        "power": 617313.007518797,
+        "lethality": 65.99999999999999
+      },
+      {
+        "level": 133,
+        "power": 625138.0200501253,
+        "lethality": 66.49999999999999
+      },
+      {
+        "level": 134,
+        "power": 632963.0325814537,
+        "lethality": 66.99999999999999
+      },
+      {
+        "level": 135,
+        "power": 640788.0451127819,
+        "lethality": 67.49999999999999
+      },
+      {
+        "level": 136,
+        "power": 648613.0576441103,
+        "lethality": 67.99999999999999
+      },
+      {
+        "level": 137,
+        "power": 656438.0701754387,
+        "lethality": 68.49999999999999
+      },
+      {
+        "level": 138,
+        "power": 664263.0827067669,
+        "lethality": 68.99999999999999
+      },
+      {
+        "level": 139,
+        "power": 672088.0952380953,
+        "lethality": 69.49999999999999
+      },
+      {
+        "level": 140,
+        "power": 683816.2958626073,
+        "lethality": 69.99999999999999
+      },
+      {
+        "level": 141,
+        "power": 695544.4964871195,
+        "lethality": 70.49999999999999
+      },
+      {
+        "level": 142,
+        "power": 707272.6971116315,
+        "lethality": 70.99999999999999
+      },
+      {
+        "level": 143,
+        "power": 719000.8977361437,
+        "lethality": 71.49999999999999
+      },
+      {
+        "level": 144,
+        "power": 730729.0983606557,
+        "lethality": 71.99999999999999
+      },
+      {
+        "level": 145,
+        "power": 742457.2989851679,
+        "lethality": 72.49999999999999
+      },
+      {
+        "level": 146,
+        "power": 754185.4996096799,
+        "lethality": 72.99999999999999
+      },
+      {
+        "level": 147,
+        "power": 765913.7002341921,
+        "lethality": 73.49999999999999
+      },
+      {
+        "level": 148,
+        "power": 777641.9008587041,
+        "lethality": 73.99999999999999
+      },
+      {
+        "level": 149,
+        "power": 789370.1014832163,
+        "lethality": 74.49999999999999
+      },
+      {
+        "level": 150,
+        "power": 801098.3021077283,
+        "lethality": 74.99999999999999
+      },
+      {
+        "level": 151,
+        "power": 812826.5027322404,
+        "lethality": 75.49999999999999
+      },
+      {
+        "level": 152,
+        "power": 824554.7033567525,
+        "lethality": 75.99999999999999
+      },
+      {
+        "level": 153,
+        "power": 836282.9039812647,
+        "lethality": 76.49999999999999
+      },
+      {
+        "level": 154,
+        "power": 848011.1046057767,
+        "lethality": 76.99999999999999
+      },
+      {
+        "level": 155,
+        "power": 859739.3052302888,
+        "lethality": 77.49999999999999
+      },
+      {
+        "level": 156,
+        "power": 871467.5058548009,
+        "lethality": 77.99999999999999
+      },
+      {
+        "level": 157,
+        "power": 883195.7064793131,
+        "lethality": 78.49999999999999
+      },
+      {
+        "level": 158,
+        "power": 894923.9071038251,
+        "lethality": 78.99999999999999
+      },
+      {
+        "level": 159,
+        "power": 906652.1077283372,
+        "lethality": 79.49999999999999
+      },
+      {
+        "level": 160,
+        "power": 918380.3083528493,
+        "lethality": 79.99999999999999
+      },
+      {
+        "level": 161,
+        "power": 930108.5089773614,
+        "lethality": 80.49999999999999
+      },
+      {
+        "level": 162,
+        "power": 941836.7096018735,
+        "lethality": 80.99999999999999
+      },
+      {
+        "level": 163,
+        "power": 953564.9102263856,
+        "lethality": 81.49999999999999
+      },
+      {
+        "level": 164,
+        "power": 965293.1108508976,
+        "lethality": 81.99999999999999
+      },
+      {
+        "level": 165,
+        "power": 977021.3114754098,
+        "lethality": 82.49999999999999
+      },
+      {
+        "level": 166,
+        "power": 988749.5120999219,
+        "lethality": 82.99999999999999
+      },
+      {
+        "level": 167,
+        "power": 1000477.712724434,
+        "lethality": 83.5
+      },
+      {
+        "level": 168,
+        "power": 1012205.913348946,
+        "lethality": 84.0
+      },
+      {
+        "level": 169,
+        "power": 1023934.113973458,
+        "lethality": 84.5
+      },
+      {
+        "level": 170,
+        "power": 1035662.31459797,
+        "lethality": 85.0
+      },
+      {
+        "level": 171,
+        "power": 1047390.515222482,
+        "lethality": 85.5
+      },
+      {
+        "level": 172,
+        "power": 1059118.715846994,
+        "lethality": 86.0
+      },
+      {
+        "level": 173,
+        "power": 1070846.916471506,
+        "lethality": 86.5
+      },
+      {
+        "level": 174,
+        "power": 1082575.117096019,
+        "lethality": 87.0
+      },
+      {
+        "level": 175,
+        "power": 1094303.317720531,
+        "lethality": 87.5
+      },
+      {
+        "level": 176,
+        "power": 1106031.518345043,
+        "lethality": 88.0
+      },
+      {
+        "level": 177,
+        "power": 1117759.718969555,
+        "lethality": 88.5
+      },
+      {
+        "level": 178,
+        "power": 1129487.919594067,
+        "lethality": 89.0
+      },
+      {
+        "level": 179,
+        "power": 1141216.120218579,
+        "lethality": 89.5
+      },
+      {
+        "level": 180,
+        "power": 1152944.320843091,
+        "lethality": 90.0
+      },
+      {
+        "level": 181,
+        "power": 1164672.521467603,
+        "lethality": 90.5
+      },
+      {
+        "level": 182,
+        "power": 1176400.722092115,
+        "lethality": 91.0
+      },
+      {
+        "level": 183,
+        "power": 1188128.922716628,
+        "lethality": 91.5
+      },
+      {
+        "level": 184,
+        "power": 1199857.12334114,
+        "lethality": 92.0
+      },
+      {
+        "level": 185,
+        "power": 1211585.323965652,
+        "lethality": 92.5
+      },
+      {
+        "level": 186,
+        "power": 1223313.524590164,
+        "lethality": 93.0
+      },
+      {
+        "level": 187,
+        "power": 1235041.725214676,
+        "lethality": 93.5
+      },
+      {
+        "level": 188,
+        "power": 1246769.925839188,
+        "lethality": 94.0
+      },
+      {
+        "level": 189,
+        "power": 1258498.1264637,
+        "lethality": 94.5
+      },
+      {
+        "level": 190,
+        "power": 1270226.327088212,
+        "lethality": 95.0
+      },
+      {
+        "level": 191,
+        "power": 1281954.527712724,
+        "lethality": 95.5
+      },
+      {
+        "level": 192,
+        "power": 1293682.728337236,
+        "lethality": 96.0
+      },
+      {
+        "level": 193,
+        "power": 1305410.928961748,
+        "lethality": 96.5
+      },
+      {
+        "level": 194,
+        "power": 1317139.129586261,
+        "lethality": 97.0
+      },
+      {
+        "level": 195,
+        "power": 1328867.330210773,
+        "lethality": 97.5
+      },
+      {
+        "level": 196,
+        "power": 1340595.530835285,
+        "lethality": 98.0
+      },
+      {
+        "level": 197,
+        "power": 1352323.731459797,
+        "lethality": 98.5
+      },
+      {
+        "level": 198,
+        "power": 1364051.932084309,
+        "lethality": 99.0
+      },
+      {
+        "level": 199,
+        "power": 1375780.132708821,
+        "lethality": 99.5
+      },
+      {
+        "level": 200,
+        "power": 1387508.333333333,
+        "lethality": 100.0
+      }
+    ],
+    "Marksman_Glove": [
+      {
+        "level": 0,
+        "power": 2900.0,
+        "health": 3.8
+      },
+      {
+        "level": 1,
+        "power": 2900.0,
+        "health": 3.8
+      },
+      {
+        "level": 2,
+        "power": 3325.0,
+        "health": 4.26
+      },
+      {
+        "level": 3,
+        "power": 3775.0,
+        "health": 4.73
+      },
+      {
+        "level": 4,
+        "power": 4225.0,
+        "health": 5.2
+      },
+      {
+        "level": 5,
+        "power": 4700.0,
+        "health": 5.66
+      },
+      {
+        "level": 6,
+        "power": 5175.0,
+        "health": 6.13
+      },
+      {
+        "level": 7,
+        "power": 5675.0,
+        "health": 6.6
+      },
+      {
+        "level": 8,
+        "power": 6200.0,
+        "health": 7.06
+      },
+      {
+        "level": 9,
+        "power": 6750.0,
+        "health": 7.53
+      },
+      {
+        "level": 10,
+        "power": 7325.0,
+        "health": 8.0
+      },
+      {
+        "level": 11,
+        "power": 7900.0,
+        "health": 8.46
+      },
+      {
+        "level": 12,
+        "power": 8500.0,
+        "health": 8.93
+      },
+      {
+        "level": 13,
+        "power": 9125.0,
+        "health": 9.4
+      },
+      {
+        "level": 14,
+        "power": 9775.0,
+        "health": 9.86
+      },
+      {
+        "level": 15,
+        "power": 10425.0,
+        "health": 10.33
+      },
+      {
+        "level": 16,
+        "power": 11125.0,
+        "health": 10.8
+      },
+      {
+        "level": 17,
+        "power": 11825.0,
+        "health": 11.26
+      },
+      {
+        "level": 18,
+        "power": 12575.0,
+        "health": 11.73
+      },
+      {
+        "level": 19,
+        "power": 13325.0,
+        "health": 12.2
+      },
+      {
+        "level": 20,
+        "power": 14125.0,
+        "health": 12.66
+      },
+      {
+        "level": 21,
+        "power": 14925.0,
+        "health": 13.13
+      },
+      {
+        "level": 22,
+        "power": 15775.0,
+        "health": 13.6
+      },
+      {
+        "level": 23,
+        "power": 16625.0,
+        "health": 14.06
+      },
+      {
+        "level": 24,
+        "power": 17525.0,
+        "health": 14.53
+      },
+      {
+        "level": 25,
+        "power": 18450.0,
+        "health": 15.0
+      },
+      {
+        "level": 26,
+        "power": 19400.0,
+        "health": 15.46
+      },
+      {
+        "level": 27,
+        "power": 20400.0,
+        "health": 15.93
+      },
+      {
+        "level": 28,
+        "power": 21425.0,
+        "health": 16.4
+      },
+      {
+        "level": 29,
+        "power": 22475.0,
+        "health": 16.86
+      },
+      {
+        "level": 30,
+        "power": 23550.0,
+        "health": 17.33
+      },
+      {
+        "level": 31,
+        "power": 24675.0,
+        "health": 17.8
+      },
+      {
+        "level": 32,
+        "power": 25825.0,
+        "health": 18.26
+      },
+      {
+        "level": 33,
+        "power": 27000.0,
+        "health": 18.73
+      },
+      {
+        "level": 34,
+        "power": 28225.0,
+        "health": 19.2
+      },
+      {
+        "level": 35,
+        "power": 29500.0,
+        "health": 19.66
+      },
+      {
+        "level": 36,
+        "power": 30800.0,
+        "health": 20.13
+      },
+      {
+        "level": 37,
+        "power": 32150.0,
+        "health": 20.6
+      },
+      {
+        "level": 38,
+        "power": 33525.0,
+        "health": 21.06
+      },
+      {
+        "level": 39,
+        "power": 34950.0,
+        "health": 21.53
+      },
+      {
+        "level": 40,
+        "power": 36425.0,
+        "health": 22.0
+      },
+      {
+        "level": 41,
+        "power": 37950.0,
+        "health": 22.46
+      },
+      {
+        "level": 42,
+        "power": 39525.0,
+        "health": 22.93
+      },
+      {
+        "level": 43,
+        "power": 41125.0,
+        "health": 23.4
+      },
+      {
+        "level": 44,
+        "power": 42775.0,
+        "health": 23.86
+      },
+      {
+        "level": 45,
+        "power": 44500.0,
+        "health": 24.33
+      },
+      {
+        "level": 46,
+        "power": 46250.0,
+        "health": 24.8
+      },
+      {
+        "level": 47,
+        "power": 48075.0,
+        "health": 25.26
+      },
+      {
+        "level": 48,
+        "power": 49925.0,
+        "health": 25.73
+      },
+      {
+        "level": 49,
+        "power": 51850.0,
+        "health": 26.2
+      },
+      {
+        "level": 50,
+        "power": 53825.0,
+        "health": 26.66
+      },
+      {
+        "level": 51,
+        "power": 55875.0,
+        "health": 27.13
+      },
+      {
+        "level": 52,
+        "power": 57975.0,
+        "health": 27.6
+      },
+      {
+        "level": 53,
+        "power": 60125.0,
+        "health": 28.06
+      },
+      {
+        "level": 54,
+        "power": 62350.0,
+        "health": 28.53
+      },
+      {
+        "level": 55,
+        "power": 64625.0,
+        "health": 29.0
+      },
+      {
+        "level": 56,
+        "power": 67000.0,
+        "health": 29.46
+      },
+      {
+        "level": 57,
+        "power": 69400.0,
+        "health": 29.93
+      },
+      {
+        "level": 58,
+        "power": 71900.0,
+        "health": 30.4
+      },
+      {
+        "level": 59,
+        "power": 74475.0,
+        "health": 30.86
+      },
+      {
+        "level": 60,
+        "power": 77100.0,
+        "health": 31.33
+      },
+      {
+        "level": 61,
+        "power": 79825.0,
+        "health": 31.8
+      },
+      {
+        "level": 62,
+        "power": 82600.0,
+        "health": 32.26
+      },
+      {
+        "level": 63,
+        "power": 85475.0,
+        "health": 32.73
+      },
+      {
+        "level": 64,
+        "power": 88425.0,
+        "health": 33.2
+      },
+      {
+        "level": 65,
+        "power": 91475.0,
+        "health": 33.66
+      },
+      {
+        "level": 66,
+        "power": 94600.0,
+        "health": 34.13
+      },
+      {
+        "level": 67,
+        "power": 97800.0,
+        "health": 34.6
+      },
+      {
+        "level": 68,
+        "power": 101100.0,
+        "health": 35.06
+      },
+      {
+        "level": 69,
+        "power": 104500.0,
+        "health": 35.53
+      },
+      {
+        "level": 70,
+        "power": 108000.0,
+        "health": 36.0
+      },
+      {
+        "level": 71,
+        "power": 111575.0,
+        "health": 36.46
+      },
+      {
+        "level": 72,
+        "power": 115275.0,
+        "health": 36.93
+      },
+      {
+        "level": 73,
+        "power": 119050.0,
+        "health": 37.4
+      },
+      {
+        "level": 74,
+        "power": 122950.0,
+        "health": 37.86
+      },
+      {
+        "level": 75,
+        "power": 126950.0,
+        "health": 38.33
+      },
+      {
+        "level": 76,
+        "power": 131075.0,
+        "health": 38.8
+      },
+      {
+        "level": 77,
+        "power": 135300.0,
+        "health": 39.26
+      },
+      {
+        "level": 78,
+        "power": 139650.0,
+        "health": 39.73
+      },
+      {
+        "level": 79,
+        "power": 144100.0,
+        "health": 40.2
+      },
+      {
+        "level": 80,
+        "power": 148700.0,
+        "health": 40.66
+      },
+      {
+        "level": 81,
+        "power": 153425.0,
+        "health": 41.13
+      },
+      {
+        "level": 82,
+        "power": 158250.0,
+        "health": 41.6
+      },
+      {
+        "level": 83,
+        "power": 163225.0,
+        "health": 42.06
+      },
+      {
+        "level": 84,
+        "power": 168350.0,
+        "health": 42.53
+      },
+      {
+        "level": 85,
+        "power": 173600.0,
+        "health": 43.0
+      },
+      {
+        "level": 86,
+        "power": 179000.0,
+        "health": 43.46
+      },
+      {
+        "level": 87,
+        "power": 184525.0,
+        "health": 43.93
+      },
+      {
+        "level": 88,
+        "power": 190225.0,
+        "health": 44.4
+      },
+      {
+        "level": 89,
+        "power": 196075.0,
+        "health": 44.86
+      },
+      {
+        "level": 90,
+        "power": 202075.0,
+        "health": 45.33
+      },
+      {
+        "level": 91,
+        "power": 208225.0,
+        "health": 45.8
+      },
+      {
+        "level": 92,
+        "power": 214550.0,
+        "health": 46.26
+      },
+      {
+        "level": 93,
+        "power": 221050.0,
+        "health": 46.73
+      },
+      {
+        "level": 94,
+        "power": 227725.0,
+        "health": 47.2
+      },
+      {
+        "level": 95,
+        "power": 234575.0,
+        "health": 47.66
+      },
+      {
+        "level": 96,
+        "power": 241625.0,
+        "health": 48.13
+      },
+      {
+        "level": 97,
+        "power": 248825.0,
+        "health": 48.6
+      },
+      {
+        "level": 98,
+        "power": 256250.0,
+        "health": 49.06
+      },
+      {
+        "level": 99,
+        "power": 263850.0,
+        "health": 49.53
+      },
+      {
+        "level": 100,
+        "power": 271675.0,
+        "health": 50.0
+      },
+      {
+        "level": 101,
+        "power": 559000.0,
+        "health": 101.0
+      },
+      {
+        "level": 102,
+        "power": 574650.0,
+        "health": 102.0
+      },
+      {
+        "level": 103,
+        "power": 590300.0,
+        "health": 103.0
+      },
+      {
+        "level": 104,
+        "power": 605950.0,
+        "health": 104.0
+      },
+      {
+        "level": 105,
+        "power": 621600.0,
+        "health": 105.0
+      },
+      {
+        "level": 106,
+        "power": 637250.0,
+        "health": 106.0
+      },
+      {
+        "level": 107,
+        "power": 652900.0,
+        "health": 107.0
+      },
+      {
+        "level": 108,
+        "power": 668550.0,
+        "health": 108.0
+      },
+      {
+        "level": 109,
+        "power": 684200.0,
+        "health": 109.0
+      },
+      {
+        "level": 110,
+        "power": 699850.0,
+        "health": 110.0
+      },
+      {
+        "level": 111,
+        "power": 715500.0,
+        "health": 111.0
+      },
+      {
+        "level": 112,
+        "power": 731150.0,
+        "health": 112.0
+      },
+      {
+        "level": 113,
+        "power": 746800.0,
+        "health": 113.0
+      },
+      {
+        "level": 114,
+        "power": 762450.0,
+        "health": 114.0
+      },
+      {
+        "level": 115,
+        "power": 778100.0,
+        "health": 115.0
+      },
+      {
+        "level": 116,
+        "power": 793750.0,
+        "health": 116.0
+      },
+      {
+        "level": 117,
+        "power": 809400.0,
+        "health": 117.0
+      },
+      {
+        "level": 118,
+        "power": 825050.0,
+        "health": 118.0
+      },
+      {
+        "level": 119,
+        "power": 840700.0,
+        "health": 119.0
+      },
+      {
+        "level": 120,
+        "power": 1046826.0,
+        "health": 120.0
+      },
+      {
+        "level": 121,
+        "power": 1062476.0,
+        "health": 121.0
+      },
+      {
+        "level": 122,
+        "power": 1078126.0,
+        "health": 122.0
+      },
+      {
+        "level": 123,
+        "power": 1093776.0,
+        "health": 123.0
+      },
+      {
+        "level": 124,
+        "power": 1109426.0,
+        "health": 124.0
+      },
+      {
+        "level": 125,
+        "power": 1125076.0,
+        "health": 125.0
+      },
+      {
+        "level": 126,
+        "power": 1140726.0,
+        "health": 126.0
+      },
+      {
+        "level": 127,
+        "power": 1156376.0,
+        "health": 127.0
+      },
+      {
+        "level": 128,
+        "power": 1172026.0,
+        "health": 128.0
+      },
+      {
+        "level": 129,
+        "power": 1187676.0,
+        "health": 129.0
+      },
+      {
+        "level": 130,
+        "power": 1203326.0,
+        "health": 130.0
+      },
+      {
+        "level": 131,
+        "power": 1218976.0,
+        "health": 131.0
+      },
+      {
+        "level": 132,
+        "power": 1234626.0,
+        "health": 132.0
+      },
+      {
+        "level": 133,
+        "power": 1250276.0,
+        "health": 133.0
+      },
+      {
+        "level": 134,
+        "power": 1265926.0,
+        "health": 134.0
+      },
+      {
+        "level": 135,
+        "power": 1281576.0,
+        "health": 135.0
+      },
+      {
+        "level": 136,
+        "power": 1297226.0,
+        "health": 136.0
+      },
+      {
+        "level": 137,
+        "power": 1312876.0,
+        "health": 137.0
+      },
+      {
+        "level": 138,
+        "power": 1328526.0,
+        "health": 138.0
+      },
+      {
+        "level": 139,
+        "power": 1344176.0,
+        "health": 139.0
+      },
+      {
+        "level": 140,
+        "power": 1367633.0,
+        "health": 140.0
+      },
+      {
+        "level": 141,
+        "power": 1391089.0,
+        "health": 141.0
+      },
+      {
+        "level": 142,
+        "power": 1414545.0,
+        "health": 142.0
+      },
+      {
+        "level": 143,
+        "power": 1438002.0,
+        "health": 143.0
+      },
+      {
+        "level": 144,
+        "power": 1461458.0,
+        "health": 144.0
+      },
+      {
+        "level": 145,
+        "power": 1484915.0,
+        "health": 145.0
+      },
+      {
+        "level": 146,
+        "power": 1508371.0,
+        "health": 146.0
+      },
+      {
+        "level": 147,
+        "power": 1531827.0,
+        "health": 147.0
+      },
+      {
+        "level": 148,
+        "power": 1555284.0,
+        "health": 148.0
+      },
+      {
+        "level": 149,
+        "power": 1578740.0,
+        "health": 149.0
+      },
+      {
+        "level": 150,
+        "power": 1602197.0,
+        "health": 150.0
+      },
+      {
+        "level": 151,
+        "power": 1625653.0,
+        "health": 151.0
+      },
+      {
+        "level": 152,
+        "power": 1649109.0,
+        "health": 152.0
+      },
+      {
+        "level": 153,
+        "power": 1672566.0,
+        "health": 153.0
+      },
+      {
+        "level": 154,
+        "power": 1696022.0,
+        "health": 154.0
+      },
+      {
+        "level": 155,
+        "power": 1719479.0,
+        "health": 155.0
+      },
+      {
+        "level": 156,
+        "power": 1742935.0,
+        "health": 156.0
+      },
+      {
+        "level": 157,
+        "power": 1766391.0,
+        "health": 157.0
+      },
+      {
+        "level": 158,
+        "power": 1789848.0,
+        "health": 158.0
+      },
+      {
+        "level": 159,
+        "power": 1813304.0,
+        "health": 159.0
+      },
+      {
+        "level": 160,
+        "power": 1836761.0,
+        "health": 160.0
+      },
+      {
+        "level": 161,
+        "power": 1860217.0,
+        "health": 161.0
+      },
+      {
+        "level": 162,
+        "power": 1883673.0,
+        "health": 162.0
+      },
+      {
+        "level": 163,
+        "power": 1907130.0,
+        "health": 163.0
+      },
+      {
+        "level": 164,
+        "power": 1930586.0,
+        "health": 164.0
+      },
+      {
+        "level": 165,
+        "power": 1954043.0,
+        "health": 165.0
+      },
+      {
+        "level": 166,
+        "power": 1977499.0,
+        "health": 166.0
+      },
+      {
+        "level": 167,
+        "power": 2000955.0,
+        "health": 167.0
+      },
+      {
+        "level": 168,
+        "power": 2024412.0,
+        "health": 168.0
+      },
+      {
+        "level": 169,
+        "power": 2047868.0,
+        "health": 169.0
+      },
+      {
+        "level": 170,
+        "power": 2071325.0,
+        "health": 170.0
+      },
+      {
+        "level": 171,
+        "power": 2094781.0,
+        "health": 171.0
+      },
+      {
+        "level": 172,
+        "power": 2118237.0,
+        "health": 172.0
+      },
+      {
+        "level": 173,
+        "power": 2141694.0,
+        "health": 173.0
+      },
+      {
+        "level": 174,
+        "power": 2165150.0,
+        "health": 174.0
+      },
+      {
+        "level": 175,
+        "power": 2188607.0,
+        "health": 175.0
+      },
+      {
+        "level": 176,
+        "power": 2212063.0,
+        "health": 176.0
+      },
+      {
+        "level": 177,
+        "power": 2235519.0,
+        "health": 177.0
+      },
+      {
+        "level": 178,
+        "power": 2258976.0,
+        "health": 178.0
+      },
+      {
+        "level": 179,
+        "power": 2282432.0,
+        "health": 179.0
+      },
+      {
+        "level": 180,
+        "power": 2305889.0,
+        "health": 180.0
+      },
+      {
+        "level": 181,
+        "power": 2329345.0,
+        "health": 181.0
+      },
+      {
+        "level": 182,
+        "power": 2352801.0,
+        "health": 182.0
+      },
+      {
+        "level": 183,
+        "power": 2376258.0,
+        "health": 183.0
+      },
+      {
+        "level": 184,
+        "power": 2399714.0,
+        "health": 184.0
+      },
+      {
+        "level": 185,
+        "power": 2423171.0,
+        "health": 185.0
+      },
+      {
+        "level": 186,
+        "power": 2446627.0,
+        "health": 186.0
+      },
+      {
+        "level": 187,
+        "power": 2470083.0,
+        "health": 187.0
+      },
+      {
+        "level": 188,
+        "power": 2493540.0,
+        "health": 188.0
+      },
+      {
+        "level": 189,
+        "power": 2516996.0,
+        "health": 189.0
+      },
+      {
+        "level": 190,
+        "power": 2540453.0,
+        "health": 190.0
+      },
+      {
+        "level": 191,
+        "power": 2563909.0,
+        "health": 191.0
+      },
+      {
+        "level": 192,
+        "power": 2587365.0,
+        "health": 192.0
+      },
+      {
+        "level": 193,
+        "power": 2610822.0,
+        "health": 193.0
+      },
+      {
+        "level": 194,
+        "power": 2634278.0,
+        "health": 194.0
+      },
+      {
+        "level": 195,
+        "power": 2657735.0,
+        "health": 195.0
+      },
+      {
+        "level": 196,
+        "power": 2681191.0,
+        "health": 196.0
+      },
+      {
+        "level": 197,
+        "power": 2704647.0,
+        "health": 197.0
+      },
+      {
+        "level": 198,
+        "power": 2728104.0,
+        "health": 198.0
+      },
+      {
+        "level": 199,
+        "power": 2751560.0,
+        "health": 199.0
+      },
+      {
+        "level": 200,
+        "power": 2775017.0,
+        "health": 200.0
+      }
+    ],
+    "Marksman_Belt": [
+      {
+        "level": 0,
+        "power": 2900.0,
+        "health": 3.8
+      },
+      {
+        "level": 1,
+        "power": 2900.0,
+        "health": 3.8
+      },
+      {
+        "level": 2,
+        "power": 3325.0,
+        "health": 4.26
+      },
+      {
+        "level": 3,
+        "power": 3775.0,
+        "health": 4.73
+      },
+      {
+        "level": 4,
+        "power": 4225.0,
+        "health": 5.2
+      },
+      {
+        "level": 5,
+        "power": 4700.0,
+        "health": 5.66
+      },
+      {
+        "level": 6,
+        "power": 5175.0,
+        "health": 6.13
+      },
+      {
+        "level": 7,
+        "power": 5675.0,
+        "health": 6.6
+      },
+      {
+        "level": 8,
+        "power": 6200.0,
+        "health": 7.06
+      },
+      {
+        "level": 9,
+        "power": 6750.0,
+        "health": 7.53
+      },
+      {
+        "level": 10,
+        "power": 7325.0,
+        "health": 8.0
+      },
+      {
+        "level": 11,
+        "power": 7900.0,
+        "health": 8.46
+      },
+      {
+        "level": 12,
+        "power": 8500.0,
+        "health": 8.93
+      },
+      {
+        "level": 13,
+        "power": 9125.0,
+        "health": 9.4
+      },
+      {
+        "level": 14,
+        "power": 9775.0,
+        "health": 9.86
+      },
+      {
+        "level": 15,
+        "power": 10425.0,
+        "health": 10.33
+      },
+      {
+        "level": 16,
+        "power": 11125.0,
+        "health": 10.8
+      },
+      {
+        "level": 17,
+        "power": 11825.0,
+        "health": 11.26
+      },
+      {
+        "level": 18,
+        "power": 12575.0,
+        "health": 11.73
+      },
+      {
+        "level": 19,
+        "power": 13325.0,
+        "health": 12.2
+      },
+      {
+        "level": 20,
+        "power": 14125.0,
+        "health": 12.66
+      },
+      {
+        "level": 21,
+        "power": 14925.0,
+        "health": 13.13
+      },
+      {
+        "level": 22,
+        "power": 15775.0,
+        "health": 13.6
+      },
+      {
+        "level": 23,
+        "power": 16625.0,
+        "health": 14.06
+      },
+      {
+        "level": 24,
+        "power": 17525.0,
+        "health": 14.53
+      },
+      {
+        "level": 25,
+        "power": 18450.0,
+        "health": 15.0
+      },
+      {
+        "level": 26,
+        "power": 19400.0,
+        "health": 15.46
+      },
+      {
+        "level": 27,
+        "power": 20400.0,
+        "health": 15.93
+      },
+      {
+        "level": 28,
+        "power": 21425.0,
+        "health": 16.4
+      },
+      {
+        "level": 29,
+        "power": 22475.0,
+        "health": 16.86
+      },
+      {
+        "level": 30,
+        "power": 23550.0,
+        "health": 17.33
+      },
+      {
+        "level": 31,
+        "power": 24675.0,
+        "health": 17.8
+      },
+      {
+        "level": 32,
+        "power": 25825.0,
+        "health": 18.26
+      },
+      {
+        "level": 33,
+        "power": 27000.0,
+        "health": 18.73
+      },
+      {
+        "level": 34,
+        "power": 28225.0,
+        "health": 19.2
+      },
+      {
+        "level": 35,
+        "power": 29500.0,
+        "health": 19.66
+      },
+      {
+        "level": 36,
+        "power": 30800.0,
+        "health": 20.13
+      },
+      {
+        "level": 37,
+        "power": 32150.0,
+        "health": 20.6
+      },
+      {
+        "level": 38,
+        "power": 33525.0,
+        "health": 21.06
+      },
+      {
+        "level": 39,
+        "power": 34950.0,
+        "health": 21.53
+      },
+      {
+        "level": 40,
+        "power": 36425.0,
+        "health": 22.0
+      },
+      {
+        "level": 41,
+        "power": 37950.0,
+        "health": 22.46
+      },
+      {
+        "level": 42,
+        "power": 39525.0,
+        "health": 22.93
+      },
+      {
+        "level": 43,
+        "power": 41125.0,
+        "health": 23.4
+      },
+      {
+        "level": 44,
+        "power": 42775.0,
+        "health": 23.86
+      },
+      {
+        "level": 45,
+        "power": 44500.0,
+        "health": 24.33
+      },
+      {
+        "level": 46,
+        "power": 46250.0,
+        "health": 24.8
+      },
+      {
+        "level": 47,
+        "power": 48075.0,
+        "health": 25.26
+      },
+      {
+        "level": 48,
+        "power": 49925.0,
+        "health": 25.73
+      },
+      {
+        "level": 49,
+        "power": 51850.0,
+        "health": 26.2
+      },
+      {
+        "level": 50,
+        "power": 53825.0,
+        "health": 26.66
+      },
+      {
+        "level": 51,
+        "power": 55875.0,
+        "health": 27.13
+      },
+      {
+        "level": 52,
+        "power": 57975.0,
+        "health": 27.6
+      },
+      {
+        "level": 53,
+        "power": 60125.0,
+        "health": 28.06
+      },
+      {
+        "level": 54,
+        "power": 62350.0,
+        "health": 28.53
+      },
+      {
+        "level": 55,
+        "power": 64625.0,
+        "health": 29.0
+      },
+      {
+        "level": 56,
+        "power": 67000.0,
+        "health": 29.46
+      },
+      {
+        "level": 57,
+        "power": 69400.0,
+        "health": 29.93
+      },
+      {
+        "level": 58,
+        "power": 71900.0,
+        "health": 30.4
+      },
+      {
+        "level": 59,
+        "power": 74475.0,
+        "health": 30.86
+      },
+      {
+        "level": 60,
+        "power": 77100.0,
+        "health": 31.33
+      },
+      {
+        "level": 61,
+        "power": 79825.0,
+        "health": 31.8
+      },
+      {
+        "level": 62,
+        "power": 82600.0,
+        "health": 32.26
+      },
+      {
+        "level": 63,
+        "power": 85475.0,
+        "health": 32.73
+      },
+      {
+        "level": 64,
+        "power": 88425.0,
+        "health": 33.2
+      },
+      {
+        "level": 65,
+        "power": 91475.0,
+        "health": 33.66
+      },
+      {
+        "level": 66,
+        "power": 94600.0,
+        "health": 34.13
+      },
+      {
+        "level": 67,
+        "power": 97800.0,
+        "health": 34.6
+      },
+      {
+        "level": 68,
+        "power": 101100.0,
+        "health": 35.06
+      },
+      {
+        "level": 69,
+        "power": 104500.0,
+        "health": 35.53
+      },
+      {
+        "level": 70,
+        "power": 108000.0,
+        "health": 36.0
+      },
+      {
+        "level": 71,
+        "power": 111575.0,
+        "health": 36.46
+      },
+      {
+        "level": 72,
+        "power": 115275.0,
+        "health": 36.93
+      },
+      {
+        "level": 73,
+        "power": 119050.0,
+        "health": 37.4
+      },
+      {
+        "level": 74,
+        "power": 122950.0,
+        "health": 37.86
+      },
+      {
+        "level": 75,
+        "power": 126950.0,
+        "health": 38.33
+      },
+      {
+        "level": 76,
+        "power": 131075.0,
+        "health": 38.8
+      },
+      {
+        "level": 77,
+        "power": 135300.0,
+        "health": 39.26
+      },
+      {
+        "level": 78,
+        "power": 139650.0,
+        "health": 39.73
+      },
+      {
+        "level": 79,
+        "power": 144100.0,
+        "health": 40.2
+      },
+      {
+        "level": 80,
+        "power": 148700.0,
+        "health": 40.66
+      },
+      {
+        "level": 81,
+        "power": 153425.0,
+        "health": 41.13
+      },
+      {
+        "level": 82,
+        "power": 158250.0,
+        "health": 41.6
+      },
+      {
+        "level": 83,
+        "power": 163225.0,
+        "health": 42.06
+      },
+      {
+        "level": 84,
+        "power": 168350.0,
+        "health": 42.53
+      },
+      {
+        "level": 85,
+        "power": 173600.0,
+        "health": 43.0
+      },
+      {
+        "level": 86,
+        "power": 179000.0,
+        "health": 43.46
+      },
+      {
+        "level": 87,
+        "power": 184525.0,
+        "health": 43.93
+      },
+      {
+        "level": 88,
+        "power": 190225.0,
+        "health": 44.4
+      },
+      {
+        "level": 89,
+        "power": 196075.0,
+        "health": 44.86
+      },
+      {
+        "level": 90,
+        "power": 202075.0,
+        "health": 45.33
+      },
+      {
+        "level": 91,
+        "power": 208225.0,
+        "health": 45.8
+      },
+      {
+        "level": 92,
+        "power": 214550.0,
+        "health": 46.26
+      },
+      {
+        "level": 93,
+        "power": 221050.0,
+        "health": 46.73
+      },
+      {
+        "level": 94,
+        "power": 227725.0,
+        "health": 47.2
+      },
+      {
+        "level": 95,
+        "power": 234575.0,
+        "health": 47.66
+      },
+      {
+        "level": 96,
+        "power": 241625.0,
+        "health": 48.13
+      },
+      {
+        "level": 97,
+        "power": 248825.0,
+        "health": 48.6
+      },
+      {
+        "level": 98,
+        "power": 256250.0,
+        "health": 49.06
+      },
+      {
+        "level": 99,
+        "power": 263850.0,
+        "health": 49.53
+      },
+      {
+        "level": 100,
+        "power": 271675.0,
+        "health": 50.0
+      },
+      {
+        "level": 101,
+        "power": 559000.0,
+        "health": 101.0
+      },
+      {
+        "level": 102,
+        "power": 574650.0,
+        "health": 102.0
+      },
+      {
+        "level": 103,
+        "power": 590300.0,
+        "health": 103.0
+      },
+      {
+        "level": 104,
+        "power": 605950.0,
+        "health": 104.0
+      },
+      {
+        "level": 105,
+        "power": 621600.0,
+        "health": 105.0
+      },
+      {
+        "level": 106,
+        "power": 637250.0,
+        "health": 106.0
+      },
+      {
+        "level": 107,
+        "power": 652900.0,
+        "health": 107.0
+      },
+      {
+        "level": 108,
+        "power": 668550.0,
+        "health": 108.0
+      },
+      {
+        "level": 109,
+        "power": 684200.0,
+        "health": 109.0
+      },
+      {
+        "level": 110,
+        "power": 699850.0,
+        "health": 110.0
+      },
+      {
+        "level": 111,
+        "power": 715500.0,
+        "health": 111.0
+      },
+      {
+        "level": 112,
+        "power": 731150.0,
+        "health": 112.0
+      },
+      {
+        "level": 113,
+        "power": 746800.0,
+        "health": 113.0
+      },
+      {
+        "level": 114,
+        "power": 762450.0,
+        "health": 114.0
+      },
+      {
+        "level": 115,
+        "power": 778100.0,
+        "health": 115.0
+      },
+      {
+        "level": 116,
+        "power": 793750.0,
+        "health": 116.0
+      },
+      {
+        "level": 117,
+        "power": 809400.0,
+        "health": 117.0
+      },
+      {
+        "level": 118,
+        "power": 825050.0,
+        "health": 118.0
+      },
+      {
+        "level": 119,
+        "power": 840700.0,
+        "health": 119.0
+      },
+      {
+        "level": 120,
+        "power": 1046826.0,
+        "health": 120.0
+      },
+      {
+        "level": 121,
+        "power": 1062476.0,
+        "health": 121.0
+      },
+      {
+        "level": 122,
+        "power": 1078126.0,
+        "health": 122.0
+      },
+      {
+        "level": 123,
+        "power": 1093776.0,
+        "health": 123.0
+      },
+      {
+        "level": 124,
+        "power": 1109426.0,
+        "health": 124.0
+      },
+      {
+        "level": 125,
+        "power": 1125076.0,
+        "health": 125.0
+      },
+      {
+        "level": 126,
+        "power": 1140726.0,
+        "health": 126.0
+      },
+      {
+        "level": 127,
+        "power": 1156376.0,
+        "health": 127.0
+      },
+      {
+        "level": 128,
+        "power": 1172026.0,
+        "health": 128.0
+      },
+      {
+        "level": 129,
+        "power": 1187676.0,
+        "health": 129.0
+      },
+      {
+        "level": 130,
+        "power": 1203326.0,
+        "health": 130.0
+      },
+      {
+        "level": 131,
+        "power": 1218976.0,
+        "health": 131.0
+      },
+      {
+        "level": 132,
+        "power": 1234626.0,
+        "health": 132.0
+      },
+      {
+        "level": 133,
+        "power": 1250276.0,
+        "health": 133.0
+      },
+      {
+        "level": 134,
+        "power": 1265926.0,
+        "health": 134.0
+      },
+      {
+        "level": 135,
+        "power": 1281576.0,
+        "health": 135.0
+      },
+      {
+        "level": 136,
+        "power": 1297226.0,
+        "health": 136.0
+      },
+      {
+        "level": 137,
+        "power": 1312876.0,
+        "health": 137.0
+      },
+      {
+        "level": 138,
+        "power": 1328526.0,
+        "health": 138.0
+      },
+      {
+        "level": 139,
+        "power": 1344176.0,
+        "health": 139.0
+      },
+      {
+        "level": 140,
+        "power": 1367633.0,
+        "health": 140.0
+      },
+      {
+        "level": 141,
+        "power": 1391089.0,
+        "health": 141.0
+      },
+      {
+        "level": 142,
+        "power": 1414545.0,
+        "health": 142.0
+      },
+      {
+        "level": 143,
+        "power": 1438002.0,
+        "health": 143.0
+      },
+      {
+        "level": 144,
+        "power": 1461458.0,
+        "health": 144.0
+      },
+      {
+        "level": 145,
+        "power": 1484915.0,
+        "health": 145.0
+      },
+      {
+        "level": 146,
+        "power": 1508371.0,
+        "health": 146.0
+      },
+      {
+        "level": 147,
+        "power": 1531827.0,
+        "health": 147.0
+      },
+      {
+        "level": 148,
+        "power": 1555284.0,
+        "health": 148.0
+      },
+      {
+        "level": 149,
+        "power": 1578740.0,
+        "health": 149.0
+      },
+      {
+        "level": 150,
+        "power": 1602197.0,
+        "health": 150.0
+      },
+      {
+        "level": 151,
+        "power": 1625653.0,
+        "health": 151.0
+      },
+      {
+        "level": 152,
+        "power": 1649109.0,
+        "health": 152.0
+      },
+      {
+        "level": 153,
+        "power": 1672566.0,
+        "health": 153.0
+      },
+      {
+        "level": 154,
+        "power": 1696022.0,
+        "health": 154.0
+      },
+      {
+        "level": 155,
+        "power": 1719479.0,
+        "health": 155.0
+      },
+      {
+        "level": 156,
+        "power": 1742935.0,
+        "health": 156.0
+      },
+      {
+        "level": 157,
+        "power": 1766391.0,
+        "health": 157.0
+      },
+      {
+        "level": 158,
+        "power": 1789848.0,
+        "health": 158.0
+      },
+      {
+        "level": 159,
+        "power": 1813304.0,
+        "health": 159.0
+      },
+      {
+        "level": 160,
+        "power": 1836761.0,
+        "health": 160.0
+      },
+      {
+        "level": 161,
+        "power": 1860217.0,
+        "health": 161.0
+      },
+      {
+        "level": 162,
+        "power": 1883673.0,
+        "health": 162.0
+      },
+      {
+        "level": 163,
+        "power": 1907130.0,
+        "health": 163.0
+      },
+      {
+        "level": 164,
+        "power": 1930586.0,
+        "health": 164.0
+      },
+      {
+        "level": 165,
+        "power": 1954043.0,
+        "health": 165.0
+      },
+      {
+        "level": 166,
+        "power": 1977499.0,
+        "health": 166.0
+      },
+      {
+        "level": 167,
+        "power": 2000955.0,
+        "health": 167.0
+      },
+      {
+        "level": 168,
+        "power": 2024412.0,
+        "health": 168.0
+      },
+      {
+        "level": 169,
+        "power": 2047868.0,
+        "health": 169.0
+      },
+      {
+        "level": 170,
+        "power": 2071325.0,
+        "health": 170.0
+      },
+      {
+        "level": 171,
+        "power": 2094781.0,
+        "health": 171.0
+      },
+      {
+        "level": 172,
+        "power": 2118237.0,
+        "health": 172.0
+      },
+      {
+        "level": 173,
+        "power": 2141694.0,
+        "health": 173.0
+      },
+      {
+        "level": 174,
+        "power": 2165150.0,
+        "health": 174.0
+      },
+      {
+        "level": 175,
+        "power": 2188607.0,
+        "health": 175.0
+      },
+      {
+        "level": 176,
+        "power": 2212063.0,
+        "health": 176.0
+      },
+      {
+        "level": 177,
+        "power": 2235519.0,
+        "health": 177.0
+      },
+      {
+        "level": 178,
+        "power": 2258976.0,
+        "health": 178.0
+      },
+      {
+        "level": 179,
+        "power": 2282432.0,
+        "health": 179.0
+      },
+      {
+        "level": 180,
+        "power": 2305889.0,
+        "health": 180.0
+      },
+      {
+        "level": 181,
+        "power": 2329345.0,
+        "health": 181.0
+      },
+      {
+        "level": 182,
+        "power": 2352801.0,
+        "health": 182.0
+      },
+      {
+        "level": 183,
+        "power": 2376258.0,
+        "health": 183.0
+      },
+      {
+        "level": 184,
+        "power": 2399714.0,
+        "health": 184.0
+      },
+      {
+        "level": 185,
+        "power": 2423171.0,
+        "health": 185.0
+      },
+      {
+        "level": 186,
+        "power": 2446627.0,
+        "health": 186.0
+      },
+      {
+        "level": 187,
+        "power": 2470083.0,
+        "health": 187.0
+      },
+      {
+        "level": 188,
+        "power": 2493540.0,
+        "health": 188.0
+      },
+      {
+        "level": 189,
+        "power": 2516996.0,
+        "health": 189.0
+      },
+      {
+        "level": 190,
+        "power": 2540453.0,
+        "health": 190.0
+      },
+      {
+        "level": 191,
+        "power": 2563909.0,
+        "health": 191.0
+      },
+      {
+        "level": 192,
+        "power": 2587365.0,
+        "health": 192.0
+      },
+      {
+        "level": 193,
+        "power": 2610822.0,
+        "health": 193.0
+      },
+      {
+        "level": 194,
+        "power": 2634278.0,
+        "health": 194.0
+      },
+      {
+        "level": 195,
+        "power": 2657735.0,
+        "health": 195.0
+      },
+      {
+        "level": 196,
+        "power": 2681191.0,
+        "health": 196.0
+      },
+      {
+        "level": 197,
+        "power": 2704647.0,
+        "health": 197.0
+      },
+      {
+        "level": 198,
+        "power": 2728104.0,
+        "health": 198.0
+      },
+      {
+        "level": 199,
+        "power": 2751560.0,
+        "health": 199.0
+      },
+      {
+        "level": 200,
+        "power": 2775017.0,
+        "health": 200.0
+      }
+    ]
+  }
+}

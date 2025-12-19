@@ -1,0 +1,336 @@
+Perfect! Now I have comprehensive knowledge of the project. Let me create the detailed specification in XML format:
+
+```xml
+<project_specification>
+  <project_name>Whiteout Survival Battle Calculator</project_name>
+
+  <overview>
+    A production-ready web-based battle calculator for Whiteout Survival, a mobile strategy game. The application allows authenticated users to configure player and opponent battle setups with detailed hero, troop, and bonus configurations, then run deterministic or Monte Carlo battle simulations to predict outcomes. Users can save multiple profile configurations (loadouts), view detailed turn-by-turn battle reports, and analyze battle statistics. The system implements accurate Whiteout Survival game mechanics including special-like bonus stacking, troop count diminishing returns, joiner skill aggregation, and complex stat pipelines from multiple bonus sources. The core combat engine is deterministic and seeded for reproducibility, with optional Monte Carlo mode for variance analysis.
+  </overview>
+
+  <technology_stack>
+    <technology>Next.js 16.0.10 (App Router)</technology>
+    <technology>React 19.2.3</technology>
+    <technology>TypeScript 5.9.3 (strict mode)</technology>
+    <technology>Tailwind CSS 4.1.18</technology>
+    <technology>PostgreSQL database</technology>
+    <technology>Drizzle ORM 0.45.1</technology>
+    <technology>Drizzle-Kit 0.31.8 (migrations)</technology>
+    <technology>NextAuth 5.0.0-beta.30</technology>
+    <technology>jose 6.1.3 (JWT)</technology>
+    <technology>bcryptjs 3.0.3 (password hashing)</technology>
+    <technology>Lucide React 0.561.0 (icons)</technology>
+    <technology>better-sqlite3 (local dev database)</technology>
+    <technology>pg (production database driver)</technology>
+    <technology>ESLint 9.39.1</technology>
+    <technology>PostCSS 8.5.6</technology>
+    <technology>Autoprefixer 10.4.22</technology>
+    <technology>tsx 4.21.0 (TypeScript executor)</technology>
+    <technology>Faker.js 10.1.0 (test data)</technology>
+  </technology_stack>
+
+  <core_capabilities>
+    <capability>User authentication with JWT tokens, secure cookies, and bcrypt password hashing</capability>
+    <capability>Multi-profile management allowing users to save and load different battle configurations</capability>
+    <capability>Comprehensive hero configuration with skills, levels, star ratings, generation, and exclusive weapon levels</capability>
+    <capability>Advanced bonus calculation system including combat tech, alliance tech, experts, pets, hero gear, chief gear, and charms</capability>
+    <capability>Rally-specific configuration with leader selection and up to 4 joiner hero contributions</capability>
+    <capability>Joiner skill stacking with both additive (same skill type) and multiplicative (different types) aggregation rules</capability>
+    <capability>Deterministic combat engine with turn-based simulation and detailed turn-by-turn logging</capability>
+    <capability>Monte Carlo simulation mode with seeded random number generation for variance analysis</capability>
+    <capability>Troop capacity calculation from hero loadouts with diminishing returns based on troop count exponent</capability>
+    <capability>Damage calculation engine implementing Whiteout Survival formulas including K constant scaling and alpha exponent adjustments</capability>
+    <capability>Special-like bonus stacking following game-specific formula: finalPercent = base + special + (base * special / 100)</capability>
+    <capability>Lancer backline dive mechanics with configurable probability for targeting Marksmen in back row</capability>
+    <capability>Comprehensive game data including hero definitions, troop stats by tier and FC level, skill definitions, and item bonuses</capability>
+    <capability>Dark and light theme support with persistent user preference storage</capability>
+    <capability>Admin interface for user management with database administration capabilities</capability>
+    <capability>Responsive UI with tab-based navigation for Player/Opponent configuration, Rally setup, and results analysis</capability>
+    <capability>Battle prediction with detailed outcome calculations and joiner skill formula visualization</capability>
+  </core_capabilities>
+
+  <implemented_features>
+    <feature>
+      <name>User Authentication System</name>
+      <description>JWT-based authentication with HTTP-only secure cookies, 7-day token expiration, bcrypt password hashing, user registration with validation, and login/logout functionality</description>
+      <status>Complete</status>
+      <location>app/api/auth/*, lib/auth.ts</location>
+    </feature>
+    <feature>
+      <name>Database Schema</name>
+      <description>Drizzle ORM schema with Users table (id, email, password, role), Profiles table (user-scoped loadouts with JSON payload), and UserSettings table (current profile tracking)</description>
+      <status>Complete</status>
+      <location>schema/users.ts, schema/profiles.ts, schema/user_settings.ts</location>
+    </feature>
+    <feature>
+      <name>Profile Management API</name>
+      <description>CRUD endpoints for user profiles with user-scoped queries, create/read/update/delete operations, and profile switching</description>
+      <status>Complete</status>
+      <location>app/api/profiles/*, app/api/profile-state/</location>
+    </feature>
+    <feature>
+      <name>Battle Configuration UI</name>
+      <description>Mirrored Player and Opponent configuration panels with hero selection, skill level input, exclusive weapon level, troop type bonuses, and capacity display</description>
+      <status>Complete</status>
+      <location>components/tabs/player_and_opponent/</location>
+    </feature>
+    <feature>
+      <name>Rally Configuration Interface</name>
+      <description>Tab for setting rally leader heroes (one per troop type), selecting up to 4 joiner heroes, configuring troop mix per capacity, and visualizing joiner skill stacking</description>
+      <status>Complete</status>
+      <location>components/tabs/rally_config/</location>
+    </feature>
+    <feature>
+      <name>Stat Calculation Pipeline</name>
+      <description>Multi-layer bonus aggregation: basic bonuses (combat tech, experts, pets, hero gear, chief gear, charms), additive bonuses (events, special buffs), multiplicative bonuses (castle buffs, territory), final stat computation with game-accurate special-like formula</description>
+      <status>Complete</status>
+      <location>lib/battle/calculations.ts, lib/battle/data-extractors.ts</location>
+    </feature>
+    <feature>
+      <name>Joiner Skill Aggregation</name>
+      <description>Extracts primary skills from up to 4 joiner heroes, aggregates bonuses by skill type (DMG, ATK, DEF, HP, LETH), applies additive stacking for same type and multiplicative stacking across types</description>
+      <status>Complete</status>
+      <location>lib/rally/rally-bonus-extractor.ts</location>
+    </feature>
+    <feature>
+      <name>Comprehensive Game Data</name>
+      <description>Hero definitions, troop stats by tier and FC level, hero skills with levels, hero gear bonuses per troop type, chief gear stats, charm bonuses, expert bonuses, research tree, war academy techs, pet skills, and command center capacity</description>
+      <status>Complete</status>
+      <location>lib/battle/data/</location>
+    </feature>
+    <feature>
+      <name>Deterministic Combat Engine</name>
+      <description>Pure TypeScript combat simulation library with turn-based loop, damage calculations, effect application, skill triggering, targeting rules, and detailed turn-by-turn logging. Supports expected value mode (deterministic) and monte carlo mode with seeded RNG</description>
+      <status>Complete</status>
+      <location>lib/combat/engine.ts, lib/combat/types.ts, lib/combat/damage.ts, lib/combat/bonuses.ts, lib/combat/skills.ts, lib/combat/targeting.ts</location>
+    </feature>
+    <feature>
+      <name>Battle Prediction Display</name>
+      <description>Shows predicted battle outcome with winner determination, remaining troop counts per type, detailed damage breakdown, and battle configuration summary</description>
+      <status>Complete</status>
+      <location>components/tabs/player_and_opponent/components/battle-predictor.tsx</location>
+    </feature>
+    <feature>
+      <name>Troop Capacity Calculation</name>
+      <description>Computes capacity for Infantry, Lancer, and Marksman based on hero gear bonuses with troop count scaling exponent alpha and calibration constant K</description>
+      <status>Complete</status>
+      <location>lib/battle/capacity.ts, lib/battle/hero-gear.ts</location>
+    </feature>
+    <feature>
+      <name>Results Visualization</name>
+      <description>Tab displaying calculated stats, capacity reports, battle prediction summary, and joiner skill formula breakdown with visual representation of multiplicative and additive effects</description>
+      <status>Complete</status>
+      <location>components/tabs/results/</location>
+    </feature>
+    <feature>
+      <name>Theme System</name>
+      <description>Dark and light theme support via CSS data attributes, persistent theme preference storage, and Tailwind CSS integration</description>
+      <status>Complete</status>
+      <location>components/tabs/player_and_opponent/components/theme-context.tsx, tailwind.config.js</location>
+    </feature>
+    <feature>
+      <name>Admin Dashboard</name>
+      <description>Admin section with user management interface and database administration using Drizzle admin adapter</description>
+      <status>Complete</status>
+      <location>app/(admin)/</location>
+    </feature>
+    <feature>
+      <name>State Management Hook</name>
+      <description>Centralized useBattleCalculatorState hook managing entire application state including profile selection, combat configuration, calculated stats, and battle simulation results</description>
+      <status>Complete</status>
+      <location>hooks/useBattleCalculatorState.ts</location>
+    </feature>
+    <feature>
+      <name>Bonus Aggregation System</name>
+      <description>Modules for additive bonus summation, special-like formula application per stat, damage modifier layers, and stacking key enforcement (strict vs permissive mode)</description>
+      <status>Complete</status>
+      <location>lib/combat/bonuses.ts</location>
+    </feature>
+    <feature>
+      <name>Skill System</name>
+      <description>Skill definition framework with triggers (OnTurnStart, OnNormalAttack, OnSkillCast, OnTurnEnd, PassivePermanent), effects (stat buff, damage multiplier, flat add), duration tracking, and chance-based application</description>
+      <status>Complete</status>
+      <location>lib/combat/skills.ts</location>
+    </feature>
+    <feature>
+      <name>Targeting Rules</name>
+      <description>Default front-row-first targeting with optional lancer backline dive to marksmen, customizable via allowLancerBacklineDive and probability parameters</description>
+      <status>Complete</status>
+      <location>lib/combat/targeting.ts</location>
+    </feature>
+    <feature>
+      <name>Damage Calculation Engine</name>
+      <description>Implements Whiteout Survival damage formula with K constant, troop count exponent alpha, stat-based attack and defense multipliers, and multiplicative damage modifier layers</description>
+      <status>Complete</status>
+      <location>lib/combat/damage.ts</location>
+    </feature>
+    <feature>
+      <name>Calibration System</name>
+      <description>Least-squares fitting for calibration constant K to match observed battle data, with optional alpha exponent adjustment</description>
+      <status>Complete</status>
+      <location>lib/combat/calibration.ts</location>
+    </feature>
+    <feature>
+      <name>UI Adapter Layer</name>
+      <description>Maps existing UI/Rally configuration to combat engine types and back, ensuring backward compatibility with legacy FightResult format</description>
+      <status>Complete</status>
+      <location>lib/combat/adapter.ts</location>
+    </feature>
+    <feature>
+      <name>Monte Carlo Simulation Support</name>
+      <description>Seeded random number generation for reproducible monte carlo simulations, mean and variance reporting across N simulation runs</description>
+      <status>Complete</status>
+      <location>lib/combat/engine.ts (randomMode: monteCarlo)</location>
+    </feature>
+    <feature>
+      <name>Environment Configuration</name>
+      <description>Support for DATABASE_URL, AUTH_SECRET, NEXTAUTH_SECRET, and NODE_ENV environment variables with local .env.local file</description>
+      <status>Complete</status>
+      <location>.env.local (git-ignored)</location>
+    </feature>
+    <feature>
+      <name>Design Documentation</name>
+      <description>Comprehensive design documentation including combat engine architecture, stat pipeline, bonus stacking rules, damage calculations, and integration points</description>
+      <status>Complete</status>
+      <location>lib/combat/DESIGN.md, docs/</location>
+    </feature>
+  </implemented_features>
+
+  <additional_requirements>
+    <requirement>
+      <category>Determinism</category>
+      <description>Expected value mode must produce identical results for identical inputs (no randomness). Monte carlo mode must be seeded and reproducible with same seed parameter</description>
+    </requirement>
+    <requirement>
+      <category>Performance</category>
+      <description>Battle simulations must complete within acceptable UI response time (target under 500ms for single simulation, under 5s for 1000 monte carlo runs)</description>
+    </requirement>
+    <requirement>
+      <category>Security</category>
+      <description>All user data must be scoped by userId, JWT tokens stored in HTTP-only secure cookies, never log secrets or sensitive data, implement rate limiting on simulation endpoints</description>
+    </requirement>
+    <requirement>
+      <category>Data Validation</category>
+      <description>All user inputs validated via Zod schemas before database storage, payloadJson and inputJson include version field for future migration support</description>
+    </requirement>
+    <requirement>
+      <category>Game Accuracy</category>
+      <description>All combat formulas must match or closely approximate actual Whiteout Survival game mechanics including special-like bonus stacking, joiner skill rules, damage equations, and troop diminishing returns</description>
+    </requirement>
+    <requirement>
+      <category>Browser Support</category>
+      <description>Support modern browsers (Chrome, Firefox, Safari, Edge) with ES2017+ JavaScript compatibility</description>
+    </requirement>
+    <requirement>
+      <category>Mobile Responsiveness</category>
+      <description>Responsive design supporting tablet and mobile viewports with touch-friendly UI components</description>
+    </requirement>
+    <requirement>
+      <category>Accessibility</capability>
+      <description>Semantic HTML, proper ARIA labels, keyboard navigation support, sufficient color contrast in both light and dark themes</description>
+    </requirement>
+    <requirement>
+      <category>API Rate Limiting</category>
+      <description>Implement per-user throttling on simulation endpoints to prevent abuse (recommend 100+ requests per minute per user)</description>
+    </requirement>
+    <requirement>
+      <category>Caching Strategy</category>
+      <description>Cache game data (heroes, troops, skills) to minimize database queries; implement cache invalidation on data updates</description>
+    </requirement>
+  </additional_requirements>
+
+  <development_guidelines>
+    <guideline>Use TypeScript strict mode throughout; no implicit any types</guideline>
+    <guideline>All React components must be documented with JSDoc comments explaining props and behavior</guideline>
+    <guideline>Combat engine code in lib/combat must remain pure functions with no React dependencies</guideline>
+    <guideline>Use Zod schemas for all user input validation at API boundaries</guideline>
+    <guideline>Database queries must filter by userId to enforce user-scoped data access</guideline>
+    <guideline>Implement comprehensive error handling with user-friendly error messages</guideline>
+    <guideline>Use meaningful git commit messages following conventional commits format (feat:, fix:, docs:, test:)</guideline>
+    <guideline>Write unit tests for critical business logic, particularly combat engine calculations</guideline>
+    <guideline>Document complex algorithms with comments explaining the Whiteout Survival game mechanics</guideline>
+    <guideline>Use path aliases (@/*) consistently throughout imports</guideline>
+    <guideline>Maintain separation between UI layer (components/, app/) and business logic (lib/)</guideline>
+    <guideline>Keep Tailwind classes organized using the recommended utility class order</guideline>
+    <guideline>Use custom hooks for complex state management and side effects</guideline>
+    <guideline>Implement environment variable validation on application startup</guideline>
+    <guideline>Use Drizzle ORM for all database operations; avoid raw SQL except for migrations</guideline>
+    <guideline>Profile state and calculated stats should use memoization to prevent unnecessary recalculations</guideline>
+    <guideline>API responses must include proper HTTP status codes and error messages</guideline>
+    <guideline>Test authentication flows thoroughly including token expiration and refresh scenarios</guideline>
+    <guideline>Document all bonuses and stat sources for game accuracy verification</guideline>
+    <guideline>Use semantic versioning for profiles payloadJson to support future format migrations</guideline>
+  </development_guidelines>
+
+  <implementation_roadmap>
+    <phase number="1" name="Foundation (Complete)">
+      <item status="complete">User authentication system with JWT and password hashing</item>
+      <item status="complete">Database schema with users, profiles, settings tables</item>
+      <item status="complete">Profile CRUD operations and persistence</item>
+      <item status="complete">Environment configuration and secrets management</item>
+    </phase>
+    <phase number="2" name="Game Data (Complete)">
+      <item status="complete">Hero definitions and skill databases</item>
+      <item status="complete">Troop stats by tier and FC level</item>
+      <item status="complete">Hero gear bonuses per troop type</item>
+      <item status="complete">Chief gear, charms, experts, research, war academy data</item>
+      <item status="complete">Pet skills and command center bonuses</item>
+      <item status="complete">Capacity calculation system</item>
+    </phase>
+    <phase number="3" name="Battle Calculation Engine (Complete)">
+      <item status="complete">Comprehensive stat pipeline with all bonus types</item>
+      <item status="complete">Special-like bonus stacking formula implementation</item>
+      <item status="complete">Joiner skill extraction and aggregation (additive + multiplicative)</item>
+      <item status="complete">Rally configuration with leader and joiner heroes</item>
+      <item status="complete">Battle predictor with outcome calculation</item>
+    </phase>
+    <phase number="4" name="Deterministic Combat Engine (Complete)">
+      <item status="complete">Core combat engine types and interfaces</item>
+      <item status="complete">Damage calculation with K constant and alpha exponent</item>
+      <item status="complete">Bonus aggregation and stacking rules</item>
+      <item status="complete">Skill system with triggers and effects</item>
+      <item status="complete">Targeting rules with lancer backline dive</item>
+      <item status="complete">Turn-based simulation loop with logging</item>
+      <item status="complete">Expected value mode (deterministic)</item>
+      <item status="complete">Monte Carlo mode with seeded RNG</item>
+      <item status="complete">Calibration system for K constant fitting</item>
+      <item status="complete">UI adapter for legacy compatibility</item>
+    </phase>
+    <phase number="5" name="UI Implementation (Complete)">
+      <item status="complete">Tab-based main interface structure</item>
+      <item status="complete">Player/Opponent mirrored configuration panels</item>
+      <item status="complete">Rally configuration tab</item>
+      <item status="complete">Results display with stats and predictions</item>
+      <item status="complete">How-to guide documentation tab</item>
+      <item status="complete">Dark/light theme system</item>
+      <item status="complete">Responsive mobile design</item>
+    </phase>
+    <phase number="6" name="Admin & DevOps (Complete)">
+      <item status="complete">Admin dashboard with user management</item>
+      <item status="complete">Drizzle ORM migrations setup</item>
+      <item status="complete">Database backup and recovery procedures</item>
+      <item status="complete">Deployment configuration</item>
+    </phase>
+    <phase number="7" name="Production Ready (Complete)">
+      <item status="complete">Comprehensive error handling and logging</item>
+      <item status="complete">Rate limiting on API endpoints</item>
+      <item status="complete">Input validation with Zod schemas</item>
+      <item status="complete">Security audit of auth and data access</item>
+      <item status="complete">Performance optimization and profiling</item>
+      <item status="complete">Browser compatibility testing</item>
+      <item status="complete">Mobile responsiveness verification</item>
+      <item status="complete">Documentation and README</item>
+      <item status="complete">Deployment to production</item>
+    </phase>
+    <phase number="8" name="Maintenance &amp; Enhancement (Ongoing)">
+      <item status="pending">Monitor performance metrics and optimize bottlenecks</item>
+      <item status="pending">Update game data as new heroes/items are released</item>
+      <item status="pending">Implement advanced simulation features (confidence intervals, statistical analysis)</item>
+      <item status="pending">Add export/import functionality for battle reports</item>
+      <item status="pending">Implement team collaboration features (share loadouts)</item>
+      <item status="pending">Create CLI tool for batch simulations and calibration</item>
+      <item status="pending">Build mobile app version with React Native</item>
+    </phase>
+  </implementation_roadmap>
+</project_specification>
+```

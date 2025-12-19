@@ -1,0 +1,1 @@
+I’m currently taking a look through the codebase to understand the layout before planning the change. Once I have a sense of the structure, I’ll proceed with implementing the new troop data database feature.

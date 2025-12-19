@@ -1,0 +1,16 @@
+{
+  "id": "create-profile-state-endpoint",
+  "category": "API",
+  "title": "Create profile state management endpoint",
+  "description": "Build /api/profile-state endpoint to get/set current active profile, with user-scoped access control.",
+  "status": "verified",
+  "priority": 1,
+  "complexity": "simple",
+  "dependencies": [
+    "create-user-settings-schema",
+    "create-session-validation"
+  ],
+  "createdAt": "2025-12-17T12:17:51.697Z",
+  "updatedAt": "2025-12-17T13:02:46.869Z",
+  "justFinishedAt": "2025-12-17T13:02:46.869Z"
+}

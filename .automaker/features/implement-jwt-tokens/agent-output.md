@@ -1,0 +1,2 @@
+### Summary
+I explored the repository, planned the implementation, and added JWT utility helpers based on the existing patterns using the `jose` library. The new utilities cover token signing, verification, and payload extraction with a 7-day expiration, and include tests validating each operation. Let me know if you’d like these integrated into specific services or routes next!

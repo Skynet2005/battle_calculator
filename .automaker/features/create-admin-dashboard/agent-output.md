@@ -1,0 +1,3 @@
+I hit an unexpected issue: the commands I attempted to run didn’t produce any output, likely because I didn’t format the tool calls correctly. Before I proceed with the requested feature implementation, I need to correctly access the project files to inspect the codebase.
+
+Could you please confirm the correct way to run shell commands in this environment (e.g., the expected format for tool calls)? Once I can list and view the repository contents, I’ll proceed with the admin dashboard feature implementation.

@@ -1,0 +1,20 @@
+{
+  "id": "implement-special-like-formula",
+  "category": "Core",
+  "title": "Implement special-like bonus stacking formula",
+  "description": "Build stat calculation using special-like formula: finalPercent = base + special + (base * special / 100), applied per stat type.",
+  "status": "verified",
+  "priority": 1,
+  "complexity": "simple",
+  "dependencies": [
+    "implement-bonus-aggregation"
+  ],
+  "createdAt": "2025-12-17T12:17:51.707Z",
+  "updatedAt": "2025-12-17T20:15:48.316Z",
+  "skipTests": false,
+  "model": "gpt-5.1-codex-max",
+  "thinkingLevel": "none",
+  "imagePaths": [],
+  "branchName": "main",
+  "justFinishedAt": "2025-12-17T20:15:48.316Z"
+}

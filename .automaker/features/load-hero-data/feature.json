@@ -1,0 +1,18 @@
+{
+  "id": "load-hero-data",
+  "category": "Game Data",
+  "title": "Load comprehensive hero definitions",
+  "description": "Create hero data database with name, type, tier, skills, stat bases, and exclusive weapon levels. Include all heroes from the game.",
+  "status": "verified",
+  "priority": 1,
+  "complexity": "moderate",
+  "dependencies": [],
+  "createdAt": "2025-12-17T12:17:51.699Z",
+  "updatedAt": "2025-12-17T20:23:33.383Z",
+  "skipTests": false,
+  "model": "gpt-5.1-codex-mini",
+  "thinkingLevel": "none",
+  "imagePaths": [],
+  "branchName": "main",
+  "justFinishedAt": "2025-12-17T20:23:33.383Z"
+}

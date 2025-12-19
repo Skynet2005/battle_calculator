@@ -1,0 +1,39 @@
+import type { SideBaseStats } from '@/lib/rally/combat-types';
+import { Dispatch, SetStateAction } from 'react';
+import type { UserProfile } from '../../types';
+import RallyConfigurationComponent from './RallyConfiguration';
+import RallyJoinerFormula from './RallyJoinerFormula';
+
+interface RallyTabProps {
+  currentProfile: UserProfile;
+  setCurrentProfile: Dispatch<SetStateAction<UserProfile | null>>;
+  playerBaseStats: SideBaseStats;
+  opponentBaseStats: SideBaseStats;
+}
+
+export default function RallyTab({
+  currentProfile,
+  setCurrentProfile,
+  playerBaseStats,
+  opponentBaseStats
+}: RallyTabProps) {
+  return (
+    <div className="tab-content active">
+      <RallyConfigurationComponent
+        rally={currentProfile.rally}
+        onRallyChangeAction={(rally) => {
+          setCurrentProfile({
+            ...currentProfile,
+            rally
+          });
+        }}
+        playerHeroLevels={currentProfile.heroLevels}
+        opponentHeroLevels={currentProfile.opponent?.heroLevels}
+        playerBaseStats={playerBaseStats}
+        opponentBaseStats={opponentBaseStats}
+      />
+      <RallyJoinerFormula rally={currentProfile.rally} />
+    </div>
+  );
+}
+
