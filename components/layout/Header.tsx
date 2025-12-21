@@ -1,5 +1,6 @@
 import ThemeToggle from '../../lib/ThemeToggle';
 import type { UserProfile } from '../types';
+import HamburgerNav from '../ui/HamburgerNav';
 
 interface HeaderProps {
   currentProfile: UserProfile | null;
@@ -22,6 +23,14 @@ export default function Header({
 }: HeaderProps) {
   return (
     <header className="text-center mb-10 text-white relative">
+      <div className="absolute top-0 left-0 z-10">
+        <HamburgerNav
+          links={[
+            { href: '/', label: 'Home' },
+            { href: '/leaderboard', label: 'Leaderboard' },
+          ]}
+        />
+      </div>
       <div className="absolute top-0 right-0 z-10 flex items-center gap-2">
         <ThemeToggle />
       </div>

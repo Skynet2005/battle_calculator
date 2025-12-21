@@ -4,6 +4,7 @@
  */
 
 export type TroopType = 'infantry' | 'lancer' | 'marksman';
+export type TroopScope = TroopType | 'all_troops' | 'rally_troops';
 export type StatType = 'attack' | 'defense' | 'lethality' | 'health';
 
 export interface BasicBonuses {
@@ -129,12 +130,20 @@ export interface BasicBonuses {
   globe: Record<StatType, number>;
 }
 
+export type AdditiveManualOverride = Partial<Record<TroopType, Partial<Record<StatType, number>>>>;
+
 export interface AdditiveBonuses {
   // Temporary events, Supreme President skills, special buffs
   temporaryEvents: Record<StatType, number>;
   supremePresident: Record<StatType, number>;
   specialBuffs: Record<StatType, number>;
+  // Optional per-troop joiner bonuses (already combined from rally/all_troops + troop-specific)
+  joinerBuffs?: Partial<Record<TroopType, Partial<Record<StatType, number>>>>;
+  // Optional manual override of the total additive bonuses per troop type
+  manualOverrideTotals?: AdditiveManualOverride;
 }
+
+export type MultiplicativeManualOverride = Partial<Record<TroopType, Partial<Record<StatType, number>>>>;
 
 export interface MultiplicativeBonuses {
   // Castle or Event Buffs
@@ -161,6 +170,22 @@ export interface MultiplicativeBonuses {
     enemyDefenseReduction: number; // 0, 10, or 20 (debuff)
     deploymentCapacity: number; // 0, 10, or 20
   };
+  // Optional per-troop joiner multiplicative bonuses (already combined from rally/all_troops + troop-specific)
+  joinerBuffs?: Partial<
+    Record<
+      TroopType,
+      Partial<{
+        attack: number;
+        defense: number;
+        lethality: number;
+        health: number;
+        damage: number;
+        damageReduction: number;
+      }>
+    >
+  >;
+  // Optional manual override of total multiplicative % per troop type/stat
+  manualOverrideTotals?: MultiplicativeManualOverride;
 }
 
 export interface FinalStats {
@@ -329,21 +354,46 @@ export function calculateBasicBonus(
  * Calculate Additive Bonuses (flat % layers)
  */
 export function calculateAdditiveBonus(
-  bonuses: AdditiveBonuses
+  bonuses: AdditiveBonuses,
+  troopType?: TroopType
 ): Record<StatType, number> {
+  const manualOverride = troopType ? bonuses.manualOverrideTotals?.[troopType] : undefined;
+  const manualOverrideActive =
+    manualOverride &&
+    Object.values(manualOverride).some((value) => value !== undefined && value !== null && !Number.isNaN(Number(value)));
+
+  if (manualOverrideActive) {
+    return {
+      attack: Number(manualOverride?.attack ?? 0),
+      defense: Number(manualOverride?.defense ?? 0),
+      lethality: Number(manualOverride?.lethality ?? 0),
+      health: Number(manualOverride?.health ?? 0),
+    };
+  }
+
+  const joinerBuff = troopType ? bonuses.joinerBuffs?.[troopType] : undefined;
+  const joinerAttack = joinerBuff?.attack ?? 0;
+  const joinerDefense = joinerBuff?.defense ?? 0;
+  const joinerLethality = joinerBuff?.lethality ?? 0;
+  const joinerHealth = joinerBuff?.health ?? 0;
+
   return {
     attack: (bonuses.temporaryEvents.attack || 0) +
       (bonuses.supremePresident.attack || 0) +
-      (bonuses.specialBuffs.attack || 0),
+      (bonuses.specialBuffs.attack || 0) +
+      joinerAttack,
     defense: (bonuses.temporaryEvents.defense || 0) +
       (bonuses.supremePresident.defense || 0) +
-      (bonuses.specialBuffs.defense || 0),
+      (bonuses.specialBuffs.defense || 0) +
+      joinerDefense,
     lethality: (bonuses.temporaryEvents.lethality || 0) +
       (bonuses.supremePresident.lethality || 0) +
-      (bonuses.specialBuffs.lethality || 0),
+      (bonuses.specialBuffs.lethality || 0) +
+      joinerLethality,
     health: (bonuses.temporaryEvents.health || 0) +
       (bonuses.supremePresident.health || 0) +
-      (bonuses.specialBuffs.health || 0),
+      (bonuses.specialBuffs.health || 0) +
+      joinerHealth,
   };
 }
 
@@ -362,8 +412,22 @@ export function calculateAdditiveBonus(
 export function calculateMultiplicativeBonus(
   baseStat: number,
   bonuses: MultiplicativeBonuses,
-  statType: StatType
+  statType: StatType,
+  troopType?: TroopType
 ): number {
+  const manualOverride = troopType ? bonuses.manualOverrideTotals?.[troopType]?.[statType] : undefined;
+  if (manualOverride !== undefined && manualOverride !== null && !Number.isNaN(Number(manualOverride))) {
+    return baseStat * (1 + Number(manualOverride) / 100);
+  }
+
+  const joinerBuff = troopType ? bonuses.joinerBuffs?.[troopType] : undefined;
+  const joinerOffense =
+    (statType === 'attack' ? (joinerBuff?.attack ?? 0) + (joinerBuff?.damage ?? 0) : 0) +
+    (statType === 'lethality' ? (joinerBuff?.lethality ?? 0) : 0);
+  const joinerDefense =
+    (statType === 'defense' ? (joinerBuff?.defense ?? 0) + (joinerBuff?.damageReduction ?? 0) : 0) +
+    (statType === 'health' ? (joinerBuff?.health ?? 0) : 0);
+
   // Sum all buff percentages
   const buffPercentSum =
     (bonuses.castleBuffs[statType] || 0) +
@@ -372,7 +436,9 @@ export function calculateMultiplicativeBonus(
     (bonuses.combatBuffs[statType] || 0) +
     (bonuses.exclusiveWeapon[statType] || 0) +
     (bonuses.allianceTerritory[statType] || 0) +
-    (bonuses.tyrantSpire[statType] || 0);
+    (bonuses.tyrantSpire[statType] || 0) +
+    joinerOffense +
+    joinerDefense;
 
   // Sum all debuff percentages
   // Note: combatDebuffs represent enemy-focused debuffs (applied to the opponent).
@@ -416,7 +482,7 @@ export function calculateFinalStats(
   const basic = calculateBasicBonus(basicBonuses, troopType);
 
   // Step 2: Calculate Additive Bonus
-  const additive = calculateAdditiveBonus(additiveBonuses);
+  const additive = calculateAdditiveBonus(additiveBonuses, troopType);
 
   // Step 3: Combine Basic + Additive
   const baseStats: Record<StatType, number> = {
@@ -436,10 +502,10 @@ export function calculateFinalStats(
 
   // Step 4: Apply Multiplicative Bonuses
   const final: FinalStats = {
-    attack: calculateMultiplicativeBonus(baseStats.attack, multiplicativeBonuses, 'attack'),
-    defense: calculateMultiplicativeBonus(baseStats.defense, multiplicativeBonuses, 'defense'),
-    lethality: calculateMultiplicativeBonus(baseStats.lethality, multiplicativeBonuses, 'lethality'),
-    health: calculateMultiplicativeBonus(baseStats.health, multiplicativeBonuses, 'health'),
+    attack: calculateMultiplicativeBonus(baseStats.attack, multiplicativeBonuses, 'attack', troopType),
+    defense: calculateMultiplicativeBonus(baseStats.defense, multiplicativeBonuses, 'defense', troopType),
+    lethality: calculateMultiplicativeBonus(baseStats.lethality, multiplicativeBonuses, 'lethality', troopType),
+    health: calculateMultiplicativeBonus(baseStats.health, multiplicativeBonuses, 'health', troopType),
   };
 
   // Round to 2 decimal places (game uses 2 decimals internally)

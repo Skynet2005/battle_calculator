@@ -37,7 +37,7 @@ const isUuid = (value: string | undefined | null) =>
 
 export function useBattleCalculatorState() {
   const [currentProfile, setCurrentProfile] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'profile' | 'opponent' | 'rally' | 'results' | 'howto'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'opponent' | 'rally' | 'results' | 'howto'>('rally');
   const [profileSubTab, setProfileSubTab] = useState<'info' | 'heroes' | 'basic' | 'research' | 'chief' | 'pets'>('info');
   const [opponentSubTab, setOpponentSubTab] = useState<'info' | 'heroes' | 'basic' | 'research' | 'chief' | 'pets'>('info');
   const [simulationMode, setSimulationMode] = useState<BattleConfig['randomMode']>('monteCarlo');

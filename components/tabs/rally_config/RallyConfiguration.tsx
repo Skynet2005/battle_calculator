@@ -518,6 +518,23 @@ function LeaderSelector({
   const [exclusiveWeaponLevel, setExclusiveWeaponLevel] = useState(hero?.exclusiveWeaponLevel);
   const [xpLevel, setXpLevel] = useState<number | undefined>(hero?.xpLevel);
   const [skillLevels, setSkillLevels] = useState<SkillLevelsByName>(hero?.skillLevels || {});
+  const heroesByGeneration = useMemo(
+    () =>
+      Array.from(
+        availableHeroes.reduce((acc, h) => {
+          const gen = h.generation;
+          if (!acc.has(gen)) acc.set(gen, []);
+          acc.get(gen)!.push(h);
+          return acc;
+        }, new Map<number, Hero[]>())
+      )
+        .sort((a, b) => a[0] - b[0])
+        .map(([gen, heroes]) => ({
+          gen,
+          heroes: heroes.sort((a, b) => a['hero-name'].localeCompare(b['hero-name']))
+        })),
+    [availableHeroes]
+  );
 
   // Use refs to track previous values and prevent infinite loops
   const prevHeroLevelsRef = useRef(heroLevels);
@@ -684,17 +701,21 @@ function LeaderSelector({
           onChange={(e) => setSelectedHeroName(e.target.value)}
         >
           <option value="">Select {type} hero...</option>
-          {availableHeroes.map(h => (
-            <option key={h['hero-name']} value={h['hero-name']}>
-              {h['hero-name']} (Gen {h.generation})
-            </option>
+          {heroesByGeneration.map(group => (
+            <optgroup key={`leader-gen-${group.gen}`} label={`Generation ${group.gen}`}>
+              {group.heroes.map(h => (
+                <option key={h['hero-name']} value={h['hero-name']}>
+                  {h['hero-name']} (Gen {h.generation})
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </div>
 
       {selectedHero && (
         <>
-          <div className="grid gap-4">
+          <div className="space-y-4">
             <div className="form-group">
               <label>Star Level</label>
               <div className="star-level-input">
@@ -734,40 +755,48 @@ function LeaderSelector({
                 </button>
               </div>
             </div>
-            <div className="form-group">
-              <label>Generation</label>
-              <input type="text" value={selectedHero.generation} disabled />
-            </div>
-            <div className="form-group">
-              <label>XP Level</label>
-              <input
-                type="number"
-                min="0"
-                max="80"
-                value={xpLevel !== undefined ? xpLevel : (heroLevel?.xpLevel ?? 80)}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  setXpLevel(isNaN(value) ? undefined : Math.max(0, Math.min(80, value)));
-                }}
-              />
-              {heroLevel && xpLevel === undefined && (
-                <p className="text-xs text-gray-400 mt-1">
-                  Using {heroLevel.xpLevel} from {isUsingPlayerHeroes ? 'Player' : 'Opponent'} Heroes section
-                </p>
-              )}
-            </div>
-            {selectedHero['exclusive-weapon'] && (
+
+            <div className="grid gap-4 md:grid-cols-3 items-end">
               <div className="form-group">
-                <label>Exclusive Weapon Level</label>
+                <label>Generation</label>
+                <input type="text" value={selectedHero.generation} disabled />
+              </div>
+              <div className="form-group">
+                <label>XP Level</label>
                 <input
                   type="number"
                   min="0"
-                  max={selectedHero['exclusive-weapon'].levels.length}
-                  value={exclusiveWeaponLevel || 0}
-                  onChange={(e) => setExclusiveWeaponLevel(parseInt(e.target.value) || undefined)}
+                  max="80"
+                  value={xpLevel !== undefined ? xpLevel : (heroLevel?.xpLevel ?? '')}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    setXpLevel(isNaN(value) ? undefined : Math.max(0, Math.min(80, value)));
+                  }}
                 />
+                {heroLevel && xpLevel === undefined && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Using {heroLevel.xpLevel} from {isUsingPlayerHeroes ? 'Player' : 'Opponent'} Heroes section
+                  </p>
+                )}
               </div>
-            )}
+              {selectedHero['exclusive-weapon'] ? (
+                <div className="form-group">
+                  <label>Exclusive Weapon Level</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={selectedHero['exclusive-weapon'].levels.length}
+                    value={exclusiveWeaponLevel || 0}
+                    onChange={(e) => setExclusiveWeaponLevel(parseInt(e.target.value) || undefined)}
+                  />
+                </div>
+              ) : (
+                <div className="form-group invisible" aria-hidden="true">
+                  <label>Exclusive Weapon Level</label>
+                  <input type="number" />
+                </div>
+              )}
+            </div>
           </div>
 
           {skills.length > 0 && (
@@ -776,32 +805,34 @@ function LeaderSelector({
               <p className="text-sm text-gray-400 dark:text-gray-400 mb-2">
                 <strong>All Rally Captain skills are active</strong> in rally battles. Configure skill levels below.
               </p>
-              {skills.map(skill => (
-                <div key={skill.name} className="form-group">
-                  <label>
-                    {skill.name}
-                    {isUsingHeroLevels && heroLevel?.skillLevels?.[skill.name] && (
-                      <span className="text-xs text-gray-400 dark:text-gray-400 ml-2">
-                        (from {isUsingPlayerHeroes ? 'Player' : 'Opponent'} config)
-                      </span>
-                    )}
-                  </label>
-                  <select
-                    value={skillLevels[skill.name] || 1}
-                    onChange={(e) => {
-                      const parsedLevel = Math.max(1, Math.min(5, parseInt(e.target.value) || 1)) as SkillLevel;
-                      setSkillLevels({
-                        ...skillLevels,
-                        [skill.name]: parsedLevel,
-                      });
-                    }}
-                  >
-                    {getHeroSkillLevelOptions(skill.data, false).map(level => (
-                      <option key={level} value={level}>Level {level}</option>
-                    ))}
-                  </select>
-                </div>
-              ))}
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 lg:grid-cols-3">
+                {skills.map(skill => (
+                  <div key={skill.name} className="form-group">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-semibold text-sm">{skill.name}</span>
+                      {isUsingHeroLevels && heroLevel?.skillLevels?.[skill.name] && (
+                        <span className="text-[11px] text-gray-400 dark:text-gray-400">
+                          (from {isUsingPlayerHeroes ? 'Player' : 'Opponent'})
+                        </span>
+                      )}
+                    </div>
+                    <select
+                      value={skillLevels[skill.name] || 1}
+                      onChange={(e) => {
+                        const parsedLevel = Math.max(1, Math.min(5, parseInt(e.target.value) || 1)) as SkillLevel;
+                        setSkillLevels({
+                          ...skillLevels,
+                          [skill.name]: parsedLevel,
+                        });
+                      }}
+                    >
+                      {getHeroSkillLevelOptions(skill.data, false).map(level => (
+                        <option key={level} value={level}>Level {level}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </>
@@ -821,6 +852,25 @@ function JoinerSelector({ joiner, availableHeroes, onJoinerChange, onRemove, her
   const [selectedHeroName, setSelectedHeroName] = useState(joiner.heroName || '');
   const [starLevel, setStarLevel] = useState(joiner.starLevel || 0);
   const [xpLevel, setXpLevel] = useState<number | undefined>(joiner.xpLevel);
+  const [skillLevels, setSkillLevels] = useState<SkillLevelsByName>(joiner.skillLevels || {});
+  const [hasManualSkillSelection, setHasManualSkillSelection] = useState(false);
+  const heroesByGeneration = useMemo(
+    () =>
+      Array.from(
+        availableHeroes.reduce((acc, hero) => {
+          const gen = hero.generation;
+          if (!acc.has(gen)) acc.set(gen, []);
+          acc.get(gen)!.push(hero);
+          return acc;
+        }, new Map<number, Hero[]>())
+      )
+        .sort((a, b) => a[0] - b[0])
+        .map(([gen, heroes]) => ({
+          gen,
+          heroes: heroes.sort((a, b) => a['hero-name'].localeCompare(b['hero-name']))
+        })),
+    [availableHeroes]
+  );
 
   const STAR_COUNT = 5;
   const SEGMENTS_PER_STAR = 6;
@@ -913,15 +963,44 @@ function JoinerSelector({ joiner, availableHeroes, onJoinerChange, onRemove, her
     }
   }, [selectedHeroName, heroLevels, starLevel, xpLevel]);
 
+  // Sync skill levels from heroLevels when available
+  useEffect(() => {
+    if (hasManualSkillSelection) return;
+    if (selectedHeroName) {
+      const selectedHero = availableHeroes.find(h => h['hero-name'] === selectedHeroName);
+      const skills = selectedHero ? getHeroExpeditionSkills(selectedHero) : [];
+      if (skills.length === 0) return;
+      const merged: SkillLevelsByName = { ...skillLevels };
+      skills.forEach((skill) => {
+        const fromHeroLevels = heroLevels?.[selectedHeroName]?.skillLevels?.[skill.name];
+        const opts = getHeroSkillLevelOptions(skill.data, false);
+        const maxLevel = opts.length > 0 ? (opts[opts.length - 1] as SkillLevel) : 1;
+        if (fromHeroLevels !== undefined) {
+          merged[skill.name] = fromHeroLevels as SkillLevel;
+        } else if (merged[skill.name] === undefined) {
+          merged[skill.name] = maxLevel as SkillLevel;
+        }
+      });
+      const changed = JSON.stringify(merged) !== JSON.stringify(skillLevels);
+      if (changed) {
+        setSkillLevels(merged);
+      }
+    }
+  }, [selectedHeroName, heroLevels, availableHeroes, skillLevels, hasManualSkillSelection]);
+
   // Track previous joiner to avoid unnecessary onJoinerChange calls
   useEffect(() => {
     if (selectedHeroName) {
       const selectedHero = availableHeroes.find(h => h['hero-name'] === selectedHeroName);
       if (selectedHero) {
         const skills = getHeroExpeditionSkills(selectedHero);
-        const skillLevels: SkillLevelsByName = {};
+        const newSkillLevels: SkillLevelsByName = {};
         skills.forEach(skill => {
-          skillLevels[skill.name] = 1; // Joiners only get level 1
+          const fromHeroLevels = heroLevels?.[selectedHeroName]?.skillLevels?.[skill.name];
+          const existing = skillLevels[skill.name];
+          const opts = getHeroSkillLevelOptions(skill.data, false);
+          const maxLevel = opts.length > 0 ? (opts[opts.length - 1] as SkillLevel) : 1;
+          newSkillLevels[skill.name] = (fromHeroLevels ?? existing ?? maxLevel) as SkillLevel;
         });
 
         // Get star level and XP level: prefer from heroLevels if available, otherwise use current state
@@ -940,7 +1019,7 @@ function JoinerSelector({ joiner, availableHeroes, onJoinerChange, onRemove, her
           heroClass: selectedHero['hero-class'] as TroopType,
           starLevel: effectiveStarLevel,
           generation: selectedHero.generation,
-          skillLevels,
+          skillLevels: newSkillLevels,
           xpLevel: effectiveXpLevel, // Include XP level in RallyHero
         };
 
@@ -971,11 +1050,18 @@ function JoinerSelector({ joiner, availableHeroes, onJoinerChange, onRemove, her
         };
       }
     }
-  }, [selectedHeroName, starLevel, xpLevel, heroLevels, availableHeroes]);
+  }, [selectedHeroName, starLevel, xpLevel, heroLevels, availableHeroes, skillLevels]);
 
   const selectedHero = availableHeroes.find(h => h['hero-name'] === selectedHeroName);
   const heroLevel = selectedHeroName ? heroLevels?.[selectedHeroName] : undefined;
   const isUsingHeroLevels = !!heroLevel;
+  const firstSkill = selectedHero ? getHeroExpeditionSkills(selectedHero)[0] : null;
+  const maxLevelForFirstSkill = firstSkill
+    ? (() => {
+      const opts = getHeroSkillLevelOptions(firstSkill.data, false);
+      return opts.length > 0 ? (opts[opts.length - 1] as SkillLevel) : 1;
+    })()
+    : 1;
 
   return (
     <div className="card mb-4 bg-slate-700/50 dark:bg-slate-700/50">
@@ -1006,14 +1092,18 @@ function JoinerSelector({ joiner, availableHeroes, onJoinerChange, onRemove, her
               onChange={(e) => setSelectedHeroName(e.target.value)}
             >
               <option value="">Select hero...</option>
-              {availableHeroes.map(h => (
-                <option key={h['hero-name']} value={h['hero-name']}>
-                  {h['hero-name']} ({h['hero-class']}, Gen {h.generation})
-                </option>
+              {heroesByGeneration.map(group => (
+                <optgroup key={`gen-${group.gen}`} label={`Generation ${group.gen}`}>
+                  {group.heroes.map(h => (
+                    <option key={h['hero-name']} value={h['hero-name']}>
+                      {h['hero-name']} ({h['hero-class']}, Gen {h.generation})
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
-          {selectedHero && (
+          {selectedHero ? (
             <>
               <div className="form-group">
                 <label>Generation</label>
@@ -1038,49 +1128,104 @@ function JoinerSelector({ joiner, availableHeroes, onJoinerChange, onRemove, her
                 )}
               </div>
             </>
+          ) : (
+            <>
+              <div className="form-group invisible" aria-hidden="true">
+                <label>Generation</label>
+                <input type="text" value="" readOnly />
+              </div>
+              <div className="form-group invisible" aria-hidden="true">
+                <label>XP Level</label>
+                <input type="number" value="" readOnly />
+              </div>
+            </>
           )}
         </div>
 
         {selectedHero && (
           <>
-            <div className="form-group">
-              <label>Star Level</label>
-              <div className="star-level-input">
-                {Array.from({ length: STAR_COUNT }, (_, starIdx) => {
-                  const starBase = starIdx * SEGMENTS_PER_STAR;
-                  return (
-                    <div key={`star-${starIdx}`} className="hex-star" role="group" aria-label={`Star ${starIdx + 1}`}>
-                      <svg viewBox="0 0 120 120" aria-hidden="true">
-                        {Array.from({ length: SEGMENTS_PER_STAR }, (_, segmentIdx) => {
-                          const level = starBase + segmentIdx + 1;
-                          const isActive = starLevel >= level;
-                          return (
-                            <path
-                              key={level}
-                              d="M60 8 L72 32 L60 56 L48 32 Z"
-                              transform={`rotate(${-segmentIdx * 60} 60 60)`}
-                              className={`hex-segment ${isActive ? 'active' : ''}`}
-                              onClick={() => {
-                                const newStarLevel = Math.max(0, Math.min(MAX_STAR_LEVEL, level));
-                                setStarLevel(newStarLevel);
-                              }}
-                              aria-label={`Set star level to ${level}`}
-                            />
-                          );
-                        })}
-                      </svg>
-                    </div>
-                  );
-                })}
-                <button
-                  type="button"
-                  className="star-reset"
-                  onClick={() => setStarLevel(0)}
-                  aria-label="Reset star level"
-                >
-                  Reset
-                </button>
+            <div className="grid gap-4 md:grid-cols-2 items-start">
+              <div className="form-group">
+                <label>Star Level</label>
+                <div className="star-level-input">
+                  {Array.from({ length: STAR_COUNT }, (_, starIdx) => {
+                    const starBase = starIdx * SEGMENTS_PER_STAR;
+                    return (
+                      <div key={`star-${starIdx}`} className="hex-star" role="group" aria-label={`Star ${starIdx + 1}`}>
+                        <svg viewBox="0 0 120 120" aria-hidden="true">
+                          {Array.from({ length: SEGMENTS_PER_STAR }, (_, segmentIdx) => {
+                            const level = starBase + segmentIdx + 1;
+                            const isActive = starLevel >= level;
+                            return (
+                              <path
+                                key={level}
+                                d="M60 8 L72 32 L60 56 L48 32 Z"
+                                transform={`rotate(${-segmentIdx * 60} 60 60)`}
+                                className={`hex-segment ${isActive ? 'active' : ''}`}
+                                onClick={() => {
+                                  const newStarLevel = Math.max(0, Math.min(MAX_STAR_LEVEL, level));
+                                  setStarLevel(newStarLevel);
+                                }}
+                                aria-label={`Set star level to ${level}`}
+                              />
+                            );
+                          })}
+                        </svg>
+                      </div>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    className="star-reset"
+                    onClick={() => setStarLevel(0)}
+                    aria-label="Reset star level"
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
+
+              {firstSkill ? (
+                <div className="form-group">
+                  <label className="flex items-center justify-between gap-2">
+                    <span>{firstSkill.name}</span>
+                    {isUsingHeroLevels && heroLevel?.skillLevels?.[firstSkill.name] && (
+                      <span className="text-[11px] text-gray-400 dark:text-gray-400">
+                        (from {isUsingPlayerHeroes ? 'Player' : 'Opponent'})
+                      </span>
+                    )}
+                  </label>
+                  <select
+                    value={skillLevels[firstSkill.name] ?? heroLevel?.skillLevels?.[firstSkill.name] ?? maxLevelForFirstSkill}
+                    onChange={(e) => {
+                      const parsedLevel = Math.max(1, Math.min(5, parseInt(e.target.value) || 1)) as SkillLevel;
+                      const nextSkillLevels = {
+                        ...skillLevels,
+                        [firstSkill.name]: parsedLevel
+                      };
+                      setSkillLevels(nextSkillLevels);
+                      setHasManualSkillSelection(true);
+                      onJoinerChange({
+                        ...joiner,
+                        heroName: selectedHeroName,
+                        xpLevel,
+                        starLevel,
+                        generation: selectedHero.generation,
+                        skillLevels: nextSkillLevels
+                      });
+                    }}
+                  >
+                    {getHeroSkillLevelOptions(firstSkill.data, false).map(level => (
+                      <option key={level} value={level}>Level {level}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="form-group invisible" aria-hidden="true">
+                  <label>Skill Level</label>
+                  <input type="number" value="" readOnly />
+                </div>
+              )}
             </div>
           </>
         )}
@@ -1243,7 +1388,7 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
     const details: Array<{
       heroName: string;
       skillName: string;
-      maxLevel: number;
+      skillLevel: number;
       skillType: string | null;
       bonusValue: number;
       reason?: string;
@@ -1308,7 +1453,7 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
     };
 
     // Helper function to extract bonus values per type (supports mixed stats like Philly)
-    const extractBonusValues = (skillData: any, maxLevel: number): Record<string, number> => {
+    const extractBonusValues = (skillData: any, levelToUse: number): Record<string, number> => {
       const result: Record<string, number> = {
         damage: 0,
         attack: 0,
@@ -1327,7 +1472,7 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
         const value = skillData[key];
         const numericValue = (() => {
           if (typeof value === 'object' && value !== null) {
-            const levelValue = value[maxLevel.toString()] || value['1'];
+            const levelValue = value[levelToUse.toString()] || value['1'];
             return typeof levelValue === 'number' ? levelValue : 0;
           }
           if (typeof value === 'number') {
@@ -1340,6 +1485,35 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
         const pct = numericValue * 100;
         const lower = key.toLowerCase();
 
+        // Prefer explicit *_percentage keys (e.g., all_troops_damage_up_percentage)
+        if (lower.includes('percentage')) {
+          if (lower.includes('reduction') || lower.includes('taken') || lower.includes('received')) {
+            addValue('damageReduction', pct);
+            return;
+          }
+          if (lower.includes('damage')) {
+            addValue('damage', pct);
+            return;
+          }
+          if (lower.includes('attack')) {
+            addValue('attack', pct);
+            return;
+          }
+          if (lower.includes('defense')) {
+            addValue('defense', pct);
+            return;
+          }
+          if (lower.includes('health')) {
+            addValue('health', pct);
+            return;
+          }
+          if (lower.includes('lethality')) {
+            addValue('lethality', pct);
+            return;
+          }
+        }
+
+        // Fallback heuristics (legacy)
         const isDamageIncrease =
           lower.includes('damage_increase') ||
           lower.includes('damage_dealt_increase') ||
@@ -1354,32 +1528,11 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
           lower.includes('all_troops_damage_up') ||
           lower.includes('dot_percentage') ||
           lower.includes('damage_per_turn') ||
-          lower.includes('defense_reduction');
-        if (isDamageIncrease) {
-          addValue('damage', pct);
-        }
-        if (lower.includes('attack_up')) {
-          addValue('attack', pct);
-        }
-        if (lower.includes('defense_up')) {
-          addValue('defense', pct);
-        }
-        if (lower.includes('health_up')) {
-          addValue('health', pct);
-        }
-        if (lower.includes('lethality_increase')) {
-          addValue('lethality', pct);
-        }
-        if (
-          lower.includes('damage_up') ||
+          lower.includes('defense_reduction') ||
           lower.includes('extra_damage_up') ||
-          lower.includes('normal_attack_damage_up') ||
-          lower.includes('skill_damage_up') ||
-          lower.includes('enemy_damage_taken_up')
-        ) {
-          addValue('damage', pct);
-        }
-        if (
+          lower.includes('enemy_damage_taken_up');
+
+        const isDamageReduction =
           lower.includes('damage_taken_down') ||
           lower.includes('damage_reduction') ||
           lower.includes('damage_received_reduction') ||
@@ -1390,23 +1543,44 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
           lower.includes('enemy_damage_down') ||
           lower.includes('enemy_attack_down') ||
           lower.includes('enemy_attack_reduction') ||
-          lower.includes('lethality_reduction')
-        ) {
+          lower.includes('lethality_reduction');
+
+        if (isDamageIncrease) {
+          addValue('damage', pct);
+          return;
+        }
+        if (isDamageReduction) {
           addValue('damageReduction', pct);
+          return;
+        }
+        if (lower.includes('attack_up') || lower.includes('attack_increase') || lower.includes('attack_bonus')) {
+          addValue('attack', pct);
+          return;
+        }
+        if (lower.includes('defense_up') || lower.includes('defense_increase') || lower.includes('defense_bonus')) {
+          addValue('defense', pct);
+          return;
+        }
+        if (lower.includes('health_up') || lower.includes('health_increase') || lower.includes('health_bonus')) {
+          addValue('health', pct);
+          return;
+        }
+        if (lower.includes('lethality_increase') || lower.includes('lethality_bonus')) {
+          addValue('lethality', pct);
         }
       });
 
       return result;
     };
 
-    const extractControlChance = (skillData: any, maxLevel: number): number => {
+    const extractControlChance = (skillData: any, levelToUse: number): number => {
       let chance = 0;
       Object.keys(skillData).forEach(key => {
         const lower = key.toLowerCase();
         const value = skillData[key];
         const numericValue = (() => {
           if (typeof value === 'object' && value !== null) {
-            const levelValue = value[maxLevel.toString()] || value['1'];
+            const levelValue = value[levelToUse.toString()] || value['1'];
             return typeof levelValue === 'number' ? levelValue : 0;
           }
           if (typeof value === 'number') return value;
@@ -1483,15 +1657,17 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
         }
       }
 
-      const bonusValues = extractBonusValues(skillData, maxLevel);
+      const selectedLevel = (joiner.skillLevels?.[firstSkill.name] as SkillLevel | undefined) ?? maxLevel;
+
+      const bonusValues = extractBonusValues(skillData, selectedLevel);
       const contributionEntries = Object.entries(bonusValues).filter(([, v]) => v > 0) as Array<[keyof typeof bonusValues, number]>;
       if (contributionEntries.length === 0) {
-        const controlChance = extractControlChance(skillData, maxLevel);
+        const controlChance = extractControlChance(skillData, selectedLevel);
         if (controlChance > 0) {
           details.push({
             heroName: joiner.heroName,
             skillName: (skillData['skill-name'] as string) || firstSkill.name,
-            maxLevel,
+            skillLevel: selectedLevel,
             skillType: 'Control',
             bonusValue: controlChance,
             reason: `Control: Stun/immobilize chance +${controlChance.toFixed(2)}% (informational; not included in ATK/DMG stacking).`,
@@ -1502,7 +1678,7 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
         details.push({
           heroName: joiner.heroName,
           skillName: (skillData['skill-name'] as string) || firstSkill.name,
-          maxLevel,
+          skillLevel: selectedLevel,
           skillType,
           bonusValue: 0,
           reason: 'Skill does not grant a percentage-based attack/defense/health/lethality/damage bonus.',
@@ -1529,7 +1705,7 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
       details.push({
         heroName: joiner.heroName,
         skillName: (skillData['skill-name'] as string) || firstSkill.name,
-        maxLevel,
+        skillLevel: selectedLevel,
         skillType: typeLabel,
         bonusValue: contributionEntries.reduce((sum, [, v]) => sum + v, 0),
         reason: summary
@@ -1561,7 +1737,7 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
     <div className="card info-card mt-6">
       <h4>Joiner Bonus Calculations</h4>
       <p className="text-sm text-gray-400 dark:text-gray-400 mb-4">
-        Showing calculations for the first {breakdown.details.length} joiner(s). Each uses their first expedition skill at maximum level.
+        Showing calculations for the first {breakdown.details.length} joiner(s). Each uses their first expedition skill at the configured level (defaults to that hero’s max if not set).
       </p>
 
       <div className="callout callout-success text-sm space-y-2">
@@ -1578,7 +1754,7 @@ function JoinerMathBreakdown({ joiners }: { joiners: RallyHero[] }) {
             Joiner {index + 1}: {detail.heroName}
           </div>
           <div className="text-sm text-gray-400 dark:text-gray-400 mb-2">
-            Skill: <strong>{detail.skillName}</strong> (Level {detail.maxLevel})
+            Skill: <strong>{detail.skillName}</strong> (Level {detail.skillLevel})
           </div>
           {detail.bonusValue > 0 ? (
             <div className="text-sm">

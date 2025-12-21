@@ -37,26 +37,26 @@ export default function HowToUseGuideTab({
 }: HowToUseGuideProps) {
   const steps: GuideStep[] = [
     {
-      id: 'profiles',
-      title: '1. Configure Player & Opponent',
-      summary: 'Load permanent stats, heroes, pets, and additive stacks so the calculator mirrors your in-game account.',
-      checklist: [
-        'Use the Player/Opponent tabs to enter gear, research, city buffs, pets, and VIP values.',
-        'Assign heroes per troop type plus up to four joiners; rally leaders pull their exclusive skills and weapon bonuses automatically.',
-        'Verify capacity overrides only when you need to match a manual number from screenshots.'
-      ],
-      status: playerReady && opponentReady ? 'complete' : profileLoaded ? 'pending' : 'pending'
-    },
-    {
       id: 'rally',
-      title: '2. Build the Rally Config',
-      summary: 'Pick march leaders, stack capacity sources, and set troop ratios that reflect the rally you plan to launch.',
+      title: '1. Build the Rally Config',
+      summary: 'Start here: set leaders/joiners, capacity stacks, and troop mix to define the battle scaffold before stats.',
       checklist: [
         'Confirm the Capacity Breakdown (Base + Temporary) matches your deployment/rally totals.',
         'Use the Troop Mix Quick Editors to match the desired march size for both sides.',
         'Surface leader/joiner bonuses and multipliers directly in this tab to ensure parity.'
       ],
       status: rallyReady ? 'complete' : 'pending'
+    },
+    {
+      id: 'profiles',
+      title: '2. Enter Player & Opponent',
+      summary: 'Load permanent stats, heroes, pets, and additive/multiplicative stacks after the rally scaffold is set.',
+      checklist: [
+        'Use the Player/Opponent tabs to enter gear, research, city buffs, pets, and VIP values.',
+        'Assign heroes per troop type plus up to four joiners; rally leaders pull their exclusive skills and weapon bonuses automatically.',
+        'Only override capacity or additive/multiplicative summaries when matching a verified in-game total.'
+      ],
+      status: playerReady && opponentReady ? 'complete' : profileLoaded ? 'pending' : 'pending'
     },
     {
       id: 'results',
@@ -72,8 +72,8 @@ export default function HowToUseGuideTab({
   ];
 
   const dataFlowOverview = [
-    'Player/Opponent tabs capture permanent stats and convert them into SideBaseStats.',
-    'Rally Config combines stats with leaders/joiners, capacity stacks, and troop mix to build FighterSnapshots.',
+    'Rally Config sets the scaffold first: leaders/joiners, capacity stacks, and troop mix for both sides.',
+    'Player/Opponent tabs then supply permanent stats that become SideBaseStats applied to the rally scaffold.',
     'Fight simulation iterates BattleRound → Fight, applying morale, type advantage, DOT, and control effects each round.',
     'Results tab visualizes totals, special bonuses, capacity deltas, and per-hit math via the Damage Calculation Debug panel.'
   ];

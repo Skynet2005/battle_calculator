@@ -24,6 +24,7 @@ const tabCopy: Record<TabKey, { title: string; description: string }> = {
 
 export default function BattleCalculatorPage() {
   const [authUser, setAuthUser] = useState<{ email: string; username: string } | null>(null);
+  const [authSessionVersion, setAuthSessionVersion] = useState(0);
   const profileGateRef = useRef<ProfileGateRef>(null);
 
   const {
@@ -79,6 +80,9 @@ export default function BattleCalculatorPage() {
       console.error('Logout failed', err);
     } finally {
       setAuthUser(null);
+      setCurrentProfile(null);
+      setActiveTab('rally');
+      setAuthSessionVersion((v) => v + 1);
     }
   };
 
@@ -95,6 +99,9 @@ export default function BattleCalculatorPage() {
       console.error('Delete failed', err);
     } finally {
       setAuthUser(null);
+      setCurrentProfile(null);
+      setActiveTab('rally');
+      setAuthSessionVersion((v) => v + 1);
     }
   };
 
@@ -250,7 +257,7 @@ export default function BattleCalculatorPage() {
 
   return (
     <>
-      <AuthGate onAuthSuccess={setAuthUser} />
+      <AuthGate key={authSessionVersion} onAuthSuccess={setAuthUser} />
       {authUser && (
         <ProfileGate
           ref={profileGateRef}

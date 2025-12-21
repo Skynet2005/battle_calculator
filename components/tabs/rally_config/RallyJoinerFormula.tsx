@@ -1,8 +1,8 @@
 'use client';
 
+import { TROOP_TYPE_LIST, sumCapacityCounts } from '@/lib/battle/battle-calculator-helpers';
+import { extractJoinerBonuses } from '@/lib/rally/rally-bonus-extractor';
 import { useMemo } from 'react';
-import { getHeroByName } from '../../../lib/battle';
-import { getHeroExpeditionSkills } from '../../../lib/battle/data-selectors';
 import type { RallyConfiguration } from '../../types';
 import { SectionCard } from '../../ui';
 
@@ -14,113 +14,39 @@ export default function RallyJoinerFormula({ rally }: RallyJoinerFormulaProps) {
   const joiners = rally.joiners ?? [];
 
   const joinerBonuses = useMemo(() => {
-    const bonuses = {
-      attack: 0,
-      defense: 0,
-      lethality: 0,
-      health: 0,
-      all_troops_attack: 0,
-      all_troops_defense: 0,
-      all_troops_lethality: 0,
-      all_troops_health: 0,
-      rally_troops_attack: 0,
-      rally_troops_lethality: 0,
-      rally_troops_health: 0,
-    };
+    const extracted = extractJoinerBonuses(joiners, 'attacking');
+    const perScope = extracted.perScope;
 
-    // Only process the first 4 joiners
-    const firstFourJoiners = joiners.slice(0, 4);
+    const combinedPerTroop = TROOP_TYPE_LIST.reduce<Record<string, { attack: number; defense: number; lethality: number; health: number }>>((acc, troop) => {
+      const all = perScope.additive.all_troops || {};
+      const rallyAdd = perScope.additive.rally_troops || {};
+      const troopAdd = perScope.additive[troop] || {};
+      acc[troop] = {
+        attack: (all.attack || 0) + (rallyAdd.attack || 0) + (troopAdd.attack || 0),
+        defense: (all.defense || 0) + (rallyAdd.defense || 0) + (troopAdd.defense || 0),
+        lethality: (all.lethality || 0) + (rallyAdd.lethality || 0) + (troopAdd.lethality || 0),
+        health: (all.health || 0) + (rallyAdd.health || 0) + (troopAdd.health || 0),
+      };
+      return acc;
+    }, {});
 
-    firstFourJoiners.forEach((joiner, index) => {
-      if (!joiner.heroName) return;
+    const capacityCounts = sumCapacityCounts(rally.capacity);
+    const totalTroops = Math.max(1, capacityCounts.infantry + capacityCounts.lancer + capacityCounts.marksman);
 
-      const hero = getHeroByName(joiner.heroName);
-      if (!hero) return;
+    const weighted = TROOP_TYPE_LIST.reduce(
+      (acc, troop) => {
+        const weight = capacityCounts[troop] > 0 ? capacityCounts[troop] / totalTroops : 0;
+        acc.attack += (combinedPerTroop[troop].attack || 0) * weight;
+        acc.defense += (combinedPerTroop[troop].defense || 0) * weight;
+        acc.lethality += (combinedPerTroop[troop].lethality || 0) * weight;
+        acc.health += (combinedPerTroop[troop].health || 0) * weight;
+        return acc;
+      },
+      { attack: 0, defense: 0, lethality: 0, health: 0 }
+    );
 
-      const skills = getHeroExpeditionSkills(hero);
-      if (skills.length === 0) return;
-
-      // Only process the first skill
-      const firstSkill = skills[0];
-      const skillData = firstSkill.data;
-      if (!skillData) return;
-
-      // Find the maximum skill level for this skill
-      let maxLevel = 1;
-      Object.keys(skillData).forEach(key => {
-        if (key === 'skill-name' || key === 'description' || key === 'trigger_chance') return;
-        const value = skillData[key];
-        if (typeof value === 'object' && value !== null) {
-          const levelKeys = Object.keys(value)
-            .filter(k => !isNaN(parseInt(k)))
-            .map(k => parseInt(k))
-            .sort((a, b) => b - a);
-          if (levelKeys.length > 0 && levelKeys[0] > maxLevel) {
-            maxLevel = levelKeys[0];
-          }
-        }
-      });
-
-      // Use maximum skill level
-      const level = maxLevel;
-
-      // Extract bonuses from skill at maximum level
-      // Check for level-based properties
-      Object.keys(skillData).forEach(key => {
-        if (key === 'skill-name' || key === 'description') return;
-
-        const value = skillData[key];
-        if (typeof value === 'object' && value !== null) {
-          // It's a level-based object
-          const levelValue = value[level.toString()] || value['1'];
-          if (typeof levelValue === 'number') {
-            const percentage = levelValue * 100;
-
-            // Map skill properties to bonuses
-            if (key.includes('attack_increase') && key.includes('all_troops')) {
-              bonuses.all_troops_attack += percentage;
-            } else if (key.includes('defense_increase') && key.includes('all_troops')) {
-              bonuses.all_troops_defense += percentage;
-            } else if (key.includes('health_increase') && key.includes('all_troops')) {
-              bonuses.all_troops_health += percentage;
-            } else if (key.includes('attack_increase') && key.includes('rally')) {
-              bonuses.rally_troops_attack += percentage;
-            } else if (key.includes('health_increase') && key.includes('rally')) {
-              bonuses.rally_troops_health += percentage;
-            } else if (key.includes('lethality') && key.includes('rally')) {
-              bonuses.rally_troops_lethality += percentage;
-            } else if (key.includes('attack_increase') && !key.includes('all_troops') && !key.includes('rally')) {
-              bonuses.attack += percentage;
-            } else if (key.includes('defense_increase') && !key.includes('all_troops')) {
-              bonuses.defense += percentage;
-            } else if (key.includes('health_increase') && !key.includes('all_troops') && !key.includes('rally')) {
-              bonuses.health += percentage;
-            } else if (key.includes('lethality') && !key.includes('rally')) {
-              bonuses.lethality += percentage;
-            }
-          }
-        } else if (typeof value === 'number') {
-          // Direct percentage value
-          const percentage = value * 100;
-          if (key.includes('attack_increase') && key.includes('all_troops')) {
-            bonuses.all_troops_attack += percentage;
-          } else if (key.includes('defense_increase') && key.includes('all_troops')) {
-            bonuses.all_troops_defense += percentage;
-          } else if (key.includes('health_increase') && key.includes('all_troops')) {
-            bonuses.all_troops_health += percentage;
-          } else if (key.includes('attack_increase') && key.includes('rally')) {
-            bonuses.rally_troops_attack += percentage;
-          } else if (key.includes('health_increase') && key.includes('rally')) {
-            bonuses.rally_troops_health += percentage;
-          } else if (key.includes('lethality') && key.includes('rally')) {
-            bonuses.rally_troops_lethality += percentage;
-          }
-        }
-      });
-    });
-
-    return bonuses;
-  }, [joiners]);
+    return { combinedPerTroop, weighted };
+  }, [joiners, rally.capacity]);
 
   return (
     <SectionCard
@@ -158,45 +84,39 @@ export default function RallyJoinerFormula({ rally }: RallyJoinerFormulaProps) {
             </div>
           )}
           <div className="grid gap-4 mt-3">
-            {(joinerBonuses.attack > 0 || joinerBonuses.defense > 0 || joinerBonuses.lethality > 0 || joinerBonuses.health > 0) && (
-              <div className="callout callout-muted">
-                <strong>Individual Troop Bonuses:</strong>
-                <div className="text-sm mt-2 space-y-1">
-                  {joinerBonuses.attack > 0 && <div>Attack: +{joinerBonuses.attack.toFixed(2)}%</div>}
-                  {joinerBonuses.defense > 0 && <div>Defense: +{joinerBonuses.defense.toFixed(2)}%</div>}
-                  {joinerBonuses.lethality > 0 && <div>Lethality: +{joinerBonuses.lethality.toFixed(2)}%</div>}
-                  {joinerBonuses.health > 0 && <div>Health: +{joinerBonuses.health.toFixed(2)}%</div>}
-                </div>
+            <div className="callout callout-muted">
+              <strong>Per-Troop Joiner Bonuses (attack/defense/lethality/health):</strong>
+              <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-3 text-sm mt-2">
+                {TROOP_TYPE_LIST.map((troop) => {
+                  const values = joinerBonuses.combinedPerTroop[troop];
+                  const hasValue = Object.values(values).some((v) => v > 0);
+                  return (
+                    <div key={troop} className={!hasValue ? 'text-gray-400 dark:text-gray-400' : ''}>
+                      <div className="font-semibold capitalize">{troop}</div>
+                      <div className="mt-1 space-y-1">
+                        <div>Attack: +{values.attack.toFixed(2)}%</div>
+                        <div>Defense: +{values.defense.toFixed(2)}%</div>
+                        <div>Lethality: +{values.lethality.toFixed(2)}%</div>
+                        <div>Health: +{values.health.toFixed(2)}%</div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
 
-            {(joinerBonuses.all_troops_attack > 0 || joinerBonuses.all_troops_defense > 0 ||
-              joinerBonuses.all_troops_lethality > 0 || joinerBonuses.all_troops_health > 0) && (
-                <div className="callout callout-muted">
-                  <strong>All Troops Bonuses:</strong>
-                  <div className="text-sm mt-2 space-y-1">
-                    {joinerBonuses.all_troops_attack > 0 && <div>Attack: +{joinerBonuses.all_troops_attack.toFixed(2)}%</div>}
-                    {joinerBonuses.all_troops_defense > 0 && <div>Defense: +{joinerBonuses.all_troops_defense.toFixed(2)}%</div>}
-                    {joinerBonuses.all_troops_lethality > 0 && <div>Lethality: +{joinerBonuses.all_troops_lethality.toFixed(2)}%</div>}
-                    {joinerBonuses.all_troops_health > 0 && <div>Health: +{joinerBonuses.all_troops_health.toFixed(2)}%</div>}
-                  </div>
-                </div>
-              )}
-
-            {(joinerBonuses.rally_troops_attack > 0 || joinerBonuses.rally_troops_lethality > 0 ||
-              joinerBonuses.rally_troops_health > 0) && (
-                <div className="callout callout-muted">
-                  <strong>Rally Troops Bonuses:</strong>
-                  <div className="text-sm mt-2 space-y-1">
-                    {joinerBonuses.rally_troops_attack > 0 && <div>Attack: +{joinerBonuses.rally_troops_attack.toFixed(2)}%</div>}
-                    {joinerBonuses.rally_troops_lethality > 0 && <div>Lethality: +{joinerBonuses.rally_troops_lethality.toFixed(2)}%</div>}
-                    {joinerBonuses.rally_troops_health > 0 && <div>Health: +{joinerBonuses.rally_troops_health.toFixed(2)}%</div>}
-                  </div>
-                </div>
-              )}
+            <div className="callout callout-muted">
+              <strong>Derived Overall (weighted by rally capacity mix, display-only):</strong>
+              <div className="text-sm mt-2 space-y-1">
+                <div>Attack: +{joinerBonuses.weighted.attack.toFixed(2)}%</div>
+                <div>Defense: +{joinerBonuses.weighted.defense.toFixed(2)}%</div>
+                <div>Lethality: +{joinerBonuses.weighted.lethality.toFixed(2)}%</div>
+                <div>Health: +{joinerBonuses.weighted.health.toFixed(2)}%</div>
+              </div>
+            </div>
           </div>
 
-          {Object.values(joinerBonuses).every(v => v === 0) && (
+          {TROOP_TYPE_LIST.every(troop => Object.values(joinerBonuses.combinedPerTroop[troop]).every(v => v === 0)) && (
             <div className="text-sm text-gray-400 dark:text-gray-400 mt-2">
               No bonuses detected from joiners. This may be because:
               <ul className="list-disc pl-5 mt-1 space-y-1">

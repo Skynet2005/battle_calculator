@@ -5673,6 +5673,581 @@ export const xura: Hero = {
   }
 };
 
+export const gregory: Hero = {
+  "hero-name": "Gregory",
+  "hero-class": "infantry",
+  "generation": 10,
+  "max-star-power": 3209952,
+  "max-skill-power": 101520,
+  "max-level-power": 865824,
+  "base-stats": {
+    "infantry-attack": 11.1088,
+    "infantry-defense": 11.1088
+  },
+  "skills": {
+    expedition: {
+      "1": {
+        "skill-name": "Legion of the Sun",
+        "description": "Gregory nurtures latent talents his troops did not realize they had, increasing Attack by 3/6/9/12/15% and Defense by 2/4/6/8/10% for all troops.",
+        "all_troops_attack_up_percentage": {
+          "1": 0.03,
+          "2": 0.06,
+          "3": 0.09,
+          "4": 0.12,
+          "5": 0.15
+        },
+        "all_troops_defense_up_percentage": {
+          "1": 0.02,
+          "2": 0.04,
+          "3": 0.06,
+          "4": 0.08,
+          "5": 0.10
+        }
+      },
+      "2": {
+        "skill-name": "Charged Assault",
+        "description": "Gregory inspires everyone with his valor and enthusiasm, granting all troop's normal attacks a 5/10/15/20/25% chance of dealing critical damage.",
+        "crit_rate_percentage": {
+          "1": 0.05,
+          "2": 0.10,
+          "3": 0.15,
+          "4": 0.20,
+          "5": 0.25
+        }
+      },
+      "3": {
+        "skill-name": "Unbroken",
+        "description": "Gregory forms unbroken defensive lines, reducing Infantry’s Damage Taken by 4/8/12/16/20%.",
+        "infantry_damage_taken_down_percentage": {
+          "1": 0.04,
+          "2": 0.08,
+          "3": 0.12,
+          "4": 0.16,
+          "5": 0.20
+        }
+      }
+    }
+  },
+  "exclusive-weapon": {
+    name: "Solarsword",
+    levels: [
+      {
+        level: 1,
+        "infantry-lethality": 0.2775,
+        "infantry-health": 0.2775,
+        power: 133640,
+        skills: { expedition: null }
+      },
+      {
+        level: 2,
+        "infantry-lethality": 0.555,
+        "infantry-health": 0.555,
+        power: 267280,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 5%.",
+            "defender_troops_lethality_up_percentage": 0.05
+          }
+        }
+      },
+      {
+        level: 3,
+        "infantry-lethality": 0.8325,
+        "infantry-health": 0.8325,
+        power: 400920,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 5%.",
+            "defender_troops_lethality_up_percentage": 0.05
+          }
+        }
+      },
+      {
+        level: 4,
+        "infantry-lethality": 1.11,
+        "infantry-health": 1.11,
+        power: 534560,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 7.5%.",
+            "defender_troops_lethality_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 5,
+        "infantry-lethality": 1.3875,
+        "infantry-health": 1.3875,
+        power: 668200,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 7.5%.",
+            "defender_troops_lethality_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 6,
+        "infantry-lethality": 1.665,
+        "infantry-health": 1.665,
+        power: 801840,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 10%.",
+            "defender_troops_lethality_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 7,
+        "infantry-lethality": 1.9425,
+        "infantry-health": 1.9425,
+        power: 935480,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 10%.",
+            "defender_troops_lethality_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 8,
+        "infantry-lethality": 2.22,
+        "infantry-health": 2.22,
+        power: 1069120,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 12.5%.",
+            "defender_troops_lethality_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 9,
+        "infantry-lethality": 2.4975,
+        "infantry-health": 2.4975,
+        power: 1202760,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 12.5%.",
+            "defender_troops_lethality_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 10,
+        "infantry-lethality": 2.775,
+        "infantry-health": 2.775,
+        power: 1253250,
+        skills: {
+          expedition: {
+            "skill-name": "Day of the Guard",
+            "description": "Courage and the will to victory will always surpass mercenary greed. Gregory's leadership increases Defender Troops' Lethality by 15% (max).",
+            "defender_troops_lethality_up_percentage": 0.15
+          }
+        }
+      }
+    ]
+  }
+};
+
+export const blanchette: Hero = {
+  "hero-name": "Blanchette",
+  "hero-class": "marksman",
+  "generation": 10,
+  "max-star-power": 3209952,
+  "max-skill-power": 101520,
+  "max-level-power": 865824,
+  "base-stats": {
+    "marksman-attack": 11.1088,
+    "marksman-defense": 11.1088
+  },
+  "skills": {
+    expedition: {
+      "1": {
+        "skill-name": "Armed to the Teeth",
+        "description": "Blanchette works to ensure her forces are at least as well armed as she is, increasing all Troops' Lethality by 5/10/15/20/25%.",
+        "all_troops_lethality_up_percentage": {
+          "1": 0.05,
+          "2": 0.10,
+          "3": 0.15,
+          "4": 0.20,
+          "5": 0.25
+        }
+      },
+      "2": {
+        "skill-name": "Blood Hunter",
+        "description": "Blanchette's Marksmen fire a crystal blade every 3 rounds, dealing 15/30/45/60/75% extra damage to the targets.",
+        "extra_damage_up_percentage": {
+          "1": 0.15,
+          "2": 0.30,
+          "3": 0.45,
+          "4": 0.60,
+          "5": 0.75
+        },
+        "trigger_every_n_rounds": 3
+      },
+      "3": {
+        "skill-name": "Crimson Sniper",
+        "description": "Thanks to Blanchette's expertise in the art of sniping and her leadership, her Marksmen deal 8/16/24/32/40% extra damage to enemy Lancers and 4/8/12/16/20% extra damage to enemy Marksmen every 2 strikes.",
+        "marksman_damage_to_lancer_up_percentage": {
+          "1": 0.08,
+          "2": 0.16,
+          "3": 0.24,
+          "4": 0.32,
+          "5": 0.40
+        },
+        "marksman_damage_to_marksman_up_percentage": {
+          "1": 0.04,
+          "2": 0.08,
+          "3": 0.12,
+          "4": 0.16,
+          "5": 0.20
+        },
+        "trigger_every_n_strikes": 2
+      }
+    }
+  },
+  "exclusive-weapon": {
+    name: "Wolf Hunter",
+    levels: [
+      {
+        level: 1,
+        "marksman-lethality": 0.2775,
+        "marksman-health": 0.2775,
+        power: 133640,
+        skills: { expedition: null }
+      },
+      {
+        level: 2,
+        "marksman-lethality": 0.555,
+        "marksman-health": 0.555,
+        power: 267280,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 5%.",
+            "rally_troops_lethality_up_percentage": 0.05
+          }
+        }
+      },
+      {
+        level: 3,
+        "marksman-lethality": 0.8325,
+        "marksman-health": 0.8325,
+        power: 400920,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 5%.",
+            "rally_troops_lethality_up_percentage": 0.05
+          }
+        }
+      },
+      {
+        level: 4,
+        "marksman-lethality": 1.11,
+        "marksman-health": 1.11,
+        power: 534560,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 7.5%.",
+            "rally_troops_lethality_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 5,
+        "marksman-lethality": 1.3875,
+        "marksman-health": 1.3875,
+        power: 668200,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 7.5%.",
+            "rally_troops_lethality_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 6,
+        "marksman-lethality": 1.665,
+        "marksman-health": 1.665,
+        power: 801840,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 10%.",
+            "rally_troops_lethality_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 7,
+        "marksman-lethality": 1.9425,
+        "marksman-health": 1.9425,
+        power: 935480,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 10%.",
+            "rally_troops_lethality_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 8,
+        "marksman-lethality": 2.22,
+        "marksman-health": 2.22,
+        power: 1069120,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 12.5%.",
+            "rally_troops_lethality_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 9,
+        "marksman-lethality": 2.4975,
+        "marksman-health": 2.4975,
+        power: 1202760,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 12.5%.",
+            "rally_troops_lethality_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 10,
+        "marksman-lethality": 2.775,
+        "marksman-health": 2.775,
+        power: 1253250,
+        skills: {
+          expedition: {
+            "skill-name": "Lightning Strike",
+            "description": "Enemy formations have no chance against Blanchette's lightning fast Rally, increasing Rally Troops’ Lethality by 15% (max).",
+            "rally_troops_lethality_up_percentage": 0.15
+          }
+        }
+      }
+    ]
+  }
+};
+
+export const freya: Hero = {
+  "hero-name": "Freya",
+  "hero-class": "lancer",
+  "generation": 10,
+  "max-star-power": 3209952,
+  "max-skill-power": 101520,
+  "max-level-power": 865824,
+  "base-stats": {
+    "lancer-attack": 11.1088,
+    "lancer-defense": 11.1088
+  },
+  "skills": {
+    expedition: {
+      "1": {
+        "skill-name": "Fog of War",
+        "description": "Freya lobs a smoke grenade to darken enemies' vision, reducing all enemy Troops' Attack by [4%/8%/12%/16%/20%].",
+        "enemy_attack_down_percentage": {
+          "1": 0.04,
+          "2": 0.08,
+          "3": 0.12,
+          "4": 0.16,
+          "5": 0.20
+        }
+      },
+      "2": {
+        "skill-name": "Blood Moon Scythe",
+        "description": "After launching a normal attack, she has a 50% chance of performing Reap, dealing [20%/40%/60%/80%/100%] damage.",
+        "extra_damage_up_percentage": {
+          "1": 0.20,
+          "2": 0.40,
+          "3": 0.60,
+          "4": 0.80,
+          "5": 1.00
+        },
+        "trigger_chance": 0.50
+      },
+      "3": {
+        "skill-name": "Night's Vengeance",
+        "description": "Decreases damage taken and increases damage dealt for her Infantries and Marksmen by [3%/6%/9%/12%/15%].",
+        "infantry_damage_taken_down_percentage": {
+          "1": 0.03,
+          "2": 0.06,
+          "3": 0.09,
+          "4": 0.12,
+          "5": 0.15
+        },
+        "marksman_damage_taken_down_percentage": {
+          "1": 0.03,
+          "2": 0.06,
+          "3": 0.09,
+          "4": 0.12,
+          "5": 0.15
+        },
+        "infantry_damage_up_percentage": {
+          "1": 0.03,
+          "2": 0.06,
+          "3": 0.09,
+          "4": 0.12,
+          "5": 0.15
+        },
+        "marksman_damage_up_percentage": {
+          "1": 0.03,
+          "2": 0.06,
+          "3": 0.09,
+          "4": 0.12,
+          "5": 0.15
+        }
+      }
+    }
+  },
+  "exclusive-weapon": {
+    name: "Blood Moon Scythe",
+    levels: [
+      {
+        level: 1,
+        "lancer-lethality": 0.2775,
+        "lancer-health": 0.2775,
+        power: 133640,
+        skills: { expedition: null }
+      },
+      {
+        level: 2,
+        "lancer-lethality": 0.555,
+        "lancer-health": 0.555,
+        power: 267280,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 5%.",
+            "defender_troops_defense_up_percentage": 0.05
+          }
+        }
+      },
+      {
+        level: 3,
+        "lancer-lethality": 0.8325,
+        "lancer-health": 0.8325,
+        power: 400920,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 5%.",
+            "defender_troops_defense_up_percentage": 0.05
+          }
+        }
+      },
+      {
+        level: 4,
+        "lancer-lethality": 1.11,
+        "lancer-health": 1.11,
+        power: 534560,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 7.5%.",
+            "defender_troops_defense_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 5,
+        "lancer-lethality": 1.3875,
+        "lancer-health": 1.3875,
+        power: 668200,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 7.5%.",
+            "defender_troops_defense_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 6,
+        "lancer-lethality": 1.665,
+        "lancer-health": 1.665,
+        power: 801840,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 10%.",
+            "defender_troops_defense_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 7,
+        "lancer-lethality": 1.9425,
+        "lancer-health": 1.9425,
+        power: 935480,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 10%.",
+            "defender_troops_defense_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 8,
+        "lancer-lethality": 2.22,
+        "lancer-health": 2.22,
+        power: 1069120,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 12.5%.",
+            "defender_troops_defense_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 9,
+        "lancer-lethality": 2.4975,
+        "lancer-health": 2.4975,
+        power: 1202760,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 12.5%.",
+            "defender_troops_defense_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 10,
+        "lancer-lethality": 2.775,
+        "lancer-health": 2.775,
+        power: 1253250,
+        skills: {
+          expedition: {
+            "skill-name": "Defender of the Watch",
+            "description": "Freya's eyes have never wavered from her sacred watch-task, increasing Defender Troops’ Defense by 15%(max).",
+            "defender_troops_defense_up_percentage": 0.15
+          }
+        }
+      }
+    ]
+  }
+};
+
 export const HEROES: Hero[] = [
   bahiti,
   gina,
@@ -5710,7 +6285,10 @@ export const HEROES: Hero[] = [
   sonya,
   fred,
   magnus,
-  xura
+  xura,
+  gregory,
+  blanchette,
+  freya
 ];
 
 const buildClassBuckets = (): Record<HeroClass, Hero[]> => ({

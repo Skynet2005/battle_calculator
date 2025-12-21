@@ -4,7 +4,14 @@ import type { HeroLevel, RallyConfiguration, TroopMixConfig, UserProfile } from 
 import { totalTroops as countTroops } from '../rally/combat-fighter';
 import type { RallySideConfig, SideBaseStats, TroopCounts } from '../rally/combat-types';
 import { calculateRallyBonuses, extractLeaderBonuses } from '../rally/rally-bonus-extractor';
-import type { AdditiveBonuses, BasicBonuses, MultiplicativeBonuses, TroopType } from './calculations';
+import type {
+  AdditiveBonuses,
+  AdditiveManualOverride,
+  BasicBonuses,
+  MultiplicativeBonuses,
+  MultiplicativeManualOverride,
+  TroopType
+} from './calculations';
 import { calculateFinalStats } from './calculations';
 import { getChiefCharmBonuses } from './data-extractors';
 import { getChiefGearTypes } from './data-selectors';
@@ -130,10 +137,49 @@ export function computeTroopSpecificHeroBonus(
 
 export function normalizeAdditiveBonuses(bonuses?: AdditiveBonuses): AdditiveBonuses {
   const zero = { attack: 0, defense: 0, lethality: 0, health: 0 };
+  const manualOverrideTotals: AdditiveManualOverride | undefined = bonuses?.manualOverrideTotals
+    ? TROOP_TYPE_LIST.reduce((acc, troop) => {
+      const override = bonuses.manualOverrideTotals?.[troop];
+      const hasValue =
+        override &&
+        (override.attack !== undefined ||
+          override.defense !== undefined ||
+          override.lethality !== undefined ||
+          override.health !== undefined);
+      if (!hasValue) {
+        return acc;
+      }
+      acc[troop] = {
+        attack: Number(override?.attack ?? 0),
+        defense: Number(override?.defense ?? 0),
+        lethality: Number(override?.lethality ?? 0),
+        health: Number(override?.health ?? 0)
+      };
+      return acc;
+    }, {} as AdditiveManualOverride)
+    : undefined;
+
+  const joinerBuffs = TROOP_TYPE_LIST.reduce((acc, troop) => {
+    const existing = bonuses?.joinerBuffs?.[troop];
+    if (!existing) {
+      acc[troop] = { ...zero };
+    } else {
+      acc[troop] = {
+        attack: Number(existing.attack ?? 0),
+        defense: Number(existing.defense ?? 0),
+        lethality: Number(existing.lethality ?? 0),
+        health: Number(existing.health ?? 0)
+      };
+    }
+    return acc;
+  }, {} as NonNullable<AdditiveBonuses['joinerBuffs']>);
+
   return {
     temporaryEvents: { ...zero, ...(bonuses?.temporaryEvents ?? {}) },
     supremePresident: { ...zero, ...(bonuses?.supremePresident ?? {}) },
-    specialBuffs: { ...zero, ...(bonuses?.specialBuffs ?? {}) }
+    specialBuffs: { ...zero, ...(bonuses?.specialBuffs ?? {}) },
+    joinerBuffs,
+    ...(manualOverrideTotals && Object.keys(manualOverrideTotals).length > 0 ? { manualOverrideTotals } : {})
   };
 }
 
@@ -148,6 +194,41 @@ export function normalizeMultiplicativeBonuses(bonuses?: MultiplicativeBonuses):
     enemyDefenseReduction: 0,
     deploymentCapacity: 0
   };
+  const manualOverrideTotals: MultiplicativeManualOverride | undefined = bonuses?.manualOverrideTotals
+    ? TROOP_TYPE_LIST.reduce((acc, troop) => {
+      const override = bonuses.manualOverrideTotals?.[troop];
+      const hasValue =
+        override &&
+        (override.attack !== undefined ||
+          override.defense !== undefined ||
+          override.lethality !== undefined ||
+          override.health !== undefined);
+      if (!hasValue) {
+        return acc;
+      }
+      acc[troop] = {
+        attack: Number(override?.attack ?? 0),
+        defense: Number(override?.defense ?? 0),
+        lethality: Number(override?.lethality ?? 0),
+        health: Number(override?.health ?? 0)
+      };
+      return acc;
+    }, {} as MultiplicativeManualOverride)
+    : undefined;
+
+  const joinerBuffs = TROOP_TYPE_LIST.reduce((acc, troop) => {
+    const existing = bonuses?.joinerBuffs?.[troop];
+    acc[troop] = {
+      attack: Number(existing?.attack ?? 0),
+      defense: Number(existing?.defense ?? 0),
+      lethality: Number(existing?.lethality ?? 0),
+      health: Number(existing?.health ?? 0),
+      damage: Number(existing?.damage ?? 0),
+      damageReduction: Number(existing?.damageReduction ?? 0)
+    };
+    return acc;
+  }, {} as NonNullable<MultiplicativeBonuses['joinerBuffs']>);
+
   return {
     castleBuffs: { ...zero, ...(bonuses?.castleBuffs ?? {}) },
     eventBuffs: { ...zero, ...(bonuses?.eventBuffs ?? {}) },
@@ -157,7 +238,9 @@ export function normalizeMultiplicativeBonuses(bonuses?: MultiplicativeBonuses):
     exclusiveWeapon: { ...zero, ...(bonuses?.exclusiveWeapon ?? {}) },
     allianceTerritory: { ...zero, ...(bonuses?.allianceTerritory ?? {}) },
     tyrantSpire: { ...zero, ...(bonuses?.tyrantSpire ?? {}) },
-    cityBonuses: { ...defaultCity, ...(bonuses?.cityBonuses ?? {}) }
+    cityBonuses: { ...defaultCity, ...(bonuses?.cityBonuses ?? {}) },
+    joinerBuffs,
+    ...(manualOverrideTotals && Object.keys(manualOverrideTotals).length > 0 ? { manualOverrideTotals } : {})
   };
 }
 

@@ -20,9 +20,9 @@ interface TabBarProps {
 }
 
 const DEFAULT_TABS: Tab[] = [
+  { key: 'rally', label: 'Rally Config', shortLabel: 'Rally' },
   { key: 'profile', label: 'Player', shortLabel: 'Player' },
   { key: 'opponent', label: 'Opponent', shortLabel: 'Opponent' },
-  { key: 'rally', label: 'Rally Config', shortLabel: 'Rally' },
   { key: 'results', label: 'Results', shortLabel: 'Results' },
   { key: 'howto', label: 'How-to-Use', shortLabel: 'Guide' }
 ];

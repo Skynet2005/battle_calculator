@@ -3,10 +3,19 @@ import type { ExpertSelections, HeroGearSelections } from '../../../lib/battle';
 import { getExpertBonuses, PETS_DATA } from '../../../lib/battle';
 import {
   createDefaultAdditiveBonuses,
+  createDefaultMultiplicativeBonuses,
   defaultExpertSelections,
   TROOP_TYPE_LIST
 } from '../../../lib/battle/battle-calculator-helpers';
-import type { AdditiveBonuses, BasicBonuses, MultiplicativeBonuses, StatType, TroopType } from '../../../lib/battle/calculations';
+import type {
+  AdditiveBonuses,
+  AdditiveManualOverride,
+  BasicBonuses,
+  MultiplicativeBonuses,
+  MultiplicativeManualOverride,
+  StatType,
+  TroopType
+} from '../../../lib/battle/calculations';
 import { calculateBasicBonus } from '../../../lib/battle/calculations';
 import { getChiefCharmBonuses, getChiefGearBonuses } from '../../../lib/battle/data-extractors';
 import { getAllTroopDefinitionsForType } from '../../../lib/battle/data-selectors';
@@ -20,6 +29,8 @@ import AdditiveBonusesInput from './components/additive-bonuses-input';
 import type { CapacityReport } from './components/battle-predictor';
 import CapacitySummaryGrid from './components/capacity-summary-grid';
 import ChiefSection from './components/chief-section';
+import ManualAdditiveOverride from './components/manual-additive-override';
+import ManualMultiplicativeOverride from './components/manual-multiplicative-override';
 import MultiplicativeBonusesInput from './components/MultiplicativeBonusesInput';
 import PetsSection from './components/pets-section';
 import ResearchSection from './components/research-section';
@@ -60,6 +71,36 @@ export default function PlayerTab({
     };
   }, [currentProfile?.rally, playerJoinerInfo]);
 
+  const handleManualAdditiveOverrideChange = (manualOverrideTotals?: AdditiveManualOverride) => {
+    setCurrentProfile((prev) =>
+      prev
+        ? {
+          ...prev,
+          additiveBonuses: {
+            ...createDefaultAdditiveBonuses(),
+            ...(prev.additiveBonuses || createDefaultAdditiveBonuses()),
+            manualOverrideTotals
+          }
+        }
+        : prev
+    );
+  };
+
+  const handleManualMultiplicativeOverrideChange = (manualOverrideTotals?: MultiplicativeManualOverride) => {
+    setCurrentProfile((prev) =>
+      prev
+        ? {
+          ...prev,
+          multiplicativeBonuses: {
+            ...createDefaultMultiplicativeBonuses(),
+            ...(prev.multiplicativeBonuses || createDefaultMultiplicativeBonuses()),
+            manualOverrideTotals
+          }
+        }
+        : prev
+    );
+  };
+
   return (
     <div className="tab-content active">
       <div className="tabs mb-4">
@@ -99,7 +140,7 @@ export default function PlayerTab({
             title="Bonus Settings"
             description="Toggle pet skills and city bonuses for calculations in the summary sections below."
             collapsible
-            defaultCollapsed={false}
+            defaultCollapsed
           >
             <FormField
               label="Pet Skills"
@@ -233,7 +274,7 @@ export default function PlayerTab({
             title="Capacity"
             description="Manual override inputs (optional). Leave at 0 to use calculated values from all sources below."
             collapsible
-            defaultCollapsed={false}
+            defaultCollapsed
           >
 
             <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -335,8 +376,19 @@ export default function PlayerTab({
             title="Additive Bonuses Summary"
             description="Total additive bonuses from all sources. These are added together before multiplicative bonuses are applied."
             collapsible
-            defaultCollapsed={false}
+            defaultCollapsed
           >
+            <SectionCard
+              title="Manual Additive Override (optional)"
+              description="Enter total additive % per troop/stat; leave collapsed to use calculated values."
+              collapsible
+              defaultCollapsed
+            >
+              <ManualAdditiveOverride
+                overrides={currentProfile.additiveBonuses?.manualOverrideTotals}
+                onChange={handleManualAdditiveOverrideChange}
+              />
+            </SectionCard>
             {TROOP_TYPE_LIST.map((troopType: TroopType) => {
               const troopKey: TroopType = troopType;
               const expertBonuses = getExpertBonuses(currentProfile.expertSelections || defaultExpertSelections);
@@ -449,11 +501,35 @@ export default function PlayerTab({
                 specialBuffs: (currentProfile.additiveBonuses || createDefaultAdditiveBonuses()).specialBuffs
               };
 
+              const manualOverrideTotals = currentProfile.additiveBonuses?.manualOverrideTotals?.[troopKey];
+              const manualOverrideActive =
+                manualOverrideTotals &&
+                Object.values(manualOverrideTotals).some(
+                  (value) => value !== undefined && value !== null && !Number.isNaN(Number(value))
+                );
+              const manualAdditiveTotals = manualOverrideActive
+                ? {
+                  attack: Number(manualOverrideTotals?.attack ?? 0),
+                  defense: Number(manualOverrideTotals?.defense ?? 0),
+                  lethality: Number(manualOverrideTotals?.lethality ?? 0),
+                  health: Number(manualOverrideTotals?.health ?? 0)
+                }
+                : null;
+
+              const computedAdditiveTotals = {
+                attack: breakdown.temporaryEvents.attack + breakdown.supremePresident.attack + breakdown.specialBuffs.attack,
+                defense: breakdown.temporaryEvents.defense + breakdown.supremePresident.defense + breakdown.specialBuffs.defense,
+                lethality: breakdown.temporaryEvents.lethality + breakdown.supremePresident.lethality + breakdown.specialBuffs.lethality,
+                health: breakdown.temporaryEvents.health + breakdown.supremePresident.health + breakdown.specialBuffs.health
+              };
+
               const calculateResearchValue = (stat: StatType) => {
                 const researchTotal = currentProfile.basicBonuses.combatTech.totalTroopBonus[stat] || 0;
                 const researchTroopTypeOnly = (troopTypeBonuses[troopKey]?.[stat] || 0) - researchTotal;
                 return researchTroopTypeOnly + researchTotal;
               };
+
+              const additiveTotals = manualAdditiveTotals ?? computedAdditiveTotals;
 
               const total = {
                 attack:
@@ -473,9 +549,7 @@ export default function PlayerTab({
                   breakdown.specialHeroes.attack +
                   breakdown.vipPrestige.attack +
                   breakdown.globe.attack +
-                  breakdown.temporaryEvents.attack +
-                  breakdown.supremePresident.attack +
-                  breakdown.specialBuffs.attack,
+                  additiveTotals.attack,
                 defense:
                   calculateResearchValue('defense') +
                   breakdown.allianceTech.defense +
@@ -493,9 +567,7 @@ export default function PlayerTab({
                   breakdown.specialHeroes.defense +
                   breakdown.vipPrestige.defense +
                   breakdown.globe.defense +
-                  breakdown.temporaryEvents.defense +
-                  breakdown.supremePresident.defense +
-                  breakdown.specialBuffs.defense,
+                  additiveTotals.defense,
                 lethality:
                   calculateResearchValue('lethality') +
                   breakdown.allianceTech.lethality +
@@ -513,9 +585,7 @@ export default function PlayerTab({
                   breakdown.specialHeroes.lethality +
                   breakdown.vipPrestige.lethality +
                   breakdown.globe.lethality +
-                  breakdown.temporaryEvents.lethality +
-                  breakdown.supremePresident.lethality +
-                  breakdown.specialBuffs.lethality,
+                  additiveTotals.lethality,
                 health:
                   calculateResearchValue('health') +
                   breakdown.allianceTech.health +
@@ -533,14 +603,18 @@ export default function PlayerTab({
                   breakdown.specialHeroes.health +
                   breakdown.vipPrestige.health +
                   breakdown.globe.health +
-                  breakdown.temporaryEvents.health +
-                  breakdown.supremePresident.health +
-                  breakdown.specialBuffs.health
+                  additiveTotals.health
               };
 
               return (
                 <div key={troopType} className="mb-8 pb-8 border-b border-slate-700/50">
                   <h4 className="text-xl font-bold mb-4 capitalize">{troopType}</h4>
+
+                  {manualOverrideActive && (
+                    <div className="mb-4 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-100 [data-theme='light']:text-emerald-700">
+                      Manual additive totals are applied for this troop type. Calculated breakdowns remain for reference.
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     {(['attack', 'defense', 'lethality', 'health'] as const).map((stat) => (
@@ -584,11 +658,10 @@ export default function PlayerTab({
                       }
                       const otherSpecialBuffs = specialBuffsValue - joinerAddValue;
 
-                      const additiveSum =
-                        breakdown.temporaryEvents[stat] +
-                        breakdown.supremePresident[stat] +
-                        joinerAddValue +
-                        otherSpecialBuffs;
+                      const additiveTotalForStat = (manualAdditiveTotals ?? computedAdditiveTotals)[stat];
+                      const referenceAdditiveTotal = computedAdditiveTotals[stat];
+                      const manualOverrideValue = manualAdditiveTotals?.[stat];
+                      const usingManualOverride = manualOverrideActive && manualOverrideValue !== undefined && manualOverrideValue !== null;
 
                       const basicItems = [
                         { label: 'Research', value: researchTotalValue, detail: researchTroopTypeOnly > 0 || researchTotal > 0 ? `(Troop Type: ${researchTroopTypeOnly > 0 ? '+' : ''}${researchTroopTypeOnly.toFixed(2)}%, Total: ${researchTotal > 0 ? '+' : ''}${researchTotal.toFixed(2)}%)` : null },
@@ -609,12 +682,30 @@ export default function PlayerTab({
                         { label: 'Globe', value: breakdown.globe[stat] }
                       ];
 
-                      const additiveItems = [
-                        { label: 'Temporary Events', value: breakdown.temporaryEvents[stat] },
-                        { label: 'Supreme President', value: breakdown.supremePresident[stat] },
-                        { label: 'Joiners (Special Buffs)', value: joinerAddValue },
-                        { label: 'Special Buffs (Other)', value: otherSpecialBuffs }
+                      type AdditiveItem = {
+                        label: string;
+                        value: number;
+                        muted?: boolean;
+                        highlight?: boolean;
+                        alwaysShow?: boolean;
+                      };
+
+                      const baseAdditiveItems: AdditiveItem[] = [
+                        { label: 'Temporary Events', value: breakdown.temporaryEvents[stat], muted: usingManualOverride },
+                        { label: 'Supreme President', value: breakdown.supremePresident[stat], muted: usingManualOverride },
+                        { label: 'Joiners (Special Buffs)', value: joinerAddValue, muted: usingManualOverride },
+                        { label: 'Special Buffs (Other)', value: otherSpecialBuffs, muted: usingManualOverride }
                       ];
+
+                      const additiveItems: AdditiveItem[] = usingManualOverride
+                        ? [
+                          { label: 'Manual Override', value: additiveTotalForStat, highlight: true, alwaysShow: true },
+                          { label: 'Calculated Total (reference)', value: referenceAdditiveTotal, muted: true, alwaysShow: true },
+                          ...baseAdditiveItems
+                        ]
+                        : baseAdditiveItems;
+
+                      const additiveSum = additiveTotalForStat;
 
                       const breakdownSum = basicSum + additiveSum;
                       const totalValue = total[stat];
@@ -650,21 +741,38 @@ export default function PlayerTab({
                           <div>
                             <div className="text-sm font-semibold text-bonus-section-header mb-2 pb-1 border-b border-slate-700/50 [data-theme='light']:border-gray-500">Additive Bonuses</div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-                              {additiveItems.map((item) => (
-                                item.value !== 0 ? (
-                                  <div key={item.label} className="flex justify-between items-center py-1.5 px-2 rounded hover:bg-slate-800/40 transition-colors [data-theme='light']:hover:bg-gray-100">
+                              {additiveItems.map((item) => {
+                                const isZero = item.value === 0;
+                                const showZeroState = isZero && !item.alwaysShow;
+                                const containerClasses = [
+                                  'flex justify-between items-center py-1.5 px-2 rounded transition-colors',
+                                  item.highlight
+                                    ? 'border border-emerald-400/60 bg-emerald-500/10 shadow-[0_0_6px_rgba(16,185,129,0.25)]'
+                                    : 'hover:bg-slate-800/40 [data-theme=\'light\']:hover:bg-gray-100',
+                                  item.muted ? 'opacity-70' : ''
+                                ].join(' ');
+                                const valueClass = item.highlight
+                                  ? 'font-semibold text-bonus-total'
+                                  : 'font-semibold text-bonus-additive';
+
+                                if (showZeroState) {
+                                  return (
+                                    <div key={item.label} className="flex justify-between items-center py-1.5 px-2 rounded opacity-60">
+                                      <span className="text-bonus-zero">{item.label}:</span>
+                                      <span className="text-bonus-zero-value">0.00%</span>
+                                    </div>
+                                  );
+                                }
+
+                                return (
+                                  <div key={item.label} className={containerClasses}>
                                     <span className="text-bonus-label font-medium">{item.label}:</span>
-                                    <span className="font-semibold text-bonus-additive">
+                                    <span className={valueClass}>
                                       {item.value > 0 ? '+' : ''}{item.value.toFixed(2)}%
                                     </span>
                                   </div>
-                                ) : (
-                                  <div key={item.label} className="flex justify-between items-center py-1.5 px-2 rounded opacity-60">
-                                    <span className="text-bonus-zero">{item.label}:</span>
-                                    <span className="text-bonus-zero-value">0.00%</span>
-                                  </div>
-                                )
-                              ))}
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
@@ -681,8 +789,19 @@ export default function PlayerTab({
             title="Multiplicative Bonuses Summary"
             description="Total multiplicative bonuses from Pet Skills, City Bonuses, and Joiners. These are applied after additive bonuses."
             collapsible
-            defaultCollapsed={false}
+            defaultCollapsed
           >
+            <SectionCard
+              title="Manual Multiplicative Override (optional)"
+              description="Enter total multiplicative % per troop/stat; leave collapsed to use calculated values."
+              collapsible
+              defaultCollapsed
+            >
+              <ManualMultiplicativeOverride
+                overrides={currentProfile.multiplicativeBonuses.manualOverrideTotals}
+                onChange={handleManualMultiplicativeOverrideChange}
+              />
+            </SectionCard>
             {TROOP_TYPE_LIST.map((troopType) => {
               // Calculate pet skills directly from petSkillSelections (same as pets-section.tsx)
               const petSkillSelections = currentProfile.petSkillSelections || {};
@@ -741,6 +860,13 @@ export default function PlayerTab({
               const petSkills = petSkillsEnabled ? calculatedPetSkills : { attack: 0, defense: 0, lethality: 0, health: 0 };
               const cityBonuses = currentProfile.multiplicativeBonuses.cityBonuses || { attack: 0, defense: 0, lethality: 0, health: 0, enemyAttackReduction: 0, enemyDefenseReduction: 0, deploymentCapacity: 0 };
               const joinerMultiplicative = playerJoinerInfo?.multiplicative || { damage: 0, attack: 0, defense: 0, lethality: 0, health: 0, damageReduction: 0 };
+              const manualOverrideTotals = currentProfile.multiplicativeBonuses.manualOverrideTotals?.[troopType];
+              const manualOverrideActive =
+                manualOverrideTotals &&
+                Object.values(manualOverrideTotals).some(
+                  (value) => value !== undefined && value !== null && !Number.isNaN(Number(value))
+                );
+
               const total = {
                 attack: petSkills.attack + cityBonuses.attack + joinerMultiplicative.attack + joinerMultiplicative.damage,
                 defense: petSkills.defense + cityBonuses.defense + joinerMultiplicative.defense,
@@ -748,18 +874,35 @@ export default function PlayerTab({
                 health: petSkills.health + cityBonuses.health + joinerMultiplicative.health
               };
 
+              const manualTotals = manualOverrideActive
+                ? {
+                  attack: Number(manualOverrideTotals?.attack ?? 0),
+                  defense: Number(manualOverrideTotals?.defense ?? 0),
+                  lethality: Number(manualOverrideTotals?.lethality ?? 0),
+                  health: Number(manualOverrideTotals?.health ?? 0)
+                }
+                : null;
+
+              const displayTotals = manualTotals ?? total;
+
               const combatDebuffs = { ...calculatedPetDebuffs, ...(currentProfile.multiplicativeBonuses.combatDebuffs || {}) };
 
               return (
                 <div key={troopType} className="mb-8 pb-8 border-b border-slate-700/50 [data-theme='light']:border-gray-300">
                   <h4 className="text-xl font-bold mb-4 capitalize text-bonus-label">{troopType}</h4>
 
+                  {manualOverrideActive && (
+                    <div className="mb-4 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-100 [data-theme='light']:text-emerald-700">
+                      Manual multiplicative totals are applied for this troop type. Calculated breakdowns remain for reference.
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     {(['attack', 'defense', 'lethality', 'health'] as const).map((stat) => (
                       <div key={stat} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 [data-theme='light']:bg-gray-100 [data-theme='light']:border-gray-300">
                         <div className="text-xs text-bonus-label mb-2 uppercase tracking-wide font-semibold">{stat}</div>
                         <div className="text-2xl font-bold text-bonus-total">
-                          {total[stat] > 0 ? '+' : ''}{total[stat].toFixed(2)}%
+                          {displayTotals[stat] > 0 ? '+' : ''}{displayTotals[stat].toFixed(2)}%
                         </div>
                       </div>
                     ))}
@@ -803,9 +946,19 @@ export default function PlayerTab({
                                 {cityBonuses[stat] > 0 ? '+' : ''}{cityBonuses[stat].toFixed(2)}%
                               </span>
                             </div>
+                            {manualOverrideActive && (
+                              <div className="flex justify-between items-center py-1.5 px-2 rounded border border-emerald-400/60 bg-emerald-500/10 shadow-[0_0_6px_rgba(16,185,129,0.25)]">
+                                <span className="text-bonus-label font-semibold">Manual Override:</span>
+                                <span className="font-semibold text-bonus-total">
+                                  {displayTotals[stat] > 0 ? '+' : ''}{displayTotals[stat].toFixed(2)}%
+                                </span>
+                              </div>
+                            )}
                             <div className="flex justify-between items-center py-1.5 px-2 rounded hover:bg-slate-800/40 transition-colors [data-theme='light']:hover:bg-gray-100">
-                              <span className="text-bonus-label font-semibold">Grand Total:</span>
-                              <span className="font-semibold text-bonus-total">
+                              <span className="text-bonus-label font-medium">
+                                {manualOverrideActive ? 'Calculated Total (reference):' : 'Grand Total:'}
+                              </span>
+                              <span className={`font-semibold ${manualOverrideActive ? 'text-bonus-additive opacity-80' : 'text-bonus-total'}`}>
                                 {total[stat] > 0 ? '+' : ''}{total[stat].toFixed(2)}%
                               </span>
                             </div>
@@ -944,14 +1097,31 @@ export default function PlayerTab({
               }}
               additiveBonuses={currentProfile.additiveBonuses}
               onAdditiveBonusesChange={(bonuses: AdditiveBonuses) => {
-                setCurrentProfile((prev) => prev ? { ...prev, additiveBonuses: bonuses } : null);
+                setCurrentProfile((prev) =>
+                  prev
+                    ? {
+                      ...prev,
+                      additiveBonuses: {
+                        ...bonuses,
+                        manualOverrideTotals: prev.additiveBonuses?.manualOverrideTotals
+                      }
+                    }
+                    : null
+                );
               }}
               multiplicativeBonuses={currentProfile.multiplicativeBonuses}
               onMultiplicativeBonusesChange={(bonuses: MultiplicativeBonuses) => {
-                setCurrentProfile({
-                  ...currentProfile,
-                  multiplicativeBonuses: bonuses
-                });
+                setCurrentProfile((prev) =>
+                  prev
+                    ? {
+                      ...prev,
+                      multiplicativeBonuses: {
+                        ...bonuses,
+                        manualOverrideTotals: prev.multiplicativeBonuses?.manualOverrideTotals
+                      }
+                    }
+                    : null
+                );
               }}
               rally={currentProfile.rally}
             />

@@ -12,7 +12,7 @@ import type {
   SkillLevelsByName
 } from '../battle';
 import { getHeroByName } from '../battle';
-import type { AdditiveBonuses, BasicBonuses, MultiplicativeBonuses } from '../battle/calculations';
+import type { AdditiveBonuses, BasicBonuses, MultiplicativeBonuses, TroopScope, TroopType } from '../battle/calculations';
 import { getHeroExpeditionSkills } from '../battle/data-selectors';
 
 /**
@@ -205,6 +205,8 @@ function extractHeroSkillBonuses(
 
   return { additive, multiplicative };
 }
+
+const TROOP_TYPES: TroopType[] = ['infantry', 'lancer', 'marksman'];
 
 /**
  * Extract exclusive weapon bonuses
@@ -498,28 +500,31 @@ function categorizeSkillType(skillData: LevelSkill | null): string | null {
     'extra_damage_up',
     'normal_attack_damage_up',
     'skill_damage_up',
+    'damage_increase',
+    'damage_dealt_increase',
+    'additional_damage',
     'enemy_damage_taken_up',
   ];
   const damageReductionKeywords = [
     'damage_taken_down',
     'damage_taken',
     'enemy_damage_down',
+    'damage_reduction',
+    'damage_from_skills_reduction',
   ];
+  const attackKeywords = ['attack_up', 'attack_bonus', 'attack_increase'];
+  const defenseKeywords = ['defense_up', 'defense_bonus', 'defense_increase'];
+  const healthKeywords = ['health_up', 'health_bonus', 'health_increase'];
 
-  // Check for damage bonuses first (damage_dealt_increase, damage_boost, etc.)
   if (keys.some(k => damageIncreaseKeywords.some(keyword => k.includes(keyword) && !k.includes('damage_taken')))) {
     return 'damage';
   }
-
-  // Treat damage reduction / resistance as defensive bonuses
   if (keys.some(k => damageReductionKeywords.some(keyword => k.includes(keyword)))) {
     return 'damageReduction';
   }
-
-  // Check for stat bonuses
-  if (keys.some(k => k.includes('attack_up') || k.includes('attack_bonus'))) return 'attack';
-  if (keys.some(k => k.includes('defense_up') || k.includes('defense_bonus'))) return 'defense';
-  if (keys.some(k => k.includes('health_up') || k.includes('health_bonus'))) return 'health';
+  if (keys.some(k => attackKeywords.some(keyword => k.includes(keyword)))) return 'attack';
+  if (keys.some(k => defenseKeywords.some(keyword => k.includes(keyword)))) return 'defense';
+  if (keys.some(k => healthKeywords.some(keyword => k.includes(keyword)))) return 'health';
   if (keys.some(k => k.includes('lethality_increase') || k.includes('lethality_bonus'))) return 'lethality';
 
   return null;
@@ -537,17 +542,47 @@ export function extractJoinerBonuses(
 ): {
   additive: { attack: number; defense: number; lethality: number; health: number };
   multiplicative: { damage: number; attack: number; defense: number; health: number; lethality: number; damageReduction: number };
+  perScope: {
+    additive: Partial<Record<TroopScope, Partial<Record<'attack' | 'defense' | 'lethality' | 'health', number>>>>;
+    multiplicative: Partial<Record<TroopScope, Partial<{ attack: number; defense: number; lethality: number; health: number; damage: number; damageReduction: number }>>>;
+    hasTroopSpecific: boolean;
+  };
 } {
-  const additive = { attack: 0, defense: 0, lethality: 0, health: 0 };
+  type Bucket = {
+    damage: number[];
+    attack: number[];
+    defense: number[];
+    health: number[];
+    lethality: number[];
+    damageReduction: number[];
+  };
 
-  // Group bonuses by type for proper stacking
-  const bonusesByType: Record<string, number[]> = {
+  const scopes: TroopScope[] = ['all_troops', 'rally_troops', 'infantry', 'lancer', 'marksman'];
+  const emptyBucket = (): Bucket => ({
     damage: [],
     attack: [],
     defense: [],
     health: [],
     lethality: [],
     damageReduction: [],
+  });
+
+  const bonusesByScope: Record<TroopScope, Bucket> = {
+    all_troops: emptyBucket(),
+    rally_troops: emptyBucket(),
+    infantry: emptyBucket(),
+    lancer: emptyBucket(),
+    marksman: emptyBucket(),
+  };
+
+  const getScopeForKey = (key: string): TroopScope => {
+    const lowered = key.toLowerCase();
+    if (lowered.startsWith('infantry_')) return 'infantry';
+    if (lowered.startsWith('lancer_')) return 'lancer';
+    if (lowered.startsWith('marksman_')) return 'marksman';
+    if (lowered.includes('rally_troops')) return 'rally_troops';
+    if (lowered.includes('all_troops')) return 'all_troops';
+    return 'all_troops';
   };
 
   // Only process the first 4 joiners
@@ -610,111 +645,153 @@ export function extractJoinerBonuses(
       }
     });
 
+    // Allow configured joiner skill level; otherwise fall back to max
+    const levelToUse: SkillLevel =
+      (joiner.skillLevels?.[firstSkill.name] as SkillLevel | undefined) ??
+      maxLevel;
+
     // Categorize the skill type
     const skillType = categorizeSkillType(skillData);
     if (!skillType) return;
 
-    // Extract the bonus value at max level
-    let bonusValue = 0;
+    const damageIncreaseKeywords = [
+      'damage_up',
+      'extra_damage_up',
+      'normal_attack_damage_up',
+      'skill_damage_up',
+      'damage_increase',
+      'damage_dealt_increase',
+      'additional_damage',
+      'enemy_damage_taken_up',
+    ];
+    const damageReductionKeywords = [
+      'damage_taken_down',
+      'damage_reduction',
+      'damage_received_reduction',
+      'damage_resistance',
+      'damage_from_attacks_reduction',
+      'damage_from_skills_reduction',
+    ];
+
+    // Extract the bonus value at the chosen level and bucket it by troop scope
     Object.keys(skillData).forEach(key => {
       if (key === 'skill-name' || key === 'description' || key === 'trigger_chance') return;
 
-      const value = extractSkillValue(skillData[key as keyof LevelSkill] as any, maxLevel);
+      const value = extractSkillValue(skillData[key as keyof LevelSkill] as any, levelToUse);
       if (value === 0) return;
 
-      // Check if this property matches the skill type
-      if (skillType === 'damage' && (key.includes('damage_increase') || key.includes('damage_dealt_increase') ||
-        key.includes('damage_boost') || key.includes('damage_percentage') ||
-        key.includes('additional_damage') || key.includes('skill_damage_increase'))) {
-        bonusValue += value * 100; // Convert to percentage
-      } else if (skillType === 'attack' && key.includes('attack_increase')) {
-        bonusValue += value * 100;
-      } else if (skillType === 'defense' && key.includes('defense_increase')) {
-        bonusValue += value * 100;
-      } else if (skillType === 'health' && key.includes('health_increase')) {
-        bonusValue += value * 100;
-      } else if (skillType === 'lethality' && key.includes('lethality_increase')) {
-        bonusValue += value * 100;
-      } else if (skillType === 'damageReduction' && (key.includes('damage_taken_reduction') ||
-        key.includes('damage_reduction') || key.includes('damage_received_reduction') ||
-        key.includes('damage_resistance') || key.includes('damage_from_attacks_reduction') ||
-        key.includes('damage_from_skills_reduction'))) {
-        bonusValue += value * 100;
+      const scope = getScopeForKey(key);
+      const bucket = bonusesByScope[scope];
+      if (!bucket) return;
+
+      const normalizedKey = key.toLowerCase();
+      const isDamageKey = damageIncreaseKeywords.some(keyword => normalizedKey.includes(keyword) && !normalizedKey.includes('damage_taken'));
+      const isDamageReductionKey = damageReductionKeywords.some(keyword => normalizedKey.includes(keyword));
+
+      if (isDamageReductionKey) {
+        bucket.damageReduction.push(value * 100);
+      }
+
+      if (skillType === 'damage' && isDamageKey) {
+        bucket.damage.push(value * 100);
+      } else if (skillType === 'attack' && normalizedKey.includes('attack_increase')) {
+        bucket.attack.push(value * 100);
+      } else if (skillType === 'defense' && normalizedKey.includes('defense_increase')) {
+        bucket.defense.push(value * 100);
+      } else if (skillType === 'health' && normalizedKey.includes('health_increase')) {
+        bucket.health.push(value * 100);
+      } else if (skillType === 'lethality' && normalizedKey.includes('lethality_increase')) {
+        bucket.lethality.push(value * 100);
       }
     });
-
-    if (bonusValue > 0) {
-      bonusesByType[skillType].push(bonusValue);
-    }
   });
 
-  // Apply stacking rules:
-  // - Same type: Additive (sum all bonuses of same type)
-  //   Example: Two +DMG joiners: 10% + 25% = 35% total DMG
-  // - Different types: Multiplicative (each type multiplies separately)
-  //   Example: +DMG and +ATK: Base × (1 + DMG%) × (1 + ATK%)
+  const summarizeScope = (bucket: Bucket): {
+    additive: { attack: number; defense: number; lethality: number; health: number };
+    multiplicative: { damage: number; attack: number; defense: number; health: number; lethality: number; damageReduction: number };
+  } => {
+    const additive = { attack: 0, defense: 0, lethality: 0, health: 0 };
+    const multiplicative = { damage: 0, attack: 0, defense: 0, health: 0, lethality: 0, damageReduction: 0 };
 
-  const multiplicative = {
-    damage: 0,
-    attack: 0,
-    defense: 0,
-    health: 0,
-    lethality: 0,
-    damageReduction: 0,
+    if (mode === 'attacking') {
+      additive.attack += bucket.attack.reduce((sum, val) => sum + val, 0);
+      multiplicative.damage = bucket.damage.reduce((sum, val) => sum + val, 0);
+      multiplicative.damageReduction = 0;
+    } else if (mode === 'defending') {
+      additive.defense += bucket.defense.reduce((sum, val) => sum + val, 0);
+      additive.health += bucket.health.reduce((sum, val) => sum + val, 0);
+      additive.lethality += bucket.lethality.reduce((sum, val) => sum + val, 0);
+      multiplicative.damageReduction = bucket.damageReduction.reduce((sum, val) => sum + val, 0);
+    } else {
+      const sumType = (arr: number[]) => arr.reduce((sum, val) => sum + val, 0);
+      multiplicative.damage = sumType(bucket.damage);
+      multiplicative.attack = sumType(bucket.attack);
+      multiplicative.defense = sumType(bucket.defense);
+      multiplicative.health = sumType(bucket.health);
+      multiplicative.lethality = sumType(bucket.lethality);
+      multiplicative.damageReduction = sumType(bucket.damageReduction);
+      additive.attack += multiplicative.attack;
+      additive.defense += multiplicative.defense;
+      additive.health += multiplicative.health;
+      additive.lethality += multiplicative.lethality;
+    }
+
+    return { additive, multiplicative };
   };
 
-  // Sum bonuses of the same type (additive stacking within same type)
-  // Filter based on mode
-  if (mode === 'attacking') {
-    // Only include attack/damage bonuses when attacking
-    const attackTotal = bonusesByType.attack.reduce((sum, val) => sum + val, 0);
-    const damageTotal = bonusesByType.damage.reduce((sum, val) => sum + val, 0);
-    const damageReductionTotal = bonusesByType.damageReduction.reduce((sum, val) => sum + val, 0);
-    additive.attack += attackTotal;
-    multiplicative.damage = damageTotal;
-    multiplicative.damageReduction = damageReductionTotal;
-  } else if (mode === 'defending') {
-    // Only include defense/lethality/health bonuses when defending
-    const defenseTotal = bonusesByType.defense.reduce((sum, val) => sum + val, 0);
-    const healthTotal = bonusesByType.health.reduce((sum, val) => sum + val, 0);
-    const lethalityTotal = bonusesByType.lethality.reduce((sum, val) => sum + val, 0);
-    const damageReductionTotal = bonusesByType.damageReduction.reduce((sum, val) => sum + val, 0);
-    additive.defense += defenseTotal;
-    additive.health += healthTotal;
-    additive.lethality += lethalityTotal;
-    multiplicative.damageReduction = damageReductionTotal;
-  } else {
-    // No mode specified, include all (for backward compatibility)
-    Object.keys(bonusesByType).forEach(type => {
-      if (bonusesByType[type].length > 0) {
-        // Same type bonuses add together
-        const total = bonusesByType[type].reduce((sum, val) => sum + val, 0);
+  const perScopeAdditive: Record<TroopScope, { attack: number; defense: number; lethality: number; health: number }> = {
+    all_troops: summarizeScope(bonusesByScope.all_troops).additive,
+    rally_troops: summarizeScope(bonusesByScope.rally_troops).additive,
+    infantry: summarizeScope(bonusesByScope.infantry).additive,
+    lancer: summarizeScope(bonusesByScope.lancer).additive,
+    marksman: summarizeScope(bonusesByScope.marksman).additive,
+  };
 
-        if (type === 'damage') {
-          // Damage bonuses are multiplicative (affect final damage)
-          multiplicative.damage = total;
-        } else if (type === 'attack') {
-          // Attack bonuses: same type adds, but different types multiply
-          // For now, we'll add to additive, but track separately for multiplication
-          additive.attack += total;
-          multiplicative.attack = total; // Track for multiplication with other types
-        } else if (type === 'defense') {
-          additive.defense += total;
-          multiplicative.defense = total;
-        } else if (type === 'health') {
-          additive.health += total;
-          multiplicative.health = total;
-        } else if (type === 'lethality') {
-          additive.lethality += total;
-          multiplicative.lethality = total;
-        } else if (type === 'damageReduction') {
-          multiplicative.damageReduction = total;
-        }
-      }
-    });
+  const perScopeMultiplicative: Record<TroopScope, { damage: number; attack: number; defense: number; health: number; lethality: number; damageReduction: number }> = {
+    all_troops: summarizeScope(bonusesByScope.all_troops).multiplicative,
+    rally_troops: summarizeScope(bonusesByScope.rally_troops).multiplicative,
+    infantry: summarizeScope(bonusesByScope.infantry).multiplicative,
+    lancer: summarizeScope(bonusesByScope.lancer).multiplicative,
+    marksman: summarizeScope(bonusesByScope.marksman).multiplicative,
+  };
+
+  const hasTroopSpecific = ['infantry', 'lancer', 'marksman'].some(scope => {
+    const bucket = bonusesByScope[scope as TroopScope];
+    return Object.values(bucket).some(arr => arr.length > 0);
+  });
+
+  const globalScopes: TroopScope[] = ['all_troops', 'rally_troops'];
+  if (!hasTroopSpecific) {
+    globalScopes.push('infantry', 'lancer', 'marksman');
   }
 
-  return { additive, multiplicative };
+  const additive = { attack: 0, defense: 0, lethality: 0, health: 0 };
+  const multiplicative = { damage: 0, attack: 0, defense: 0, health: 0, lethality: 0, damageReduction: 0 };
+
+  globalScopes.forEach(scope => {
+    const add = perScopeAdditive[scope] || { attack: 0, defense: 0, lethality: 0, health: 0 };
+    const mul = perScopeMultiplicative[scope] || { damage: 0, attack: 0, defense: 0, health: 0, lethality: 0, damageReduction: 0 };
+    additive.attack += add.attack || 0;
+    additive.defense += add.defense || 0;
+    additive.lethality += add.lethality || 0;
+    additive.health += add.health || 0;
+    multiplicative.damage += mul.damage || 0;
+    multiplicative.attack += mul.attack || 0;
+    multiplicative.defense += mul.defense || 0;
+    multiplicative.health += mul.health || 0;
+    multiplicative.lethality += mul.lethality || 0;
+    multiplicative.damageReduction += mul.damageReduction || 0;
+  });
+
+  return {
+    additive,
+    multiplicative,
+    perScope: {
+      additive: perScopeAdditive,
+      multiplicative: perScopeMultiplicative,
+      hasTroopSpecific,
+    },
+  };
 }
 
 /**
@@ -845,15 +922,73 @@ export function calculateRallyBonuses(
     : (rally.opponentJoiners || rally.joiners || []);
   const joinerBonuses = extractJoinerBonuses(joinersToUse, mode);
 
-  // Additive bonuses (stat increases) - same types are already summed
+  // Global/all-troops contributions (display and backward-compat path)
   additive.specialBuffs.attack += joinerBonuses.additive.attack;
   additive.specialBuffs.defense += joinerBonuses.additive.defense;
   additive.specialBuffs.lethality += joinerBonuses.additive.lethality;
   additive.specialBuffs.health += joinerBonuses.additive.health;
-
-  // Multiplicative bonuses (damage) - different types multiply
   multiplicative.combatBuffs.attack += joinerBonuses.multiplicative.damage;
   multiplicative.cityBonuses.enemyAttackReduction += joinerBonuses.multiplicative.damageReduction;
+
+  // Per-troop joiner bonuses (no leaking across troops)
+  const joinerAdditiveByTroop: NonNullable<AdditiveBonuses['joinerBuffs']> = {
+    infantry: { attack: 0, defense: 0, lethality: 0, health: 0 },
+    lancer: { attack: 0, defense: 0, lethality: 0, health: 0 },
+    marksman: { attack: 0, defense: 0, lethality: 0, health: 0 },
+  };
+  const joinerMultiplicativeByTroop: NonNullable<MultiplicativeBonuses['joinerBuffs']> = {
+    infantry: { attack: 0, defense: 0, lethality: 0, health: 0, damage: 0, damageReduction: 0 },
+    lancer: { attack: 0, defense: 0, lethality: 0, health: 0, damage: 0, damageReduction: 0 },
+    marksman: { attack: 0, defense: 0, lethality: 0, health: 0, damage: 0, damageReduction: 0 },
+  };
+  const perScopeAdditive = joinerBonuses.perScope?.additive ?? {};
+  const perScopeMultiplicative = joinerBonuses.perScope?.multiplicative ?? {};
+
+  TROOP_TYPES.forEach(troop => {
+    const additiveTarget = joinerAdditiveByTroop[troop];
+    const multiplicativeTarget = joinerMultiplicativeByTroop[troop];
+    if (!additiveTarget || !multiplicativeTarget) {
+      return;
+    }
+
+    const add = (perScopeAdditive.all_troops || {}) as any;
+    const rallyAdd = (perScopeAdditive.rally_troops || {}) as any;
+    const troopAdd = (perScopeAdditive[troop as TroopScope] || {}) as any;
+
+    additiveTarget.attack = (add.attack || 0) + (rallyAdd.attack || 0) + (troopAdd.attack || 0);
+    additiveTarget.defense = (add.defense || 0) + (rallyAdd.defense || 0) + (troopAdd.defense || 0);
+    additiveTarget.lethality = (add.lethality || 0) + (rallyAdd.lethality || 0) + (troopAdd.lethality || 0);
+    additiveTarget.health = (add.health || 0) + (rallyAdd.health || 0) + (troopAdd.health || 0);
+
+    const mulAll = perScopeMultiplicative.all_troops || {};
+    const mulRally = perScopeMultiplicative.rally_troops || {};
+    const mulTroop = perScopeMultiplicative[troop as TroopScope] || {};
+
+    const attackMul = (mulAll.damage || 0) + (mulAll.attack || 0) + (mulRally.damage || 0) + (mulRally.attack || 0) + (mulTroop.damage || 0) + (mulTroop.attack || 0);
+    const defenseMul = (mulAll.defense || 0) + (mulAll.damageReduction || 0) + (mulRally.defense || 0) + (mulRally.damageReduction || 0) + (mulTroop.defense || 0) + (mulTroop.damageReduction || 0);
+    const healthMul = (mulAll.health || 0) + (mulRally.health || 0) + (mulTroop.health || 0);
+    const lethalityMul = (mulAll.lethality || 0) + (mulRally.lethality || 0) + (mulTroop.lethality || 0);
+    const dmgRed = (mulAll.damageReduction || 0) + (mulRally.damageReduction || 0) + (mulTroop.damageReduction || 0);
+
+    multiplicativeTarget.attack = attackMul;
+    multiplicativeTarget.defense = defenseMul;
+    multiplicativeTarget.health = healthMul;
+    multiplicativeTarget.lethality = lethalityMul;
+    multiplicativeTarget.damage = attackMul;
+    multiplicativeTarget.damageReduction = dmgRed;
+
+    joinerMultiplicativeByTroop[troop] = {
+      attack: attackMul,
+      defense: defenseMul,
+      health: healthMul,
+      lethality: lethalityMul,
+      damage: attackMul,
+      damageReduction: dmgRed,
+    };
+  });
+
+  additive.joinerBuffs = joinerAdditiveByTroop;
+  multiplicative.joinerBuffs = joinerMultiplicativeByTroop;
 
   return { basic, additive, multiplicative };
 }
