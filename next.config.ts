@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
    */
   outputFileTracingIncludes: {
     "/api/**": ["./drizzle/**/*"],
+    "/leaderboard": ["./drizzle/**/*"],
+    "/leaderboard/**": ["./drizzle/**/*"],
+    "/leaderboard.rsc": ["./drizzle/**/*"],
   },
 };
 
