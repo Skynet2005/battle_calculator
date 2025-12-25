@@ -393,14 +393,16 @@ const jeronimo: Hero = {
       },
       "3": {
         "skill-name": "Expert Swordsmanship",
-        "description": "Jeronimo's teachings in sword arts grants all troops' attack a [4% / 8% / 12% / 16% / 20%] chance of stunning the target for 1 turn.",
-        "all_troops_stun_chance_percentage": {
-          "1": 0.04,
-          "2": 0.08,
-          "3": 0.12,
-          "4": 0.16,
-          "5": 0.20
-        }
+        "description": "Jeronimo's teachings in sword arts increases Damage Dealt by [6% / 12% / 18% / 24% / 30%] for all troops for 2 turns every 4 turns.",
+        "all_troops_damage_up_percentage": {
+          "1": 0.06,
+          "2": 0.12,
+          "3": 0.18,
+          "4": 0.24,
+          "5": 0.30
+        },
+        "duration_turns": 2,
+        "trigger_every_n_turns": 4
       }
     }
   },
@@ -551,16 +553,16 @@ const molly: Hero = {
   "skills": {
     expedition: {
       "1": {
-        "skill-name": "Calling of the Snow",
-        "description": "Molly leads a charge as overwhelming as an avalanche, granting all troops' attack a [4% / 8% / 12% / 16% / 20%] chance of stunning the target for 1 turn.",
-        "all_troops_stun_chance_percentage": {
-          "1": 0.04,
-          "2": 0.08,
-          "3": 0.12,
-          "4": 0.16,
-          "5": 0.20
+        "skill-name": "Snow's Grace",
+        "description": "Molly calls upon the grace of winter, granting a 40% chance of reducing all troops' Damage Taken by [10% / 20% / 30% / 40% / 50%].",
+        "all_troops_damage_taken_down_percentage": {
+          "1": 0.10,
+          "2": 0.20,
+          "3": 0.30,
+          "4": 0.40,
+          "5": 0.50
         },
-        "duration_turns": 1,
+        "trigger_chance": 0.40,
       },
       "2": {
         "skill-name": "Ice Dominion",
@@ -734,16 +736,16 @@ const natalia: Hero = {
   "skills": {
     expedition: {
       "1": {
-        "skill-name": "Wildling Roar",
-        "description": "Natalia's bear roars and instills terror into the hearts of enemies, granting all troops' attack a [4% / 8% / 12% / 16% / 20%] chance of stunning the target for 1 turn.",
-        "all_troops_stun_chance_percentage": {
-          "1": 0.04,
-          "2": 0.08,
-          "3": 0.12,
-          "4": 0.16,
-          "5": 0.20
+        "skill-name": "Feral Protection",
+        "description": "Natalia's feral instincts protect her troops, granting a 40% chance of reducing all troops' Damage Taken by [10% / 20% / 30% / 40% / 50%].",
+        "all_troops_damage_taken_down_percentage": {
+          "1": 0.10,
+          "2": 0.20,
+          "3": 0.30,
+          "4": 0.40,
+          "5": 0.50
         },
-        "duration_turns": 1,
+        "trigger_chance": 0.40,
       },
       "2": {
         "skill-name": "Queen of the Wild",
@@ -1112,14 +1114,15 @@ export const alonso: Hero = {
     expedition: {
       "1": {
         "skill-name": "Onslaught",
-        "description": "Alonso's strength, like a massive wave, grants all troops' attack a [4% / 8% / 12% / 16% / 20%] chance of stunning the target for 1 turn.",
-        "all_troops_stun_chance_percentage": {
-          "1": 0.04,
-          "2": 0.08,
-          "3": 0.12,
-          "4": 0.16,
-          "5": 0.20
-        }
+        "description": "Alonso unleashes a devastating onslaught, granting a 40% chance of increasing all troops' Lethality by [10% / 20% / 30% / 40% / 50%].",
+        "all_troops_lethality_up_percentage": {
+          "1": 0.10,
+          "2": 0.20,
+          "3": 0.30,
+          "4": 0.40,
+          "5": 0.50
+        },
+        "trigger_chance": 0.40
       },
       "2": {
         "skill-name": "Iron Strength",
@@ -1293,15 +1296,14 @@ export const flint: Hero = {
     expedition: {
       "1": {
         "skill-name": "Pyromaniac",
-        "description": "Every flame, no matter how small, can ignite a roaring fire. Flint grants all troops' attack a 20% chance of setting the target on fire, dealing [8% / 16% / 24% / 32% / 40%] damage per turn for 3 turns.",
-        "dot_percentage": {
-          "1": 0.08,
-          "2": 0.16,
-          "3": 0.24,
-          "4": 0.32,
-          "5": 0.40
-        },
-        "duration_seconds": 3
+        "description": "Flint's pyromaniac tendencies fuel his infantry with destructive power, increasing his infantry's Damage Dealt by [20% / 40% / 60% / 80% / 100%].",
+        "infantry_damage_up_percentage": {
+          "1": 0.20,
+          "2": 0.40,
+          "3": 0.60,
+          "4": 0.80,
+          "5": 1.00
+        }
       },
       "2": {
         "skill-name": "Burning Resolve",
@@ -1316,13 +1318,13 @@ export const flint: Hero = {
       },
       "3": {
         "skill-name": "Immolation",
-        "description": "Flint's burning vengeance threatens all foes, granting all troops' attack a 50% chance of increasing enemy troops' damage taken by [10% / 20% / 30% / 40% / 50%].",
-        "target_damage_taken_up_percentage": {
-          "1": 0.10,
-          "2": 0.20,
-          "3": 0.30,
-          "4": 0.40,
-          "5": 0.50
+        "description": "Flint's self-immolation fuels his troops with lethal precision, increasing all troops' Lethality by [5% / 10% / 15% / 20% / 25%].",
+        "all_troops_lethality_up_percentage": {
+          "1": 0.05,
+          "2": 0.10,
+          "3": 0.15,
+          "4": 0.20,
+          "5": 0.25
         }
       }
     }
@@ -1501,15 +1503,16 @@ export const philly: Hero = {
         }
       },
       "3": {
-        "skill-name": "Numbing Spores",
-        "description": "Philly coats weapons with a mysterious fungal extract, granting all troops' attack a [4% / 8% / 12% / 16% / 20%] chance of stunning the target for 1 turn.",
-        "all_troops_stun_chance_percentage": {
-          "1": 0.04,
-          "2": 0.08,
-          "3": 0.12,
-          "4": 0.16,
-          "5": 0.20
-        }
+        "skill-name": "Energizing Shot",
+        "description": "Philly energizes her troops with a potent shot, granting a 40% chance of reducing all troops' Damage Taken by [10% / 20% / 30% / 40% / 50%].",
+        "all_troops_damage_taken_down_percentage": {
+          "1": 0.10,
+          "2": 0.20,
+          "3": 0.30,
+          "4": 0.40,
+          "5": 0.50
+        },
+        "trigger_chance": 0.40
       }
     }
   },
@@ -1838,14 +1841,14 @@ export const logan: Hero = {
   "skills": {
     expedition: {
       "1": {
-        "skill-name": "Lion Strike",
-        "description": "Logan's modified weapon can tear into enemies more easily, granting all troops' attack a 20% chance of dealing [8% / 16% / 24% / 32% / 40%] extra damage per turn for 3 turns.",
-        "all_troops_extra_damage_up_percentage": {
-          "1": 0.08,
-          "2": 0.16,
-          "3": 0.24,
-          "4": 0.32,
-          "5": 0.40
+        "skill-name": "Lion's Might",
+        "description": "Logan's mighty roar strikes fear into enemies, reducing all enemy Troops' Attack by [4% / 8% / 12% / 16% / 20%].",
+        "enemy_attack_down_percentage": {
+          "1": 0.04,
+          "2": 0.08,
+          "3": 0.12,
+          "4": 0.16,
+          "5": 0.20
         }
       },
       "2": {
@@ -2991,7 +2994,7 @@ export const hector: Hero = {
       },
       "2": {
         "skill-name": "Rampant",
-        "description": "Hector excels at raiding on fortified positions with well-coordinated Marksmen, increasing his Infantry's damage dealt by [100% / 125% / 150% / 175% / 200%] and Marksmen's damage dealt by [10% / 20% / 30% / 40% / 50%]. The effect decreases by 80% with each attack and is removed after the fifth.",
+        "description": "Hector's rampant energy surges through his troops, increasing Infantry's Damage Dealt by [100% / 125% / 150% / 175% / 200%] and Marksmen's Damage Dealt by [20% / 40% / 60% / 80% / 100%], effective for 10 attacks with each attack damage boost being 85% of the previous one.",
         "infantry_damage_up_percentage": {
           "1": 1.00,
           "2": 1.25,
@@ -3000,12 +3003,14 @@ export const hector: Hero = {
           "5": 2.00
         },
         "marksman_damage_up_percentage": {
-          "1": 0.10,
-          "2": 0.20,
-          "3": 0.30,
-          "4": 0.40,
-          "5": 0.50
-        }
+          "1": 0.20,
+          "2": 0.40,
+          "3": 0.60,
+          "4": 0.80,
+          "5": 1.00
+        },
+        "attack_limit": 10,
+        "decay_rate": 0.85
       },
       "3": {
         "skill-name": "Blitz",

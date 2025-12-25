@@ -1,5 +1,5 @@
 import { DEFAULT_TROOP_MIX } from '@/lib/rally/rally-config';
-import type { CapacityBreakdown, CapacityReport, SpecialBonusSummary } from '../../components/tabs/player_and_opponent/components/battle-predictor';
+import type { CapacityBreakdown, CapacityReport, SpecialBonusSummary } from '../../components/tabs/player-and-opponent/components/battle-predictor';
 import type { HeroLevel, RallyConfiguration, TroopMixConfig, UserProfile } from '../../components/types';
 import { totalTroops as countTroops } from '../rally/combat-fighter';
 import type { RallySideConfig, SideBaseStats, TroopCounts } from '../rally/combat-types';

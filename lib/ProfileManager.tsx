@@ -222,7 +222,7 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
       {/* Create Profile Dialog */}
       {showCreateDialog && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-          <div className="card max-w-md w-[90%] animate-fade-in">
+          <div className="card max-w-md w-9/10 animate-fade-in">
             <h3 className="flex items-center gap-2">
               <Plus className="w-5 h-5" />
               Create New Profile
@@ -264,7 +264,7 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
 
       {/* Current Profile Indicator */}
       {currentProfile && (
-        <div className="mb-4 p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/10 rounded-lg border border-blue-500/40 shadow-lg shadow-blue-500/10">
+        <div className="mb-4 p-4 bg-linear-to-r from-blue-500/20 to-cyan-500/10 rounded-lg border border-blue-500/40 shadow-lg shadow-blue-500/10">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <strong className="text-blue-300">Active Profile:</strong>

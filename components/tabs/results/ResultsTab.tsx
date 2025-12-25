@@ -1,9 +1,11 @@
+import type { BattleConfig, BattleReport } from '@/lib/combat/types';
 import { DEFAULT_TROOP_MIX } from '@/lib/rally/rally-config';
 import type { FightResult } from '../../../lib/rally/combat-fight';
 import type { TroopMixConfig } from '../../types';
-import BattlePredictor, { type BattleSideContext, type CapacityReport } from '../player_and_opponent/components/battle-predictor';
-
-import type { BattleConfig, BattleReport } from '@/lib/combat/types';
+import BattlePredictor, {
+  type BattleSideContext,
+  type CapacityReport
+} from '../player-and-opponent/components/battle-predictor';
 
 interface ResultsTabProps {
   player: BattleSideContext | null;
@@ -44,6 +46,7 @@ export default function ResultsTab({
         player={player}
         opponent={opponent}
         fightResult={fightResult}
+        battleReport={battleReport}
         errorMessage={errorMessage}
         simulationMode={simulationMode}
         setSimulationModeAction={setSimulationModeAction}
@@ -54,9 +57,7 @@ export default function ResultsTab({
         opponentCapacity={opponentCapacity}
         playerMixInput={playerMixInput}
         opponentMixInput={opponentMixInput}
-        battleReport={battleReport}
       />
     </div>
   );
 }
-

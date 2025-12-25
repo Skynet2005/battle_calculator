@@ -1,7 +1,7 @@
 import type { BattleConfig, BattleReport } from '@/lib/combat/types';
 import { DEFAULT_TROOP_MIX, buildConfigForSide, mixToCounts } from '@/lib/rally/rally-config';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { BattleSideContext, CapacityReport } from '../components/tabs/player_and_opponent/components/battle-predictor';
+import type { BattleSideContext, CapacityReport } from '../components/tabs/player-and-opponent/components/battle-predictor';
 import type { RallyHero, TroopMixConfig, UserProfile } from '../components/types';
 import { PETS_DATA } from '../lib/battle';
 import {

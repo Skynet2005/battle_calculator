@@ -17,6 +17,7 @@ export default function RallyJoinerFormula({ rally }: RallyJoinerFormulaProps) {
     const extracted = extractJoinerBonuses(joiners, 'attacking');
     const perScope = extracted.perScope;
 
+    // Combine bonuses for each troop type
     const combinedPerTroop = TROOP_TYPE_LIST.reduce<Record<string, { attack: number; defense: number; lethality: number; health: number }>>((acc, troop) => {
       const all = perScope.additive.all_troops || {};
       const rallyAdd = perScope.additive.rally_troops || {};
@@ -30,6 +31,7 @@ export default function RallyJoinerFormula({ rally }: RallyJoinerFormulaProps) {
       return acc;
     }, {});
 
+    // Calculate weighted average based on rally capacity
     const capacityCounts = sumCapacityCounts(rally.capacity);
     const totalTroops = Math.max(1, capacityCounts.infantry + capacityCounts.lancer + capacityCounts.marksman);
 
@@ -48,14 +50,15 @@ export default function RallyJoinerFormula({ rally }: RallyJoinerFormulaProps) {
     return { combinedPerTroop, weighted };
   }, [joiners, rally.capacity]);
 
-  return (
-    <SectionCard
-      title="Rally Joiner Formula & Bonuses"
-      className="mt-4"
-    >
+  const hasAnyBonuses = TROOP_TYPE_LIST.some(troop =>
+    Object.values(joinerBonuses.combinedPerTroop[troop]).some(v => v > 0)
+  );
 
-      <div className="space-y-2 mb-4">
-        <h4>How Rally Joiners Work:</h4>
+  return (
+    <SectionCard title="Rally Joiner Formula & Bonuses" className="mt-4">
+      {/* How Rally Joiners Work */}
+      <div className="space-y-2 mb-6">
+        <h4 className="text-lg font-semibold">How Rally Joiners Work</h4>
         <ul className="list-disc pl-5 text-sm text-gray-300 dark:text-gray-300 space-y-1">
           <li>Up to <strong>4 joiners</strong> can be added to a rally</li>
           <li>Only the <strong>first 4 joiners</strong> contribute bonuses</li>
@@ -65,9 +68,10 @@ export default function RallyJoinerFormula({ rally }: RallyJoinerFormulaProps) {
         </ul>
       </div>
 
-      <div className="mb-4">
-        <h4>Formula:</h4>
-        <div className="callout callout-muted font-mono text-sm mt-2">
+      {/* Formula */}
+      <div className="mb-6">
+        <h4 className="text-lg font-semibold mb-2">Formula</h4>
+        <div className="callout callout-muted font-mono text-sm">
           <div><strong>Final Stats =</strong></div>
           <div className="ml-4 mt-1">
             [(Basic Bonuses + Joiner Bonuses + Other Additive Bonuses)] × Multiplicative Bonuses
@@ -75,50 +79,62 @@ export default function RallyJoinerFormula({ rally }: RallyJoinerFormulaProps) {
         </div>
       </div>
 
+      {/* Current Joiner Bonuses */}
       {joiners.length > 0 ? (
         <div>
-          <h4>Current Joiner Bonuses (First 4 Joiners, First Skill at Max Level):</h4>
+          <h4 className="text-lg font-semibold mb-3">Current Joiner Bonuses</h4>
+          <p className="text-sm text-gray-400 dark:text-gray-400 mb-3">
+            First 4 joiners, first skill at max level
+          </p>
+
+          {/* Warning for excess joiners */}
           {joiners.length > 4 && (
-            <div className="callout callout-warning text-sm my-2">
+            <div className="callout callout-warning text-sm mb-4">
               <strong>Note:</strong> Only the first 4 joiners contribute bonuses. {joiners.length - 4} additional joiner(s) will not contribute.
             </div>
           )}
-          <div className="grid gap-4 mt-3">
-            <div className="callout callout-muted">
-              <strong>Per-Troop Joiner Bonuses (attack/defense/lethality/health):</strong>
-              <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-3 text-sm mt-2">
-                {TROOP_TYPE_LIST.map((troop) => {
-                  const values = joinerBonuses.combinedPerTroop[troop];
-                  const hasValue = Object.values(values).some((v) => v > 0);
-                  return (
-                    <div key={troop} className={!hasValue ? 'text-gray-400 dark:text-gray-400' : ''}>
-                      <div className="font-semibold capitalize">{troop}</div>
-                      <div className="mt-1 space-y-1">
-                        <div>Attack: +{values.attack.toFixed(2)}%</div>
-                        <div>Defense: +{values.defense.toFixed(2)}%</div>
-                        <div>Lethality: +{values.lethality.toFixed(2)}%</div>
-                        <div>Health: +{values.health.toFixed(2)}%</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            <div className="callout callout-muted">
-              <strong>Derived Overall (weighted by rally capacity mix, display-only):</strong>
-              <div className="text-sm mt-2 space-y-1">
-                <div>Attack: +{joinerBonuses.weighted.attack.toFixed(2)}%</div>
-                <div>Defense: +{joinerBonuses.weighted.defense.toFixed(2)}%</div>
-                <div>Lethality: +{joinerBonuses.weighted.lethality.toFixed(2)}%</div>
-                <div>Health: +{joinerBonuses.weighted.health.toFixed(2)}%</div>
-              </div>
+          {/* Per-Troop Bonuses */}
+          <div className="callout callout-muted mb-4">
+            <strong className="block mb-3">Per-Troop Joiner Bonuses</strong>
+            <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              {TROOP_TYPE_LIST.map((troop) => {
+                const values = joinerBonuses.combinedPerTroop[troop];
+                const hasValue = Object.values(values).some((v) => v > 0);
+                return (
+                  <div key={troop} className={!hasValue ? 'text-gray-400 dark:text-gray-400' : ''}>
+                    <div className="font-semibold capitalize mb-2">{troop}</div>
+                    <div className="space-y-1">
+                      <div>Attack: +{values.attack.toFixed(2)}%</div>
+                      <div>Defense: +{values.defense.toFixed(2)}%</div>
+                      <div>Lethality: +{values.lethality.toFixed(2)}%</div>
+                      <div>Health: +{values.health.toFixed(2)}%</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {TROOP_TYPE_LIST.every(troop => Object.values(joinerBonuses.combinedPerTroop[troop]).every(v => v === 0)) && (
-            <div className="text-sm text-gray-400 dark:text-gray-400 mt-2">
-              No bonuses detected from joiners. This may be because:
+          {/* Weighted Overall */}
+          <div className="callout callout-muted">
+            <strong className="block mb-2">Weighted Overall (Display Only)</strong>
+            <p className="text-xs text-gray-400 dark:text-gray-400 mb-3">
+              Weighted by rally capacity mix
+            </p>
+            <div className="text-sm space-y-1">
+              <div>Attack: +{joinerBonuses.weighted.attack.toFixed(2)}%</div>
+              <div>Defense: +{joinerBonuses.weighted.defense.toFixed(2)}%</div>
+              <div>Lethality: +{joinerBonuses.weighted.lethality.toFixed(2)}%</div>
+              <div>Health: +{joinerBonuses.weighted.health.toFixed(2)}%</div>
+            </div>
+          </div>
+
+          {/* No bonuses detected message */}
+          {!hasAnyBonuses && (
+            <div className="callout callout-muted text-sm mt-4">
+              <strong>No bonuses detected from joiners.</strong>
+              <p className="mt-2">This may be because:</p>
               <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>Joiners don't have expedition skills</li>
                 <li>First skill doesn't have level-based values</li>
@@ -128,11 +144,10 @@ export default function RallyJoinerFormula({ rally }: RallyJoinerFormulaProps) {
           )}
         </div>
       ) : (
-        <div className="text-sm text-gray-400 dark:text-gray-400">
+        <div className="callout callout-muted text-sm">
           No joiners added yet. Add joiners in the Rally Configuration tab to see their bonuses.
         </div>
       )}
     </SectionCard>
   );
 }
-

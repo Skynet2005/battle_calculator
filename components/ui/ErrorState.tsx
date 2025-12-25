@@ -24,7 +24,7 @@ export default function ErrorState({
     <div className={`card bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 ${className}`}>
       <div className="flex items-start gap-4">
         {icon && (
-          <div className="text-red-500 dark:text-red-400 flex-shrink-0 mt-1">
+          <div className="text-red-500 dark:text-red-400 shrink-0 mt-1">
             {icon}
           </div>
         )}

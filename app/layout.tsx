@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ThemeProvider } from '../components/tabs/player_and_opponent/components/theme-context'
+import { ThemeProvider } from '../components/tabs/player-and-opponent/components/theme-context'
 import './globals.css'
 
 export const metadata: Metadata = {

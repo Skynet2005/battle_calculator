@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import ProfileManager from '../../lib/ProfileManager';
+import ProfileManager from '@/lib/ProfileManager';
 import type { UserProfile } from '../types';
 import { EmptyState } from '../ui';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTheme } from '../components/tabs/player_and_opponent/components/theme-context';
+import { useTheme } from '../components/tabs/player-and-opponent/components/theme-context';
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();

@@ -11,6 +11,7 @@ A Next.js 16 tool for planning rallies and simulating battles in Whiteout Surviv
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
 - [How to Use](#how-to-use)
+- [Expedition Battle Mechanics](#expedition-battle-mechanics)
 - [Calculation Model](#calculation-model)
 - [API Surface](#api-surface)
 - [Project Structure](#project-structure)
@@ -76,6 +77,18 @@ Notes:
 4. **Rally Configuration**: Choose leaders per troop type, add joiners, set roles, and define troop mix/capacity. Joiner stacking and hero weapon effects flow into additive/multiplicative layers automatically.
 5. **Results**: Pick Monte Carlo or deterministic mode, set simulation count, and view outcome, turn log, multipliers, and capacity breakdowns. Adjust troop mixes inline and rerun.
 6. **How To**: Quick readiness checklist and troubleshooting if a tab is incomplete or a simulation failed.
+
+## Expedition Battle Mechanics
+
+### Joiner Hero Tiers (for Bear Hunt Rally Joiners)
+- **S Tier** = Ideal for bear, abilities all stack (Jessie, Jasser, Seo-yoon, Jeronimo, Reina, Bradley, Sonya, Magnus, Blanchette, Rufus, Helvor)
+- **S- Tier** = Having only ONE of these heroes in your rally will increase your damage by alot, having a 2nd one won't do much (Hendrik, Ligesia)
+- **A Tier** = Decent damage but either chance based or some abilities won't stack with 2 or more heroes (Flint, Greg, Lynn, Wayne)
+- **B Tier** = Lower damage, not recommended unless last resort (Philly, Logan, Mia, Gwen, Renee, Norah, Gordon, Gregory)
+- **C/D Tier** = Should not be used as joiner, the only difference is that C Tier heroes can still be used for normal Rally/Garrison joiner (All others)
+
+### Expedition Timing
+Expedition mode uses turn-based combat, where both sides cast skills simultaneously within one turn. Therefore, 1 turn equals 1 second.
 
 ## Calculation Model
 
