@@ -1,4 +1,14 @@
 import { SectionCard, StatTile } from '../../ui';
+import {
+  BasicBattleInfo,
+  ExpeditionMode,
+  HeroGear,
+  JoinerFaqs,
+  KillDescriptions
+} from './components';
+import {
+  dataFlowOverview
+} from './constants';
 
 interface HowToUseGuideProps {
   profileLoaded: boolean;
@@ -71,12 +81,8 @@ export default function HowToUseGuideTab({
     }
   ];
 
-  const dataFlowOverview = [
-    'Rally Config sets the scaffold first: leaders/joiners, capacity stacks, and troop mix for both sides.',
-    'Player/Opponent tabs then supply permanent stats that become SideBaseStats applied to the rally scaffold.',
-    'Fight simulation iterates BattleRound → Fight, applying morale, type advantage, DOT, and control effects each round.',
-    'Results tab visualizes totals, special bonuses, capacity deltas, and per-hit math via the Damage Calculation Debug panel.'
-  ];
+
+
 
   const interpretationTips = [
     'Troop Mix Quick Editor accepts any percentages; the sim normalizes internally but the UI keeps your raw inputs for clarity.',
@@ -169,6 +175,26 @@ export default function HowToUseGuideTab({
             </ul>
           </SectionCard>
         </div>
+
+        <SectionCard title="Basic Battle Information" collapsible defaultCollapsed className="mt-6">
+          <BasicBattleInfo />
+        </SectionCard>
+
+        <SectionCard title="Kill Descriptions" description="Meaning in descriptions with specific verbiage" collapsible defaultCollapsed className="mt-6">
+          <KillDescriptions />
+        </SectionCard>
+
+        <SectionCard title="Expedition Mode" collapsible defaultCollapsed className="mt-6">
+          <ExpeditionMode />
+        </SectionCard>
+
+        <SectionCard title="Bear Trap Joiner FAQs & Hero Tiers" collapsible defaultCollapsed className="mt-6">
+          <JoinerFaqs />
+        </SectionCard>
+
+        <SectionCard title="Hero Gear" collapsible defaultCollapsed className="mt-6">
+          <HeroGear />
+        </SectionCard>
 
         <div className="grid gap-4 lg:grid-cols-[2fr,1fr] mt-6">
           <SectionCard title="Damage Foundation" description="Damage = Coefficient × √(Troops) × Attack × Lethality ÷ Enemy Defense">

@@ -28,6 +28,7 @@ export default function Header({
           links={[
             { href: '/', label: 'Home' },
             { href: '/leaderboard', label: 'Leaderboard' },
+            { href: '/rally-march-times', label: 'Rally March Times' },
           ]}
         />
       </div>

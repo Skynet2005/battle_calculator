@@ -109,7 +109,8 @@ export default async function LeaderboardPage({
         <HamburgerNav
           links={[
             { href: '/', label: 'Home' },
-            { href: '/leaderboard', label: 'Leaderboard' }
+            { href: '/leaderboard', label: 'Leaderboard' },
+            { href: '/rally-march-times', label: 'Rally March Times' },
           ]}
         />
         <h1 className="text-xl font-semibold tracking-tight">Player Leaderboard</h1>
