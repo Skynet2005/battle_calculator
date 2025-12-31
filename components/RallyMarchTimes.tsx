@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import HamburgerNav from '@/components/ui/HamburgerNav';
+import { useEffect, useState } from 'react';
 
 interface RallyLead {
   id: string;
@@ -50,21 +50,33 @@ export default function RallyMarchTimes() {
         return timeA - timeB;
       });
 
-      // If a land last lead is selected, move it to the end (slowest position)
+      // Calculate launch times so all rallies arrive together at the slowest march time
+      const slowestMarchTime = Math.max(...sortedLeads.map(lead => parseInt(lead.marchTime) || 0));
+
+      let launchTimes: { lead: string; launchAt: number }[] = sortedLeads.map((lead) => {
+        const marchTime = parseInt(lead.marchTime) || 0;
+        const launchAt = slowestMarchTime - marchTime; // Launch time relative to slowest arrival
+        return {
+          lead: lead.name,
+          launchAt: launchAt
+        };
+      });
+
+      // If land last is selected, adjust launch times so the land last rally launches last
       if (landLastLeadId) {
         const landLastLead = sortedLeads.find(lead => lead.id === landLastLeadId);
         if (landLastLead) {
-          const otherLeads = sortedLeads.filter(lead => lead.id !== landLastLeadId);
-          sortedLeads.splice(sortedLeads.indexOf(landLastLead), 1);
-          sortedLeads.push(landLastLead);
+          const landLastLaunchTime = launchTimes.find(lt => lt.lead === landLastLead.name)?.launchAt || 0;
+          const maxLaunchTime = Math.max(...launchTimes.map(lt => lt.launchAt));
+          const offset = maxLaunchTime - landLastLaunchTime;
+
+          // Add offset to all launch times so land last launches last
+          launchTimes = launchTimes.map(lt => ({
+            ...lt,
+            launchAt: lt.launchAt + offset
+          }));
         }
       }
-
-      // Assign launch times with 1-second intervals (fastest launches first)
-      const launchTimes: { lead: string; launchAt: number }[] = sortedLeads.map((lead, index) => ({
-        lead: lead.name,
-        launchAt: index // 0, 1, 2, 3... seconds
-      }));
 
       // Group leads by their launch time and sort by launch time descending
       const schedule: { second: number; leads: string[] }[] = [];
@@ -335,40 +347,40 @@ export default function RallyMarchTimes() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-200">Launch Schedule:</h3>
-                    <button
-                      onClick={() => {
-                        const scheduleText = launchSchedule
-                          .map(item => {
-                            const leadsWithTimes = item.leads.map(leadName => {
-                              const lead = rallyLeads.find(r => r.name === leadName);
-                              const marchTime = lead ? parseInt(lead.marchTime) || 0 : 0;
-                              return `${leadName} (${marchTime}s)`;
-                            }).join(', ');
-                            return `Countdown ${item.second}: ${leadsWithTimes}`;
-                          })
-                          .join('\n');
-                        navigator.clipboard.writeText(scheduleText);
-                      }}
+                <button
+                  onClick={() => {
+                    const scheduleText = launchSchedule
+                      .map(item => {
+                        const leadsWithTimes = item.leads.map(leadName => {
+                          const lead = rallyLeads.find(r => r.name === leadName);
+                          const marchTime = lead ? parseInt(lead.marchTime) || 0 : 0;
+                          return `${leadName} (${marchTime}s)`;
+                        }).join(', ');
+                        return `Countdown ${item.second}: ${leadsWithTimes}`;
+                      })
+                      .join('\n');
+                    navigator.clipboard.writeText(scheduleText);
+                  }}
                   className="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded transition-colors"
                   title="Copy launch schedule to clipboard"
                 >
                   📋 Copy
                 </button>
               </div>
-                  <div className="grid gap-1 max-w-md mx-auto text-left">
-                    {launchSchedule.map(item => (
-                      <div key={item.second} className="flex justify-between text-sm">
-                        <span className="text-slate-300">Countdown {item.second}:</span>
-                        <span className="text-yellow-400 font-semibold">
-                          {item.leads.map(leadName => {
-                            const lead = rallyLeads.find(r => r.name === leadName);
-                            const marchTime = lead ? parseInt(lead.marchTime) || 0 : 0;
-                            return `${leadName} (${marchTime}s)`;
-                          }).join(', ')}
-                        </span>
-                      </div>
-                    ))}
+              <div className="grid gap-1 max-w-md mx-auto text-left">
+                {launchSchedule.map(item => (
+                  <div key={item.second} className="flex justify-between text-sm">
+                    <span className="text-slate-300">Countdown {item.second}:</span>
+                    <span className="text-yellow-400 font-semibold">
+                      {item.leads.map(leadName => {
+                        const lead = rallyLeads.find(r => r.name === leadName);
+                        const marchTime = lead ? parseInt(lead.marchTime) || 0 : 0;
+                        return `${leadName} (${marchTime}s)`;
+                      }).join(', ')}
+                    </span>
                   </div>
+                ))}
+              </div>
             </div>
           )}
 
