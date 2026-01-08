@@ -2,9 +2,9 @@ import bcrypt from 'bcryptjs';
 import { eq, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { authCookieOptions, signAuthToken } from '@/lib/auth';
-import { db, migrationsReady } from '@/lib/db/db';
-import { users } from '@/schema/users';
+import { authCookieOptions, signAuthToken } from '@/server/auth/auth';
+import { db, migrationsReady } from '@/server/db/db';
+import { users } from '@/server/db/schema/users';
 
 export async function POST(req: NextRequest) {
   await migrationsReady;

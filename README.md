@@ -30,12 +30,13 @@ The calculator lets you:
 ## Feature Highlights
 
 - **Profile-aware UI**: Tabs for Player Setup, Opponent Setup, Rally Configuration, Results, and How To. Readiness chips show which steps still need data.
-- **Server-backed profiles**: Profiles are stored via API routes (`profiles`, `profile-state`) in Postgres using Drizzle. Legacy shapes are migrated on load.
+- **Server-backed profiles**: Profiles are stored via API routes (`profiles`, `profile-state`) in Postgres using Drizzle. Legacy shapes are migrated on load via `src/features/profile/api/profile-migration.ts`.
 - **Rally builder**: Assign leaders per troop type, configure joiners, set capacity overrides, and normalize troop mixes before simulation.
 - **Joiner stacking rules**: Same-type joiner bonuses add; different types multiply. The UI surfaces names and contribution breakdowns.
 - **Simulation modes**: Monte Carlo (hit/miss variance) or deterministic expected value. Supports up to 1000 simulations per run.
 - **Capacity and mix helpers**: Defaults to max-capacity values and clamps troop mixes to available capacity.
 - **Admin area (scaffolded)**: Admin layout exists under `app/(admin)` for future dashboards.
+- **Feature-first architecture**: Code is organized by feature (`battle-calculator`, `auth`, `profile`) with clear separation between UI (`features/`), domain logic (`domain/`), and server code (`server/`).
 
 ## Quick Start
 
@@ -92,11 +93,11 @@ Expedition mode uses turn-based combat, where both sides cast skills simultaneou
 
 ## Calculation Model
 
-- **Layering**: `(Basic + Additive) × Multiplicative`, with buffs/debuffs separated; formulas live in `lib/battle` and `lib/rally`.
+- **Layering**: `(Basic + Additive) × Multiplicative`, with buffs/debuffs separated; formulas live in `src/domain/battle` and `src/domain/rally`.
 - **Joiners**: Same-type skills add; different types multiply. Only the first four joiners count, and each uses its first expedition skill at its highest available level.
 - **Troop scaling**: Damage scales with √(troop count); troop mixes are normalized to available capacity when missing or overfilled.
-- **Simulation**: `simulateBattleFromUI` runs either Monte Carlo (variance) or expected value (average). Turn logs and per-side multipliers are displayed in Results.
-- **Data sources**: Game data (heroes, pets, research, gear, charms, max levels, troop tiers) live under `lib/battle/data/**` and feed selectors and default builders.
+- **Simulation**: `simulateBattleFromUI` (in `src/domain/combat/adapter`) runs either Monte Carlo (variance) or expected value (average). Turn logs and per-side multipliers are displayed in Results.
+- **Data sources**: Game data (heroes, pets, research, gear, charms, max levels, troop tiers) live under `src/domain/battle/data/**` and feed selectors and default builders.
 
 ## API Surface
 
@@ -111,29 +112,65 @@ All routes live under `app/api` and use Drizzle with Postgres:
 - `GET /api/profile` / `DELETE /api/profile` – fetch or delete the authenticated user.
 - `GET /api/joiners` – static joiner data for UI pickers.
 
-Auth tokens are verified with `lib/auth.ts`; database access is configured in `lib/db/db.ts`.
+Auth tokens are verified with `src/server/auth/auth.ts`; database access is configured in `src/server/db/db.ts`.
 
 ## Project Structure
 
 ```
-app/
+app/                                    # Next.js routes only (thin wrappers)
   page.tsx, layout.tsx, globals.css
-  (admin)/...           # admin layout + pages scaffold
-  api/...               # auth, profiles, profile-state, joiners
-components/
-  BattleCalculatorPage.tsx
-  auth/, layout/, profile/
-  tabs/ (player, opponent, rally, results, how_to)
-  ui/ (PageShell, SectionCard, StatTile, etc.)
-hooks/
-  useBattleCalculatorState.ts
-lib/
-  auth.ts, db/, battle/, rally/, combat/, profile-storage.ts, profile-migration.ts
-schema/
-  users.ts, profiles.ts, user-settings.ts, etc.
-drizzle/
-  migrations and meta
+  (admin)/...                           # admin layout + pages scaffold
+  api/...                               # auth, profiles, profile-state, joiners
+  leaderboard/, rally-march-times/      # feature routes
+
+src/
+  features/                             # Feature UI + state + orchestration
+    battle-calculator/
+      components/                       # BattleCalculatorPage, layout components
+      tabs/                             # how-to, player-opponent, rally-config, results
+      hooks/                            # useBattleCalculatorState, useSyncedMixState
+      model/                            # UI-facing types (BattleSideContext, etc.)
+      utils/                            # rally-mix, rally-outcome, turn-analytics
+    auth/
+      components/                       # AuthGate
+    profile/
+      components/                       # ProfileGate, ProfileManager
+      api/                             # profile-storage, profile-migration
+    admin/                              # drizzle-admin components
+    rally-march-times/
+      components/                       # RallyMarchTimes
+
+  domain/                               # Pure game logic (no React, no Next, no DB)
+    battle/                             # Hero/gear/pet/research data, calculations, extractors
+    combat/                             # Battle engine, skills, targeting, damage
+    rally/                              # Rally simulation, mix utils, bonus extraction
+
+  server/                               # Server-only code (DB/auth/storage/validation)
+    db/
+      schema/                           # users, profiles, user_settings, battle_results
+      db.ts, config.ts                  # Drizzle client and config
+    auth/
+      auth.ts                           # JWT signing/verification
+    middleware/
+      validateSchema.ts                 # Zod validation helpers
+    profile-storage/                    # (reserved for future server-side storage)
+
+  shared/                               # Reusable, app-agnostic pieces
+    ui/                                 # EmptyState, ErrorState, FormField, PageShell, etc.
+    utils/                              # cn (Tailwind merge), utils (formatName, etc.)
+    types/                              # Game types (UserProfile, TroopMixConfig, etc.)
+
+drizzle/                                # Drizzle-kit migrations (keep at root)
+public/                                 # Static assets
 ```
+
+### Import Paths
+
+- `@/features/*` → `src/features/*` (feature UI and state)
+- `@/domain/*` → `src/domain/*` (pure game logic)
+- `@/server/*` → `src/server/*` (server-only code)
+- `@/shared/*` → `src/shared/*` (reusable UI and utilities)
+- `@/*` → root (for app routes and config files)
 
 ## Testing & Quality
 
@@ -144,8 +181,13 @@ drizzle/
 ## Accuracy & Contributions
 
 - Calculations aim to mirror in-game behavior; if you spot drift, open an issue with an in-game repro.
-- Keep functions small and typed, prefer data-driven additions (extend `lib/battle/data/**`).
+- Keep functions small and typed, prefer data-driven additions (extend `src/domain/battle/data/**`).
 - When adding features, update migrations, API validators, and this README.
+- **Architecture rules**:
+  - `src/domain/**` must not import React, Next.js, or server code
+  - `src/server/**` must not import feature code
+  - `src/features/**` can import from `src/shared` and `src/domain`, but not `src/server` (use API routes instead)
+  - ESLint enforces these boundaries via `no-restricted-imports`
 
 ## License
 

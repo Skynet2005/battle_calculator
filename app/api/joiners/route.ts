@@ -1,5 +1,5 @@
-import { verifyAuthToken } from '@/lib/auth';
-import { getAllHeroes } from '@/lib/battle';
+import { verifyAuthToken } from '@/server/auth/auth';
+import { getAllHeroes } from '@/domain/battle';
 import { validateQuery } from '@/server/middleware/validateSchema';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';

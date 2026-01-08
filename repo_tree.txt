@@ -1,0 +1,388 @@
+Repository Tree: expedition_battle_calculator
+Generated: C:\Users\Brent\Desktop\WoS\expedition_battle_calculator
+================================================================================
+└── expedition_battle_calculator
+    ├── app
+    │   ├── (admin)
+    │   │   ├── _components
+    │   │   │   └── users-components.tsx
+    │   │   ├── _lib
+    │   │   │   ├── drizzle-admin.config.ts
+    │   │   │   └── users-table.config.ts
+    │   │   ├── admin
+    │   │   │   ├── [...segments]
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── custom-page
+    │   │   │   │   └── page.tsx
+    │   │   │   └── page.tsx
+    │   │   └── api
+    │   │       └── [[...segments]]
+    │   ├── api
+    │   │   ├── auth
+    │   │   │   ├── login
+    │   │   │   ├── me
+    │   │   │   └── register
+    │   │   ├── joiners
+    │   │   ├── profile
+    │   │   ├── profile-state
+    │   │   └── profiles
+    │   │       └── [id]
+    │   ├── leaderboard
+    │   │   └── page.tsx
+    │   ├── rally-march-times
+    │   │   └── page.tsx
+    │   ├── favicon.ico
+    │   ├── globals.css
+    │   └── page.tsx
+    ├── components
+    │   ├── auth
+    │   │   └── AuthGate.tsx
+    │   ├── profile
+    │   │   ├── ProfileGate.tsx
+    │   │   └── ProfileManager.tsx
+    │   ├── tabs
+    │   │   ├── how_to
+    │   │   │   ├── components
+    │   │   │   │   ├── BasicBattleInfo.tsx
+    │   │   │   │   ├── ExpeditionMode.tsx
+    │   │   │   │   ├── HeroGear.tsx
+    │   │   │   │   ├── index.ts
+    │   │   │   │   ├── JoinerFaqs.tsx
+    │   │   │   │   └── KillDescriptions.tsx
+    │   │   │   ├── constants.ts
+    │   │   │   └── HowToUseGuideTab.tsx
+    │   │   ├── player-and-opponent
+    │   │   │   ├── components
+    │   │   │   │   ├── chief-gear
+    │   │   │   │   │   ├── CharmCard.tsx
+    │   │   │   │   │   ├── CharmsSection.tsx
+    │   │   │   │   │   ├── chief-gear.utils.ts
+    │   │   │   │   │   ├── ChiefGearCard.tsx
+    │   │   │   │   │   ├── ChiefGearSection.tsx
+    │   │   │   │   │   ├── ChiefSection.model.ts
+    │   │   │   │   │   ├── ChiefSection.tsx
+    │   │   │   │   │   ├── ChiefTabs.tsx
+    │   │   │   │   │   └── CommandCenterSection.tsx
+    │   │   │   │   ├── hero
+    │   │   │   │   │   ├── ExclusiveWeaponRow.tsx
+    │   │   │   │   │   ├── HeroCard.tsx
+    │   │   │   │   │   ├── HeroPowerSummary.tsx
+    │   │   │   │   │   ├── HeroSelector.defaults.ts
+    │   │   │   │   │   ├── HeroSelector.model.ts
+    │   │   │   │   │   ├── HeroSelector.tsx
+    │   │   │   │   │   ├── HeroSelector.utils.ts
+    │   │   │   │   │   ├── HeroSelectorFilters.tsx
+    │   │   │   │   │   ├── HeroSelectorTabs.tsx
+    │   │   │   │   │   ├── HeroSkillsList.tsx
+    │   │   │   │   │   └── StarLevelPicker.tsx
+    │   │   │   │   ├── hero-gear
+    │   │   │   │   │   ├── heroGearRegistry.ts
+    │   │   │   │   │   ├── HeroGearSelector.tsx
+    │   │   │   │   │   ├── HeroGearSelectorPanel.tsx
+    │   │   │   │   │   └── HeroGenerationSection.tsx
+    │   │   │   │   ├── info
+    │   │   │   │   │   ├── capacity
+    │   │   │   │   │   │   ├── capacity-summary-grid.tsx
+    │   │   │   │   │   │   └── MultiplicativeBonusesInput.tsx
+    │   │   │   │   │   ├── opponent
+    │   │   │   │   │   ├── player
+    │   │   │   │   │   │   ├── player-info
+    │   │   │   │   │   │   │   ├── sections
+    │   │   │   │   │   │   │   │   ├── AdditiveBonusesCard.tsx
+    │   │   │   │   │   │   │   │   ├── BonusSettingsCard.tsx
+    │   │   │   │   │   │   │   │   ├── CapacityCard.tsx
+    │   │   │   │   │   │   │   │   ├── MultiplicativeBonusesCard.tsx
+    │   │   │   │   │   │   │   │   └── ProfileHeaderCard.tsx
+    │   │   │   │   │   │   │   ├── playerInfo.constants.ts
+    │   │   │   │   │   │   │   ├── playerInfo.types.ts
+    │   │   │   │   │   │   │   ├── playerInfo.utils.ts
+    │   │   │   │   │   │   │   └── PlayerInfoSubTab.tsx
+    │   │   │   │   │   │   ├── BasicSubTab.tsx
+    │   │   │   │   │   │   ├── ChiefSubTab.tsx
+    │   │   │   │   │   │   ├── HeroesSubTab.tsx
+    │   │   │   │   │   │   ├── PetsSubTab.tsx
+    │   │   │   │   │   │   ├── PlayerSubTabs.tsx
+    │   │   │   │   │   │   └── ResearchSubTab.tsx
+    │   │   │   │   │   ├── manual-additive-override.tsx
+    │   │   │   │   │   └── manual-multiplicative-override.tsx
+    │   │   │   │   ├── rally
+    │   │   │   │   │   └── battle-predictor
+    │   │   │   │   │       ├── sections
+    │   │   │   │   │       │   ├── BattleOverview.tsx
+    │   │   │   │   │       │   ├── ForcesSection.tsx
+    │   │   │   │   │       │   ├── TroopMixQuickEditor.tsx
+    │   │   │   │   │       │   └── TroopPowerComparison.tsx
+    │   │   │   │   │       ├── utils
+    │   │   │   │   │       │   └── mixInsights.ts
+    │   │   │   │   │       └── types.ts
+    │   │   │   │   ├── research
+    │   │   │   │   │   ├── archive
+    │   │   │   │   │   ├── BonusStatsGrid.tsx
+    │   │   │   │   │   ├── research.utils.ts
+    │   │   │   │   │   ├── ResearchBonusesDisplay.tsx
+    │   │   │   │   │   ├── ResearchCategoryCard.tsx
+    │   │   │   │   │   ├── ResearchSection.model.ts
+    │   │   │   │   │   ├── ResearchSection.tsx
+    │   │   │   │   │   ├── ResearchTabs.tsx
+    │   │   │   │   │   ├── WarAcademyBonusesDisplay.tsx
+    │   │   │   │   │   └── WarAcademyTroopSection.tsx
+    │   │   │   │   ├── special-bonuses
+    │   │   │   │   │   ├── DataSelectors.model.ts
+    │   │   │   │   │   ├── DataSelectors.tsx
+    │   │   │   │   │   ├── DataSelectors.utils.ts
+    │   │   │   │   │   ├── DataSelectorsTabs.tsx
+    │   │   │   │   │   ├── DaybreakIslandSection.tsx
+    │   │   │   │   │   ├── ExpertsSection.tsx
+    │   │   │   │   │   ├── SkinsSection.tsx
+    │   │   │   │   │   ├── SpecialBonusesSection.tsx
+    │   │   │   │   │   └── SpecialBuffsContributors.tsx
+    │   │   │   │   ├── opponent-defaults.ts
+    │   │   │   │   ├── pets-section.tsx
+    │   │   │   │   └── theme-context.tsx
+    │   │   │   ├── OpponentTab.tsx
+    │   │   │   ├── PlayerTab.model.ts
+    │   │   │   ├── PlayerTab.tsx
+    │   │   │   └── PlayerTab.types.ts
+    │   │   ├── rally_config
+    │   │   │   ├── additive-bonuses-input.tsx
+    │   │   │   ├── RallyConfiguration.tsx
+    │   │   │   ├── RallyJoinerFormula.tsx
+    │   │   │   └── RallyTab.tsx
+    │   │   └── results
+    │   │       ├── analysis
+    │   │       │   ├── ActionRow.tsx
+    │   │       │   ├── BattleAnalysisPanel.tsx
+    │   │       │   ├── CasualtyChart.tsx
+    │   │       │   ├── CasualtyChartHelpers.tsx
+    │   │       │   ├── CombatLogFilters.tsx
+    │   │       │   ├── ModifierList.tsx
+    │   │       │   ├── RallyKeyMoments.tsx
+    │   │       │   ├── RallyTurnProgress.tsx
+    │   │       │   ├── SkillList.tsx
+    │   │       │   ├── SkillTable.tsx
+    │   │       │   ├── skillUtils.ts
+    │   │       │   ├── StatBreakdown.tsx
+    │   │       │   ├── TurnCard.tsx
+    │   │       │   └── VirtualizedTurnList.tsx
+    │   │       ├── components
+    │   │       │   └── CompareTable.tsx
+    │   │       ├── sections
+    │   │       │   ├── BattleOverview.tsx
+    │   │       │   ├── BonusesPanel.tsx
+    │   │       │   ├── BonusesSection.tsx
+    │   │       │   ├── CapacityComparison.tsx
+    │   │       │   ├── FinalStatsMatrix.tsx
+    │   │       │   ├── ForcesSection.tsx
+    │   │       │   ├── OutcomeHeader.tsx
+    │   │       │   ├── OutcomeSummaryCard.tsx
+    │   │       │   ├── RallyComposition.tsx
+    │   │       │   ├── RallyWinExplanation.tsx
+    │   │       │   ├── RunSummary.tsx
+    │   │       │   ├── SidePanel.tsx
+    │   │       │   ├── SpecialBonusTable.tsx
+    │   │       │   ├── StatBlock.tsx
+    │   │       │   ├── TroopMixQuickEditor.tsx
+    │   │       │   ├── TroopPowerComparison.tsx
+    │   │       │   └── WhyYouLost.tsx
+    │   │       ├── utils
+    │   │       │   ├── format.ts
+    │   │       │   ├── keyMoments.ts
+    │   │       │   ├── mixInsights.ts
+    │   │       │   └── turnFilters.ts
+    │   │       ├── battle-predictor.tsx
+    │   │       ├── ResultsTab.tsx
+    │   │       └── types.ts
+    │   ├── ui
+    │   │   ├── EmptyState.tsx
+    │   │   ├── ErrorState.tsx
+    │   │   ├── FormField.tsx
+    │   │   ├── HamburgerNav.tsx
+    │   │   ├── index.ts
+    │   │   ├── LeaderboardTable.tsx
+    │   │   ├── LoadingSkeleton.tsx
+    │   │   ├── PageShell.tsx
+    │   │   ├── SectionCard.tsx
+    │   │   ├── StatTile.tsx
+    │   │   └── ThemeToggle.tsx
+    │   ├── BattleCalculatorPage.tsx
+    │   ├── RallyMarchTimes.tsx
+    │   └── types.ts
+    ├── drizzle
+    │   ├── meta
+    │   │   ├── 0000_snapshot.json
+    │   │   └── _journal.json
+    │   ├── 0000_sharp_kinsey_walden.sql
+    │   ├── 0001_create_users.sql
+    │   ├── 0002_profiles.sql
+    │   ├── 0003_user_settings.sql
+    │   ├── 0004_update_profiles_schema.sql
+    │   ├── 0005_battle_results.sql
+    │   └── 0006_fix_profiles_payload_columns.sql
+    ├── hooks
+    │   ├── useBattleCalculatorState.ts
+    │   └── useSyncedMixState.ts
+    ├── lib
+    │   ├── battle
+    │   │   ├── data
+    │   │   │   ├── capacity
+    │   │   │   │   ├── command-center-capacity.ts
+    │   │   │   │   └── hero-gear-capacity.ts
+    │   │   │   ├── chief_charms
+    │   │   │   │   ├── chief_charm_types.ts
+    │   │   │   │   └── chief_charms.ts
+    │   │   │   ├── chief_gear
+    │   │   │   │   ├── chief-gear-capacity.ts
+    │   │   │   │   ├── chief_gear.ts
+    │   │   │   │   └── chief_gear_types.ts
+    │   │   │   ├── command_center
+    │   │   │   │   └── command_center.ts
+    │   │   │   ├── experts
+    │   │   │   │   ├── expert-extractor.ts
+    │   │   │   │   └── expert-types.ts
+    │   │   │   ├── hero_gear
+    │   │   │   │   ├── archive
+    │   │   │   │   ├── gear-piece-core.ts
+    │   │   │   │   ├── gear-piece-specs.ts
+    │   │   │   │   ├── gear-tables.ts
+    │   │   │   │   ├── gear-wrapper.ts
+    │   │   │   │   ├── hero-gear-extractor.ts
+    │   │   │   │   ├── hero_gear_data.json
+    │   │   │   │   ├── infantry_belt.ts
+    │   │   │   │   ├── infantry_boot.ts
+    │   │   │   │   ├── infantry_glove.ts
+    │   │   │   │   ├── infantry_goggles.ts
+    │   │   │   │   ├── lancer_belt.ts
+    │   │   │   │   ├── lancer_boot.ts
+    │   │   │   │   ├── lancer_glove.ts
+    │   │   │   │   ├── lancer_goggles.ts
+    │   │   │   │   ├── marksman_belt.ts
+    │   │   │   │   ├── marksman_boot.ts
+    │   │   │   │   ├── marksman_glove.ts
+    │   │   │   │   ├── marksman_goggles.ts
+    │   │   │   │   └── mastery_power_data.json
+    │   │   │   ├── heroes
+    │   │   │   │   ├── hero-defaults.ts
+    │   │   │   │   ├── hero-extractor.ts
+    │   │   │   │   ├── hero-skill-capacity.ts
+    │   │   │   │   ├── hero.ts
+    │   │   │   │   ├── hero_types.ts
+    │   │   │   │   ├── heroes.ts
+    │   │   │   │   └── skill.ts
+    │   │   │   ├── pets
+    │   │   │   │   ├── color-tier-bonuses.ts
+    │   │   │   │   └── pet_skills.ts
+    │   │   │   ├── research
+    │   │   │   │   └── research.ts
+    │   │   │   ├── troops
+    │   │   │   │   ├── troop_levels.ts
+    │   │   │   │   ├── troop_skills.ts
+    │   │   │   │   ├── troop_skills_types.ts
+    │   │   │   │   └── troopSkillExtractor.ts
+    │   │   │   ├── war_academy
+    │   │   │   │   ├── war-academy-capacity.ts
+    │   │   │   │   ├── war_academy.ts
+    │   │   │   │   └── war_academy_types.ts
+    │   │   │   ├── mastery-power-utils.ts
+    │   │   │   ├── max-levels.ts
+    │   │   │   ├── opponent-defaults.ts
+    │   │   │   └── stat_bonuses.ts
+    │   │   ├── battle-calculator-helpers.ts
+    │   │   ├── calculations.ts
+    │   │   ├── data-extractors.ts
+    │   │   ├── data-selectors.ts
+    │   │   └── index.ts
+    │   ├── combat
+    │   │   ├── adapter.ts
+    │   │   ├── bonus-aggregator.ts
+    │   │   ├── bonuses.ts
+    │   │   ├── damage.ts
+    │   │   ├── engine.ts
+    │   │   ├── hero-skill-converter.ts
+    │   │   ├── index.ts
+    │   │   ├── skill-stacking.ts
+    │   │   ├── skills.ts
+    │   │   ├── targeting.ts
+    │   │   └── types.ts
+    │   ├── db
+    │   │   ├── config.ts
+    │   │   ├── db.ts
+    │   │   └── schema.ts
+    │   ├── drizzle-admin
+    │   │   ├── components.tsx
+    │   │   ├── drizzle-ui.tsx
+    │   │   └── types.ts
+    │   ├── rally
+    │   │   ├── ui
+    │   │   │   ├── mix.ts
+    │   │   │   └── turn-analytics.ts
+    │   │   ├── combat-battle-round.ts
+    │   │   ├── combat-fight.ts
+    │   │   ├── combat-fighter.ts
+    │   │   ├── combat-types.ts
+    │   │   ├── index.ts
+    │   │   ├── mix-utils.ts
+    │   │   ├── rally-bonus-extractor.ts
+    │   │   └── rally-config.ts
+    │   ├── types
+    │   │   ├── game.ts
+    │   │   ├── heroes.ts
+    │   │   ├── index.ts
+    │   │   ├── profile.ts
+    │   │   ├── rally.ts
+    │   │   └── troops.ts
+    │   ├── utils
+    │   │   └── cn.ts
+    │   ├── auth.ts
+    │   ├── profile-migration.ts
+    │   ├── profile-storage.ts
+    │   └── utils.ts
+    ├── public
+    │   ├── daybreak_island_bonus_part1.png
+    │   ├── daybreak_island_bonus_part2.png
+    │   ├── expert_example_no1.png
+    │   ├── expert_example_no2.png
+    │   ├── favicon.png
+    │   ├── pet_apex_assault_part1.png
+    │   ├── pet_apex_assault_part2.png
+    │   ├── pet_earthbound_vigor_part1.png
+    │   ├── pet_earthbound_vigor_part2.png
+    │   ├── pet_feral_anthem_part1.png
+    │   ├── pet_feral_anthem_part2.png
+    │   ├── pet_fogbreath_part1.png
+    │   ├── pet_fogbreath_part2.png
+    │   ├── pet_hardened_skin_part1.png
+    │   ├── pet_hardened_skin_part2.png
+    │   ├── pet_lightning_raid_part1.png
+    │   ├── pet_lightning_raid_part2.png
+    │   ├── pet_rally_beasts_part1.png
+    │   ├── pet_rally_beasts_part2.png
+    │   ├── pet_razorbeak.png
+    │   ├── pet_stat_bonuses_details.png
+    │   ├── pet_tumbling_power_part1.png
+    │   ├── pet_tumbling_power_part2.png
+    │   ├── skins_bonus_detail_1.png
+    │   ├── skins_bonus_detail_2.png
+    │   ├── tech_bonus_overview_part_1.png
+    │   ├── tech_bonus_overview_part_2.png
+    │   ├── war_academy_tech_bonus_part1.png
+    │   └── war_academy_tech_bonus_part2.png
+    ├── schema
+    │   ├── battle_results.ts
+    │   ├── profiles.ts
+    │   ├── user_settings.ts
+    │   └── users.ts
+    ├── server
+    │   └── middleware
+    │       └── validateSchema.ts
+    ├── .gitignore
+    ├── drizzle.config.ts
+    ├── eslint.config.mjs
+    ├── LICENSE
+    ├── next.config.ts
+    ├── package-lock.json
+    ├── package.json
+    ├── postcss.config.mjs
+    ├── README.md
+    ├── tailwind.config.js
+    ├── tsconfig.json
+    └── vitest.config.mts

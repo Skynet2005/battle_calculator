@@ -1,10 +1,10 @@
-import HamburgerNav from '@/components/ui/HamburgerNav';
-import LeaderboardTable, { type LeaderboardRow } from '@/components/ui/LeaderboardTable';
-import { buildSideBaseStats } from '@/lib/battle/battle-calculator-helpers';
-import type { FinalStats } from '@/lib/battle/calculations';
-import { db, migrationsReady } from '@/lib/db/db';
-import { profiles } from '@/schema/profiles';
-import { users } from '@/schema/users';
+import HamburgerNav from '@/shared/ui/HamburgerNav';
+import LeaderboardTable, { type LeaderboardRow } from '@/shared/ui/LeaderboardTable';
+import { buildSideBaseStats } from '@/domain/battle/battle-calculator-helpers';
+import type { FinalStats } from '@/domain/battle/calculations';
+import { db, migrationsReady } from '@/server/db/db';
+import { profiles } from '@/server/db/schema/profiles';
+import { users } from '@/server/db/schema/users';
 import { desc, eq } from 'drizzle-orm';
 
 type StatKeys = 'attack' | 'defense' | 'lethality' | 'health';

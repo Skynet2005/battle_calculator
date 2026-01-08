@@ -1,9 +1,9 @@
 import { and, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { verifyAuthToken } from '@/lib/auth';
-import { db, migrationsReady } from '@/lib/db/db';
-import { profiles, userSettings } from '@/lib/db/schema';
+import { verifyAuthToken } from '@/server/auth/auth';
+import { db, migrationsReady } from '@/server/db/db';
+import { profiles, userSettings } from '@/server/db/schema';
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   await migrationsReady;

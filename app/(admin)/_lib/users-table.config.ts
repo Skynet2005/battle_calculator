@@ -7,8 +7,8 @@ import {
   UserRowNav,
   UserViewPageNav,
 } from "@/app/(admin)/_components/users-components";
-import { DrizzleTableConfig } from "@/lib/drizzle-admin/types";
-import { users } from "@/schema/users";
+import { DrizzleTableConfig } from "@/features/admin/drizzle-admin/types";
+import { users } from "@/server/db/schema/users";
 import type { ComponentType } from "react";
 
 const adminComponents: Record<string, ComponentType<object>> = {
