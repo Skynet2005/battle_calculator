@@ -1,10 +1,10 @@
 'use client';
 
+import type { UserProfile } from '@/shared/types';
 import React from 'react';
 import Header from './Header';
 import TabBar, { type TabKey } from './TabBar';
 import TabPanel from './TabPanel';
-import type { UserProfile } from '../types';
 
 interface MainLayoutProps {
   currentProfile: UserProfile | null;
@@ -56,3 +56,4 @@ export default function MainLayout({
 
 export { TabPanel };
 export type { TabKey };
+
