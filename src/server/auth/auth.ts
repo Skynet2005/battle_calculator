@@ -1,10 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
+import { config } from '../config/env';
 
-const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
-
-if (!secret) {
-  throw new Error('AUTH_SECRET or NEXTAUTH_SECRET must be set');
-}
+const secret = config.AUTH_SECRET;
 
 const secretKey = new TextEncoder().encode(secret);
 
@@ -12,7 +9,7 @@ export const authCookieOptions = () => ({
   name: 'auth_token',
   httpOnly: true,
   sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production',
+  secure: config.NODE_ENV === 'production',
   path: '/',
   maxAge: 60 * 60 * 24 * 7, // 7 days
 });

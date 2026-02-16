@@ -1,40 +1,67 @@
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { verifyAuthToken } from '@/server/auth/auth';
 import { db, migrationsReady } from '@/server/db/db';
-import { users } from '@/server/db/schema/users';
+import { users, userSettings } from '@/server/db/schema';
+import { requireAuth } from '@/server/middleware/auth';
+import { withErrorHandling, ApiError } from '@/server/middleware/apiErrorHandler';
 
-export async function GET(req: NextRequest) {
+export const GET = withErrorHandling(async (req: NextRequest) => {
   await migrationsReady;
-  const token = req.cookies.get('auth_token')?.value;
+  const auth = await requireAuth(req);
 
-  if (!token) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const payload = await verifyAuthToken(token);
-
-    const userResult = await db
+  const [userResult, settingsResult] = await Promise.all([
+    db
       .select({
         id: users.id,
         email: users.email,
         username: users.name,
+        image: users.image,
       })
       .from(users)
-      .where(eq(users.id, payload.id))
-      .limit(1);
+      .where(eq(users.id, auth.userId))
+      .limit(1),
+    db
+      .select({
+        gameRoleId: userSettings.gameRoleId,
+        gameId: userSettings.gameId,
+        gameState: userSettings.gameState,
+        gameFurnaceLevel: userSettings.gameFurnaceLevel,
+        gameProfilePicture: userSettings.gameProfilePicture,
+      })
+      .from(userSettings)
+      .where(eq(userSettings.userId, auth.userId))
+      .limit(1),
+  ]);
 
-    const user = userResult[0];
+  const user = userResult[0];
+  const settings = settingsResult[0];
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    return NextResponse.json(user, { status: 200 });
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!user) {
+    throw new ApiError(401, 'User not found', 'USER_NOT_FOUND');
   }
-}
+
+  const response = {
+    ...user,
+    gameData: settings
+      ? {
+          roleId: settings.gameRoleId,
+          gameId: settings.gameId,
+          state: settings.gameState,
+          furnaceLevel: settings.gameFurnaceLevel,
+          profilePicture: settings.gameProfilePicture || user.image,
+        }
+      : null,
+  };
+
+  // Add short private cache for user data (user-specific, so private cache)
+  // max-age: 30 seconds - short cache for user data
+  // private: only cacheable by user's browser, not CDN
+  return NextResponse.json(response, {
+    status: 200,
+    headers: {
+      'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+    },
+  });
+});
 

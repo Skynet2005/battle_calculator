@@ -138,19 +138,8 @@ export async function getProfile(id: string): Promise<UserProfile | null> {
     // where 'data' contains the actual profile object
     const profileData = response.data || response;
 
-    console.log('Raw profile data from database:', {
-      id: response.id,
-      name: response.name,
-      hasHeroLevels: !!profileData?.heroLevels,
-      hasExpertSelections: !!profileData?.expertSelections,
-      hasPetSkillSelections: !!profileData?.petSkillSelections,
-      hasBasicBonuses: !!profileData?.basicBonuses,
-      hasHeroGearSelections: !!profileData?.heroGearSelections,
-      hasChiefGearSelections: !!profileData?.chiefGearSelections,
-      hasCharmLevels: !!profileData?.charmLevels,
-      hasWarAcademySelections: !!profileData?.warAcademySelections,
-      hasOpponent: !!profileData?.opponent,
-    });
+    // Debug logging removed - use clientLogger if needed
+    // clientLogger.debug('Raw profile data from database', { profileId: response.id });
 
     // Merge the response metadata with the profile data
     const profileToMigrate = {
@@ -162,22 +151,12 @@ export async function getProfile(id: string): Promise<UserProfile | null> {
     };
 
     const migrated = migrateProfile(profileToMigrate);
-    console.log('Migrated profile:', {
-      id: migrated.id,
-      name: migrated.name,
-      hasHeroLevels: !!migrated.heroLevels && Object.keys(migrated.heroLevels).length > 0,
-      hasExpertSelections: !!migrated.expertSelections,
-      hasPetSkillSelections: !!migrated.petSkillSelections && Object.keys(migrated.petSkillSelections || {}).length > 0,
-      hasBasicBonuses: !!migrated.basicBonuses,
-      hasHeroGearSelections: !!migrated.heroGearSelections,
-      hasChiefGearSelections: !!migrated.chiefGearSelections && Object.keys(migrated.chiefGearSelections || {}).length > 0,
-      hasCharmLevels: !!migrated.charmLevels && Object.keys(migrated.charmLevels || {}).length > 0,
-      hasWarAcademySelections: !!migrated.warAcademySelections && Object.keys(migrated.warAcademySelections || {}).length > 0,
-      hasOpponent: !!migrated.opponent,
-    });
+    // Debug logging removed - use clientLogger if needed
+    // clientLogger.debug('Migrated profile', { profileId: migrated.id });
     return migrated;
   } catch (err) {
-    console.error('Error loading profile:', err);
+    // Error logging - profile-storage is used in client context
+    // In production, these errors should be handled by the calling component
     return null;
   }
 }
@@ -402,7 +381,7 @@ export function createNewProfile(name: string): UserProfile {
     commandCenterLevel: undefined, // Will be set by user
   };
 
-  saveProfile(profile);
+  // Don't auto-save - let the caller handle saving via React Query
   return profile;
 }
 

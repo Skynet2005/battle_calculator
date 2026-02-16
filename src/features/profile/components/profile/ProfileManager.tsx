@@ -1,179 +1,190 @@
 'use client';
 
-import { Check, Copy, Edit2, Plus, Trash2, User, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Check, Copy, Edit2, Loader2, Plus, Trash2, User, X } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
 import type { UserProfile } from '@/shared/types';
-import {
-  createNewProfile,
-  createProfile,
-  deleteProfile,
-  getAllProfiles,
-  getCurrentProfile,
-  saveProfile,
-  setCurrentProfile,
-} from '@/features/profile/api/profile-storage';
+import { createNewProfile } from '@/features/profile/api/profile-storage';
+import { useProfiles, useProfile, useCreateProfile, useUpdateProfile, useDeleteProfile } from '@/shared/hooks/useProfiles';
+import { useProfileState, useSetProfileState } from '@/shared/hooks/useProfileState';
+import { migrateProfile } from '@/features/profile/api/profile-migration';
+import { toast } from '@/shared/utils/toast';
+import LoadingSkeleton from '@/shared/ui/LoadingSkeleton';
 
 interface ProfileManagerProps {
   onProfileChange: (profile: UserProfile | null) => void;
 }
 
 export default function ProfileManager({ onProfileChange }: ProfileManagerProps) {
-  const [profiles, setProfiles] = useState<UserProfile[]>([]);
-  const [currentProfile, setCurrentProfileState] = useState<UserProfile | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Use React Query hooks
+  const { data: profilesData, isLoading: isLoadingProfiles, error: profilesError } = useProfiles();
+  const { data: profileState } = useProfileState();
+  const { data: currentProfileData } = useProfile(profileState?.currentProfileId ?? null);
+  const createProfileMutation = useCreateProfile();
+  const updateProfileMutation = useUpdateProfile();
+  const deleteProfileMutation = useDeleteProfile();
+  const setProfileStateMutation = useSetProfileState();
+
+  // Transform profiles from API format to UserProfile[]
+  const profiles = useMemo(() => {
+    if (!profilesData?.profiles) return [];
+    return profilesData.profiles.map((p) => {
+      const profileToMigrate = {
+        ...p.data,
+        id: p.id,
+        name: p.name,
+        createdAt: p.createdAt ? new Date(p.createdAt).getTime() : p.data.createdAt,
+        updatedAt: p.updatedAt ? new Date(p.updatedAt).getTime() : p.data.updatedAt,
+      };
+      return migrateProfile(profileToMigrate);
+    });
+  }, [profilesData]);
+
+  const currentProfile = currentProfileData;
+
+  const loading = isLoadingProfiles || createProfileMutation.isPending || updateProfileMutation.isPending || deleteProfileMutation.isPending || setProfileStateMutation.isPending;
+  const error = profilesError?.message || createProfileMutation.error?.message || updateProfileMutation.error?.message || deleteProfileMutation.error?.message || setProfileStateMutation.error?.message || null;
+
+  // Auto-select first profile if no current profile and profiles exist
   useEffect(() => {
-    void loadProfiles();
-  }, []);
-
-  const loadProfiles = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { profiles: allProfiles, currentProfileId } = await getAllProfiles();
-      setProfiles(allProfiles);
-
-      const current = currentProfileId
-        ? allProfiles.find((p) => p.id === currentProfileId) || (await getCurrentProfile())
-        : null;
-
-      if (current) {
-        setCurrentProfileState(current);
-        onProfileChange(current);
-      } else if (allProfiles.length > 0) {
-        // Auto-select first profile
-        const first = allProfiles[0];
-        await setCurrentProfile(first.id);
-        setCurrentProfileState(first);
-        onProfileChange(first);
-      } else {
-        setCurrentProfileState(null);
-        onProfileChange(null);
-      }
-    } catch (err) {
-      setError((err as Error).message || 'Failed to load profiles');
-    } finally {
-      setLoading(false);
+    if (!profileState?.currentProfileId && profiles.length > 0 && !loading) {
+      const first = profiles[0];
+      setProfileStateMutation.mutate(first.id, {
+        onSuccess: () => {
+          onProfileChange(first);
+        },
+      });
     }
-  };
+  }, [profileState?.currentProfileId, profiles, loading, setProfileStateMutation, onProfileChange]);
 
-  const handleCreateProfile = async () => {
+  // Sync current profile with parent
+  useEffect(() => {
+    if (currentProfile) {
+      onProfileChange(currentProfile);
+    }
+  }, [currentProfile, onProfileChange]);
+
+  const handleCreateProfile = () => {
     if (!newProfileName.trim()) return;
-    try {
-      setLoading(true);
-      setError(null);
-      const profile = createNewProfile(newProfileName.trim());
-      const created = await createProfile(profile, true);
-      setCurrentProfileState(created);
-      onProfileChange(created);
-      setNewProfileName('');
-      setShowCreateDialog(false);
-      await loadProfiles();
-    } catch (err) {
-      const error = err as Error & { status?: number };
-      if (error.status === 401) {
-        setError('You are not authenticated. Please refresh the page and log in again.');
-      } else {
-        setError(error.message || 'Failed to create profile');
+    const profile = createNewProfile(newProfileName.trim());
+    createProfileMutation.mutate(
+      { name: profile.name, data: profile, setCurrent: true },
+      {
+        onSuccess: (response) => {
+          const created = migrateProfile({
+            ...response.data,
+            id: response.id,
+            name: response.name,
+            createdAt: response.createdAt ? new Date(response.createdAt).getTime() : response.data.createdAt,
+            updatedAt: response.updatedAt ? new Date(response.updatedAt).getTime() : response.data.updatedAt,
+          });
+          onProfileChange(created);
+          setNewProfileName('');
+          setShowCreateDialog(false);
+          toast.success('Profile created successfully!');
+        },
+        onError: (error) => {
+          toast.error('Failed to create profile', error.message || 'Please try again');
+        },
       }
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
-  const handleSelectProfile = async (profile: UserProfile) => {
-    try {
-      setLoading(true);
-      await setCurrentProfile(profile.id);
-      setCurrentProfileState(profile);
-      onProfileChange(profile);
-    } catch (err) {
-      setError((err as Error).message || 'Failed to select profile');
-    } finally {
-      setLoading(false);
-    }
+  const handleSelectProfile = (profile: UserProfile) => {
+    setProfileStateMutation.mutate(profile.id, {
+      onSuccess: () => {
+        onProfileChange(profile);
+        toast.success('Profile selected');
+      },
+      onError: (error) => {
+        toast.error('Failed to select profile', error.message || 'Please try again');
+      },
+    });
   };
 
-  const handleDeleteProfile = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this profile?')) return;
-    try {
-      setLoading(true);
-      await deleteProfile(id);
-      await loadProfiles();
-    } catch (err) {
-      setError((err as Error).message || 'Failed to delete profile');
-    } finally {
-      setLoading(false);
-    }
+  const handleDeleteProfile = (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this profile?')) return;
+    deleteProfileMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success('Profile deleted successfully');
+        // If deleted profile was current, clear it
+        if (currentProfile?.id === id) {
+          onProfileChange(null);
+        }
+      },
+      onError: (error) => {
+        toast.error('Failed to delete profile', error.message || 'Please try again');
+      },
+    });
   };
 
-  const handleSaveProfile = async (profile: UserProfile) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const saved = await saveProfile(profile, true);
-      setCurrentProfileState(saved);
-      onProfileChange(saved);
-      await loadProfiles();
-    } catch (err) {
-      const error = err as Error & { status?: number };
-      if (error.status === 401) {
-        setError('You are not authenticated. Please refresh the page and log in again.');
-      } else {
-        setError(error.message || 'Failed to save profile');
+  const handleSaveProfile = (profile: UserProfile) => {
+    updateProfileMutation.mutate(
+      { id: profile.id, name: profile.name, data: profile, setCurrent: true },
+      {
+        onSuccess: (response) => {
+          const saved = migrateProfile({
+            ...response.data,
+            id: response.id,
+            name: response.name,
+            createdAt: response.createdAt ? new Date(response.createdAt).getTime() : response.data.createdAt,
+            updatedAt: response.updatedAt ? new Date(response.updatedAt).getTime() : response.data.updatedAt,
+          });
+          onProfileChange(saved);
+          toast.success('Profile saved successfully!');
+        },
+        onError: (error) => {
+          toast.error('Failed to save profile', error.message || 'Please try again');
+        },
       }
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
-  const handleRenameProfile = async (profile: UserProfile) => {
+  const handleRenameProfile = (profile: UserProfile) => {
     if (!editingName.trim() || editingName.trim() === profile.name) {
       setEditingProfileId(null);
       setEditingName('');
       return;
     }
-    try {
-      setLoading(true);
-      const updatedProfile = { ...profile, name: editingName.trim() };
-      const saved = await saveProfile(updatedProfile, currentProfile?.id === profile.id);
-      if (currentProfile?.id === profile.id) {
-        setCurrentProfileState(saved);
-        onProfileChange(saved);
+    updateProfileMutation.mutate(
+      { id: profile.id, name: editingName.trim(), setCurrent: currentProfile?.id === profile.id },
+      {
+        onSuccess: () => {
+          setEditingProfileId(null);
+          setEditingName('');
+          toast.success('Profile renamed successfully');
+        },
+        onError: (error) => {
+          toast.error('Failed to rename profile', error.message || 'Please try again');
+        },
       }
-      setEditingProfileId(null);
-      setEditingName('');
-      await loadProfiles();
-    } catch (err) {
-      setError((err as Error).message || 'Failed to rename profile');
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
-  const handleDuplicateProfile = async (profile: UserProfile) => {
-    try {
-      setLoading(true);
-      const duplicatedProfile = {
-        ...profile,
-        id: crypto.randomUUID(),
-        name: `${profile.name} (Copy)`,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-      await createProfile(duplicatedProfile, false);
-      await loadProfiles();
-    } catch (err) {
-      setError((err as Error).message || 'Failed to duplicate profile');
-    } finally {
-      setLoading(false);
-    }
+  const handleDuplicateProfile = (profile: UserProfile) => {
+    const duplicatedProfile = {
+      ...profile,
+      id: crypto.randomUUID(),
+      name: `${profile.name} (Copy)`,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    createProfileMutation.mutate(
+      { name: duplicatedProfile.name, data: duplicatedProfile, setCurrent: false },
+      {
+        onSuccess: () => {
+          toast.success('Profile duplicated successfully');
+        },
+        onError: (error) => {
+          toast.error('Failed to duplicate profile', error.message || 'Please try again');
+        },
+      }
+    );
   };
 
   const startEditing = (profile: UserProfile) => {
@@ -213,9 +224,9 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
           {error}
         </div>
       )}
-      {loading && (
-        <div className="mb-3 p-3 text-sm text-blue-300 bg-blue-500/10 border border-blue-500/30 rounded-lg animate-pulse">
-          Loading...
+      {isLoadingProfiles && (
+        <div className="mb-4">
+          <LoadingSkeleton lines={3} showCard={false} />
         </div>
       )}
 
@@ -242,10 +253,19 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
               <button
                 className="button flex-1 flex items-center justify-center gap-2"
                 onClick={handleCreateProfile}
-                disabled={loading || !newProfileName.trim()}
+                disabled={createProfileMutation.isPending || !newProfileName.trim()}
               >
-                <Check className="w-4 h-4" />
-                Create
+                {createProfileMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Create
+                  </>
+                )}
               </button>
               <button
                 className="button flex-1 flex items-center justify-center gap-2 bg-slate-600 hover:bg-slate-700"
@@ -325,11 +345,16 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
                         autoFocus
                       />
                       <button
-                        className="p-1.5 text-green-400 hover:bg-green-500/20 rounded transition-colors"
+                        className="p-1.5 text-green-400 hover:bg-green-500/20 rounded transition-colors disabled:opacity-50"
                         onClick={() => handleRenameProfile(profile)}
+                        disabled={updateProfileMutation.isPending}
                         title="Save"
                       >
-                        <Check className="w-4 h-4" />
+                        {updateProfileMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Check className="w-4 h-4" />
+                        )}
                       </button>
                       <button
                         className="p-1.5 text-red-400 hover:bg-red-500/20 rounded transition-colors"
@@ -370,37 +395,48 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
-                      className="p-2 text-cyan-300 hover:bg-cyan-500/20 rounded-lg transition-colors"
+                      className="p-2 text-cyan-300 hover:bg-cyan-500/20 rounded-lg transition-colors disabled:opacity-50"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDuplicateProfile(profile);
                       }}
-                      disabled={loading}
+                      disabled={createProfileMutation.isPending}
                       title="Duplicate profile"
                     >
-                      <Copy className="w-4 h-4" />
+                      {createProfileMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
                     </button>
                     <button
-                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors disabled:opacity-50"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteProfile(profile.id);
                       }}
-                      disabled={loading}
+                      disabled={deleteProfileMutation.isPending}
                       title="Delete profile"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                     {currentProfile?.id !== profile.id && (
                       <button
-                        className="button bg-slate-700/80 hover:bg-slate-700 px-3 py-1.5 text-xs"
+                        className="button bg-slate-700/80 hover:bg-slate-700 px-3 py-1.5 text-xs flex items-center gap-1.5 disabled:opacity-50"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSelectProfile(profile);
                         }}
-                        disabled={loading}
+                        disabled={setProfileStateMutation.isPending}
                       >
-                        Select
+                        {setProfileStateMutation.isPending ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Selecting...
+                          </>
+                        ) : (
+                          'Select'
+                        )}
                       </button>
                     )}
                   </div>
@@ -441,9 +477,4 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
   );
 }
 
-// Export a hook for saving profiles
-export function useProfileSave() {
-  return (profile: UserProfile) => {
-    void saveProfile(profile);
-  };
-}
+// Note: useProfileSave is deprecated - use useUpdateProfile from @/shared/hooks/useProfiles instead

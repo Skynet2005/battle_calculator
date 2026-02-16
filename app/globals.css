@@ -528,6 +528,26 @@
     animation: fadeIn 0.3s ease-out;
   }
 
+  .modal-content::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  .modal-content::-webkit-scrollbar-track {
+    @apply bg-slate-800/50 rounded;
+  }
+
+  .modal-content::-webkit-scrollbar-thumb {
+    @apply bg-slate-600 rounded hover:bg-slate-500;
+  }
+
+  [data-theme='light'] .modal-content::-webkit-scrollbar-track {
+    @apply bg-gray-200;
+  }
+
+  [data-theme='light'] .modal-content::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 hover:bg-gray-500;
+  }
+
   [data-theme='light'] .modal-content {
     @apply bg-white/95 border-gray-200/80 shadow-soft-light;
   }

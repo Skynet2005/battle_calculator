@@ -53,3 +53,4 @@ next-env.d.ts
 
 # misc project files
 /docs
+/temp

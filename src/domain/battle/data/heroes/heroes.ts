@@ -6253,6 +6253,601 @@ export const freya: Hero = {
   }
 };
 
+export const eleonora: Hero = {
+  "hero-name": "Eleonora",
+  "hero-class": "infantry",
+  "generation": 11,
+  "max-star-power": 3209952,
+  "max-skill-power": 101520,
+  "max-level-power": 865824,
+  "base-stats": {
+    "infantry-attack": 12.8102,
+    "infantry-defense": 12.8102
+  },
+  "skills": {
+    expedition: {
+      "1": {
+        "skill-name": "Scorching Sun",
+        "description": "Eleonora inspires all troops with her royal aura and sense of honor, increasing their Health by 5/10/15/20/25%.",
+        "all_troops_health_up_percentage": {
+          "1": 0.05,
+          "2": 0.10,
+          "3": 0.15,
+          "4": 0.20,
+          "5": 0.25
+        }
+      },
+      "2": {
+        "skill-name": "Solaris Nexus",
+        "description": "Eleonora deploys a balanced formation, reducing damage taken by 2/4/6/8/10% for her Infantries and increasing damage dealt by 2/4/6/8/10% for her Marksmen.",
+        "infantry_damage_taken_down_percentage": {
+          "1": 0.02,
+          "2": 0.04,
+          "3": 0.06,
+          "4": 0.08,
+          "5": 0.10
+        },
+        "marksman_damage_up_percentage": {
+          "1": 0.02,
+          "2": 0.04,
+          "3": 0.06,
+          "4": 0.08,
+          "5": 0.10
+        }
+      },
+      "3": {
+        "skill-name": "Soaring Flame",
+        "description": "Eleonora strikes fear into her enemies with her fierce assaults, increasing all troops' damage dealt by 5/10/15/20/25% and reducing their damage taken by 5/10/15/20/25% every 5 attacks made by Infantry for 2 turns.",
+        "all_troops_damage_up_percentage": {
+          "1": 0.05,
+          "2": 0.10,
+          "3": 0.15,
+          "4": 0.20,
+          "5": 0.25
+        },
+        "all_troops_damage_taken_down_percentage": {
+          "1": 0.05,
+          "2": 0.10,
+          "3": 0.15,
+          "4": 0.20,
+          "5": 0.25
+        },
+        "trigger_every_n_attacks": 5,
+        "duration_turns": {
+          "1": 2,
+          "2": 2,
+          "3": 2,
+          "4": 2,
+          "5": 2
+        }
+      }
+    }
+  },
+  "exclusive-weapon": {
+    name: "Scepter of Solaris",
+    levels: [
+      {
+        level: 1,
+        "infantry-lethality": 0.32,
+        "infantry-health": 0.32,
+        power: 150525,
+        skills: { expedition: null }
+      },
+      {
+        level: 2,
+        "infantry-lethality": 0.64,
+        "infantry-health": 0.64,
+        power: 301050,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 7.5%.",
+            "defender_troops_health_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 3,
+        "infantry-lethality": 0.96,
+        "infantry-health": 0.96,
+        power: 451575,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 7.5%.",
+            "defender_troops_health_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 4,
+        "infantry-lethality": 1.28,
+        "infantry-health": 1.28,
+        power: 602100,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 10%.",
+            "defender_troops_health_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 5,
+        "infantry-lethality": 1.60,
+        "infantry-health": 1.60,
+        power: 752625,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 10%.",
+            "defender_troops_health_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 6,
+        "infantry-lethality": 1.92,
+        "infantry-health": 1.92,
+        power: 903150,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 12.5%.",
+            "defender_troops_health_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 7,
+        "infantry-lethality": 2.24,
+        "infantry-health": 2.24,
+        power: 1053675,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 12.5%.",
+            "defender_troops_health_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 8,
+        "infantry-lethality": 2.56,
+        "infantry-health": 2.56,
+        power: 1204200,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 15% (max level).",
+            "defender_troops_health_up_percentage": 0.15
+          }
+        }
+      },
+      {
+        level: 9,
+        "infantry-lethality": 2.88,
+        "infantry-health": 2.88,
+        power: 1354725,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 15% (max level).",
+            "defender_troops_health_up_percentage": 0.15
+          }
+        }
+      },
+      {
+        level: 10,
+        "infantry-lethality": 3.20,
+        "infantry-health": 3.20,
+        power: 1505250,
+        skills: {
+          expedition: {
+            "skill-name": "Last Fortress",
+            "description": "Eleonora fights every battle like her last, inspiring Defender Troops and increasing their Health by 15% (max level).",
+            "defender_troops_health_up_percentage": 0.15
+          }
+        }
+      }
+    ]
+  }
+};
+
+export const lloyd: Hero = {
+  "hero-name": "Lloyd",
+  "hero-class": "lancer",
+  "generation": 11,
+  "max-star-power": 3209952,
+  "max-skill-power": 101520,
+  "max-level-power": 865824,
+  "base-stats": {
+    "lancer-attack": 12.8102,
+    "lancer-defense": 12.8102
+  },
+  "skills": {
+    expedition: {
+      "1": {
+        "skill-name": "Bird Invasion",
+        "description": "Lloyd summons a large number of mechanical birds to disrupt enemies, reducing their Lethality by 4/8/12/16/20%.",
+        "enemy_lethality_down_percentage": {
+          "1": 0.04,
+          "2": 0.08,
+          "3": 0.12,
+          "4": 0.16,
+          "5": 0.20
+        }
+      },
+      "2": {
+        "skill-name": "Iceflare Bomb",
+        "description": "Lloyd prepares special bomb for all Lancers, which detonates every 3 turns, increases their attack by 30/60/90/120/150% and releases frosty mist that reduces enemy Lethality by 6/12/18/24/30% for 1 turn.",
+        "lancer_attack_up_percentage": {
+          "1": 0.30,
+          "2": 0.60,
+          "3": 0.90,
+          "4": 1.20,
+          "5": 1.50
+        },
+        "enemy_lethality_down_percentage": {
+          "1": 0.06,
+          "2": 0.12,
+          "3": 0.18,
+          "4": 0.24,
+          "5": 0.30
+        },
+        "trigger_every_n_turns": 3,
+        "duration_turns": {
+          "1": 1,
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1
+        }
+      },
+      "3": {
+        "skill-name": "Ingenious Mastery",
+        "description": "Lloyd works to equips his forces with unstable by interesting creations, granting a 40% chance to increase all Troops' Lethality by 10/20/30/40/50%.",
+        "all_troops_lethality_up_percentage": {
+          "1": 0.10,
+          "2": 0.20,
+          "3": 0.30,
+          "4": 0.40,
+          "5": 0.50
+        },
+        "trigger_chance": 0.40
+      }
+    }
+  },
+  "exclusive-weapon": {
+    name: "Mastercraft Treasure",
+    levels: [
+      {
+        level: 1,
+        "lancer-lethality": 0.32,
+        "lancer-health": 0.32,
+        power: 150525,
+        skills: { expedition: null }
+      },
+      {
+        level: 2,
+        "lancer-lethality": 0.64,
+        "lancer-health": 0.64,
+        power: 301050,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 7.5%.",
+            "defender_troops_attack_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 3,
+        "lancer-lethality": 0.96,
+        "lancer-health": 0.96,
+        power: 451575,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 7.5%.",
+            "defender_troops_attack_up_percentage": 0.075
+          }
+        }
+      },
+      {
+        level: 4,
+        "lancer-lethality": 1.28,
+        "lancer-health": 1.28,
+        power: 602100,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 10%.",
+            "defender_troops_attack_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 5,
+        "lancer-lethality": 1.60,
+        "lancer-health": 1.60,
+        power: 752625,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 10%.",
+            "defender_troops_attack_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 6,
+        "lancer-lethality": 1.92,
+        "lancer-health": 1.92,
+        power: 903150,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 12.5%.",
+            "defender_troops_attack_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 7,
+        "lancer-lethality": 2.24,
+        "lancer-health": 2.24,
+        power: 1053675,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 12.5%.",
+            "defender_troops_attack_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 8,
+        "lancer-lethality": 2.56,
+        "lancer-health": 2.56,
+        power: 1204200,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 15% (max level).",
+            "defender_troops_attack_up_percentage": 0.15
+          }
+        }
+      },
+      {
+        level: 9,
+        "lancer-lethality": 2.88,
+        "lancer-health": 2.88,
+        power: 1354725,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 15% (max level).",
+            "defender_troops_attack_up_percentage": 0.15
+          }
+        }
+      },
+      {
+        level: 10,
+        "lancer-lethality": 3.20,
+        "lancer-health": 3.20,
+        power: 1505250,
+        skills: {
+          expedition: {
+            "skill-name": "Steel Maze",
+            "description": "Lloyd installs traps on the barricade to assist in the defense, increasing Defender Troops' Attack by 15% (max level).",
+            "defender_troops_attack_up_percentage": 0.15
+          }
+        }
+      }
+    ]
+  }
+};
+
+export const rufus: Hero = {
+  "hero-name": "Rufus",
+  "hero-class": "marksman",
+  "generation": 11,
+  "max-star-power": 3209952,
+  "max-skill-power": 101520,
+  "max-level-power": 865824,
+  "base-stats": {
+    "marksman-attack": 12.8102,
+    "marksman-defense": 12.8102
+  },
+  "skills": {
+    expedition: {
+      "1": {
+        "skill-name": "Inferno Regiment",
+        "description": "Rufus uses his bold leadership to transform all troops into blazing flames on the battlefield, increasing their Attack by 5/10/15/20/25%.",
+        "all_troops_attack_up_percentage": {
+          "1": 0.05,
+          "2": 0.10,
+          "3": 0.15,
+          "4": 0.20,
+          "5": 0.25
+        }
+      },
+      "2": {
+        "skill-name": "Armor Crush",
+        "description": "Rufus equips his Marksmen with armor-piercing rounds, increasing his Infantries' damage dealt per attack by 12/24/36/48/60% and the target's damage taken by 5/10/15/20/25% for 1 turn.",
+        "infantry_damage_up_percentage": {
+          "1": 0.12,
+          "2": 0.24,
+          "3": 0.36,
+          "4": 0.48,
+          "5": 0.60
+        },
+        "enemy_damage_taken_up_percentage": {
+          "1": 0.05,
+          "2": 0.10,
+          "3": 0.15,
+          "4": 0.20,
+          "5": 0.25
+        },
+        "target_damage_taken_duration_turns": 1
+      },
+      "3": {
+        "skill-name": "Wrathful Quake",
+        "description": "Rufus' aggressive combat style grants all troops a 20% chance to intimidate enemies, reducing their Lethality by 10/20/30/40/50% for 2 turns.",
+        "enemy_lethality_down_percentage": {
+          "1": 0.10,
+          "2": 0.20,
+          "3": 0.30,
+          "4": 0.40,
+          "5": 0.50
+        },
+        "trigger_chance": 0.20,
+        "duration_turns": {
+          "1": 2,
+          "2": 2,
+          "3": 2,
+          "4": 2,
+          "5": 2
+        }
+      }
+    }
+  },
+  "exclusive-weapon": {
+    name: "Meteor Blaster",
+    levels: [
+      {
+        level: 1,
+        "marksman-lethality": 0.32,
+        "marksman-health": 0.32,
+        power: 150525,
+        skills: { expedition: null }
+      },
+      {
+        level: 2,
+        "marksman-lethality": 0.64,
+        "marksman-health": 0.64,
+        power: 301050,
+        skills: {
+          expedition: {
+            "skill-name": "Ember of Conflict",
+            "description": "Rufus' normal attacks shoot scorching bullets that set the target on fire, dealing Attack*15% damage per second for 2s.",
+            "normal_attack_damage_up_percentage": 0.15,
+            "dot_duration_seconds": 2
+          }
+        }
+      },
+      {
+        level: 3,
+        "marksman-lethality": 0.96,
+        "marksman-health": 0.96,
+        power: 451575,
+        skills: {
+          expedition: {
+            "skill-name": "Ember of Conflict",
+            "description": "Rufus' normal attacks shoot scorching bullets that set the target on fire, dealing Attack*15% damage per second for 2s.",
+            "normal_attack_damage_up_percentage": 0.15,
+            "dot_duration_seconds": 2
+          }
+        }
+      },
+      {
+        level: 4,
+        "marksman-lethality": 1.28,
+        "marksman-health": 1.28,
+        power: 602100,
+        skills: {
+          expedition: {
+            "skill-name": "Ember of Conflict",
+            "description": "Rufus' normal attacks shoot scorching bullets that set the target on fire, dealing Attack*22.5% damage per second for 2s.",
+            "normal_attack_damage_up_percentage": 0.225,
+            "dot_duration_seconds": 2
+          }
+        }
+      },
+      {
+        level: 5,
+        "marksman-lethality": 1.60,
+        "marksman-health": 1.60,
+        power: 752625,
+        skills: {
+          expedition: {
+            "skill-name": "Ember of Conflict",
+            "description": "Rufus' normal attacks shoot scorching bullets that set the target on fire, dealing Attack*22.5% damage per second for 2s.",
+            "normal_attack_damage_up_percentage": 0.225,
+            "dot_duration_seconds": 2
+          }
+        }
+      },
+      {
+        level: 6,
+        "marksman-lethality": 1.92,
+        "marksman-health": 1.92,
+        power: 903150,
+        skills: {
+          expedition: {
+            "skill-name": "Blazing Legion",
+            "description": "Rufus rallies his troops under his phoenix banner, increasing their Attack by 10%.",
+            "all_troops_attack_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 7,
+        "marksman-lethality": 2.24,
+        "marksman-health": 2.24,
+        power: 1053675,
+        skills: {
+          expedition: {
+            "skill-name": "Blazing Legion",
+            "description": "Rufus rallies his troops under his phoenix banner, increasing their Attack by 10%.",
+            "all_troops_attack_up_percentage": 0.10
+          }
+        }
+      },
+      {
+        level: 8,
+        "marksman-lethality": 2.56,
+        "marksman-health": 2.56,
+        power: 1204200,
+        skills: {
+          expedition: {
+            "skill-name": "Blazing Legion",
+            "description": "Rufus rallies his troops under his phoenix banner, increasing their Attack by 12.5%.",
+            "all_troops_attack_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 9,
+        "marksman-lethality": 2.88,
+        "marksman-health": 2.88,
+        power: 1354725,
+        skills: {
+          expedition: {
+            "skill-name": "Blazing Legion",
+            "description": "Rufus rallies his troops under his phoenix banner, increasing their Attack by 12.5%.",
+            "all_troops_attack_up_percentage": 0.125
+          }
+        }
+      },
+      {
+        level: 10,
+        "marksman-lethality": 3.20,
+        "marksman-health": 3.20,
+        power: 1505250,
+        skills: {
+          expedition: {
+            "skill-name": "Blazing Legion",
+            "description": "Rufus rallies his troops under his phoenix banner, increasing their Attack by 15% (max level).",
+            "all_troops_attack_up_percentage": 0.15
+          }
+        }
+      }
+    ]
+  }
+};
+
 export const HEROES: Hero[] = [
   bahiti,
   gina,
@@ -6293,7 +6888,10 @@ export const HEROES: Hero[] = [
   xura,
   gregory,
   blanchette,
-  freya
+  freya,
+  eleonora,
+  lloyd,
+  rufus
 ];
 
 const buildClassBuckets = (): Record<HeroClass, Hero[]> => ({

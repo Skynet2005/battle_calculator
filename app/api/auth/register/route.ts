@@ -3,33 +3,42 @@ import { eq, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { authCookieOptions, signAuthToken } from '@/server/auth/auth';
+import { containsProfanity } from '@/shared/utils/utils';
 import { db, migrationsReady } from '@/server/db/db';
 import { users } from '@/server/db/schema/users';
+import { withErrorHandling, ApiError } from '@/server/middleware/apiErrorHandler';
+import { validateBody } from '@/server/middleware/validateSchema';
+import { registerSchema } from '@/server/validation/schemas';
+import { logger } from '@/server/utils/logger';
+import { rateLimit } from '@/server/middleware/rateLimit';
 
-export async function POST(req: NextRequest) {
+// Rate limit: 3 requests per hour
+const registerRateLimit = rateLimit(3, 60 * 60 * 1000);
+
+export const POST = withErrorHandling(async (req: NextRequest) => {
   await migrationsReady;
+
+  // Apply rate limiting
+  const rateLimitResponse = registerRateLimit(req);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   const body = await req.json().catch(() => null);
-
   if (!body || typeof body !== 'object') {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    throw new ApiError(400, 'Invalid request body');
   }
 
-  const { email, username, password } = body as {
-    email?: string;
-    username?: string;
-    password?: string;
-  };
-
-  if (!email || !username || !password) {
-    return NextResponse.json({ error: 'Email, username and password are required' }, { status: 400 });
+  const validation = validateBody(registerSchema, body);
+  if (!validation.success) {
+    throw new ApiError(400, 'Validation failed', 'VALIDATION_ERROR', validation.errors);
   }
 
-  if (typeof email !== 'string' || typeof username !== 'string' || typeof password !== 'string') {
-    return NextResponse.json({ error: 'Invalid input types' }, { status: 400 });
-  }
+  const { email, username, password } = validation.data;
 
-  if (password.length < 8) {
-    return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+  // Check for profanity in username
+  if (containsProfanity(username)) {
+    throw new ApiError(400, 'Username contains inappropriate content');
   }
 
   const existingUser = await db
@@ -39,7 +48,7 @@ export async function POST(req: NextRequest) {
     .limit(1);
 
   if (existingUser.length > 0) {
-    return NextResponse.json({ error: 'User already exists' }, { status: 409 });
+    throw new ApiError(409, 'User already exists', 'USER_EXISTS');
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -58,6 +67,11 @@ export async function POST(req: NextRequest) {
       username: users.name,
     });
 
+  if (!created) {
+    logger.error('Failed to create user', undefined, { email, username });
+    throw new ApiError(500, 'Failed to create user');
+  }
+
   const token = await signAuthToken({
     id: created.id,
     email: created.email,
@@ -70,11 +84,13 @@ export async function POST(req: NextRequest) {
       email: created.email,
       username: created.username ?? username,
     },
-    { status: 201 },
+    { status: 201 }
   );
 
   res.cookies.set({ ...authCookieOptions(), value: token });
 
+  logger.info('User registered successfully', { userId: created.id, email });
+
   return res;
-}
+});
 

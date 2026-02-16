@@ -5,7 +5,7 @@
  * Uses CompareTable for better scanability.
  */
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { totalTroops } from '@/domain/rally/combat-fighter';
 import { DEFAULT_TROOP_MIX } from '@/domain/rally/rally-config';
 import { computeCountsFromMix, normalizeRatios } from '@/domain/rally/mix-utils';
@@ -27,7 +27,7 @@ interface ForcesSectionProps {
   onMixChange?: (side: 'player' | 'opponent', mix: TroopMixConfig) => void;
 }
 
-export function ForcesSection({
+function ForcesSectionComponent({
   player,
   opponent,
   playerMix,
@@ -131,3 +131,21 @@ export function ForcesSection({
     </SectionCard>
   );
 }
+
+/**
+ * Memoized ForcesSection component to prevent unnecessary re-renders
+ * Only re-renders when props actually change
+ */
+export const ForcesSection = memo(ForcesSectionComponent, (prev, next) => {
+  // Custom comparison function for deep equality check
+  // Note: We compare by reference for objects, which is fine since they should be stable
+  return (
+    prev.player === next.player &&
+    prev.opponent === next.opponent &&
+    prev.playerMix === next.playerMix &&
+    prev.opponentMix === next.opponentMix &&
+    prev.playerCapacity === next.playerCapacity &&
+    prev.opponentCapacity === next.opponentCapacity &&
+    prev.onMixChange === next.onMixChange
+  );
+});

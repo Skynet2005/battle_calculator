@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { ThemeProvider } from '@/features/battle-calculator/tabs/player-and-opponent/components/theme-context'
+import { Providers } from './providers'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -60,9 +62,12 @@ export default function RootLayout({
         <meta name="theme-color" content="#0f172a" />
       </head>
       <body>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+          <Toaster position="top-right" richColors />
+        </Providers>
       </body>
     </html>
   )

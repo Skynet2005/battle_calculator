@@ -5,7 +5,7 @@
  * Includes toggles: "Only non-zero", "Only impactful", "Show raw / show effective"
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import type { SideBaseStats } from '@/domain/rally/combat-types';
 import { formatSignedPercent, formatStatValue } from '../utils/format';
 import { SectionCard } from '@/shared/ui';
@@ -23,7 +23,7 @@ interface BonusesSectionProps {
   opponentJoinerAdditive?: BattleSideContext['joinerAdditive'];
 }
 
-export function BonusesSection({
+function BonusesSectionComponent({
   playerStats,
   opponentStats,
   playerSpecial,
@@ -141,3 +141,19 @@ export function BonusesSection({
     </SectionCard>
   );
 }
+
+/**
+ * Memoized BonusesSection component to prevent unnecessary re-renders
+ * Only re-renders when props actually change
+ */
+export const BonusesSection = memo(BonusesSectionComponent, (prev, next) => {
+  // Custom comparison function for deep equality check
+  return (
+    prev.playerStats === next.playerStats &&
+    prev.opponentStats === next.opponentStats &&
+    prev.playerSpecial === next.playerSpecial &&
+    prev.opponentSpecial === next.opponentSpecial &&
+    prev.playerJoinerAdditive === next.playerJoinerAdditive &&
+    prev.opponentJoinerAdditive === next.opponentJoinerAdditive
+  );
+});

@@ -9,6 +9,7 @@ import { SectionCard } from '@/shared/ui';
 import type { BattleSideContext } from '@/features/battle-calculator/model/types';
 import type { TroopMixConfig } from '@/shared/types';
 import { computeBestCounterRatio } from '../utils/best-counter-ratio';
+import { clientLogger } from '@/shared/utils/clientLogger';
 
 interface BestCounterRatioProps {
   player: BattleSideContext;
@@ -39,7 +40,7 @@ export function BestCounterRatio({
         }
       });
     } catch (error) {
-      console.error('Error computing best counter ratio:', error);
+      clientLogger.error('Error computing best counter ratio', error, { component: 'BestCounterRatio' });
       return null;
     }
   }, [player, opponent, rallySize]);

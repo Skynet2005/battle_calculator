@@ -1,74 +1,93 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
+import { revalidateTag } from 'next/cache';
 
-import { verifyAuthToken } from '@/server/auth/auth';
 import { db, migrationsReady } from '@/server/db/db';
 import { profiles, userSettings } from '@/server/db/schema';
+import { requireAuth } from '@/server/middleware/auth';
+import { withErrorHandling, ApiError } from '@/server/middleware/apiErrorHandler';
+import { validateBody } from '@/server/middleware/validateSchema';
+import { profileStateSchema } from '@/server/validation/schemas';
+import { logger } from '@/server/utils/logger';
 
-export async function GET(req: NextRequest) {
+export const GET = withErrorHandling(async (req: NextRequest) => {
   await migrationsReady;
-  const token = req.cookies.get('auth_token')?.value;
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = await requireAuth(req);
 
-  try {
-    const { id: userId } = await verifyAuthToken(token);
+  // Direct database query - unstable_cache can be unreliable in API routes
+  // The HTTP cache headers provide client-side caching which is sufficient
+  const row = await db
+    .select({ currentProfileId: userSettings.currentProfileId })
+    .from(userSettings)
+    .where(eq(userSettings.userId, auth.userId))
+    .limit(1);
 
-    const row = await db
-      .select({ currentProfileId: userSettings.currentProfileId })
-      .from(userSettings)
-      .where(eq(userSettings.userId, userId))
+  // Add short private cache for profile state
+  // max-age: 30 seconds - short cache since state can change
+  // private: only cacheable by user's browser, not CDN
+  return NextResponse.json(
+    { currentProfileId: row[0]?.currentProfileId ?? null },
+    {
+      headers: {
+        'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+      },
+    }
+  );
+});
+
+export const POST = withErrorHandling(async (req: NextRequest) => {
+  await migrationsReady;
+  const auth = await requireAuth(req);
+
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== 'object') {
+    throw new ApiError(400, 'Invalid request body');
+  }
+
+  const validation = validateBody(profileStateSchema, body);
+  if (!validation.success) {
+    throw new ApiError(400, 'Validation failed', 'VALIDATION_ERROR', validation.errors);
+  }
+
+  const { currentProfileId } = validation.data;
+
+  // Validate that if a profileId is provided, it exists and belongs to the user
+  if (currentProfileId !== null) {
+    const profileRow = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(and(eq(profiles.id, currentProfileId), eq(profiles.userId, auth.userId)))
       .limit(1);
 
-    return NextResponse.json({ currentProfileId: row[0]?.currentProfileId ?? null });
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (profileRow.length === 0) {
+      throw new ApiError(404, 'Profile not found', 'NOT_FOUND');
+    }
   }
-}
 
-export async function POST(req: NextRequest) {
-  await migrationsReady;
-  const token = req.cookies.get('auth_token')?.value;
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const existing = await db
+    .select({ userId: userSettings.userId })
+    .from(userSettings)
+    .where(eq(userSettings.userId, auth.userId))
+    .limit(1);
 
+  if (existing.length === 0) {
+    await db.insert(userSettings).values({ userId: auth.userId, currentProfileId });
+  } else {
+    await db
+      .update(userSettings)
+      .set({ currentProfileId, updatedAt: new Date() })
+      .where(eq(userSettings.userId, auth.userId));
+  }
+
+  // Invalidate cache after successful update
   try {
-    const { id: userId } = await verifyAuthToken(token);
-    const body = await req.json().catch(() => null);
-    const { currentProfileId } = (body || {}) as { currentProfileId?: string | null };
-
-    // Validate that if a profileId is provided, it exists and belongs to the user
-    if (currentProfileId !== null && currentProfileId !== undefined) {
-      if (typeof currentProfileId !== 'string') {
-        return NextResponse.json({ error: 'Invalid currentProfileId' }, { status: 400 });
-      }
-
-      const profileRow = await db
-        .select({ id: profiles.id })
-        .from(profiles)
-        .where(and(eq(profiles.id, currentProfileId), eq(profiles.userId, userId)))
-        .limit(1);
-
-      if (profileRow.length === 0) {
-        return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
-      }
-    }
-
-    const existing = await db
-      .select({ userId: userSettings.userId })
-      .from(userSettings)
-      .where(eq(userSettings.userId, userId))
-      .limit(1);
-
-    if (existing.length === 0) {
-      await db.insert(userSettings).values({ userId, currentProfileId: currentProfileId ?? null });
-    } else {
-      await db
-        .update(userSettings)
-        .set({ currentProfileId: currentProfileId ?? null, updatedAt: new Date() })
-        .where(eq(userSettings.userId, userId));
-    }
-
-    return NextResponse.json({ ok: true });
+    revalidateTag('user-settings', 'max');
+    revalidateTag('profiles', 'max');
   } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Cache invalidation failed, but operation succeeded
   }
-}
+
+  logger.info('Profile state updated', { userId: auth.userId, currentProfileId });
+
+  return NextResponse.json({ ok: true });
+});

@@ -5,20 +5,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authCookieOptions, signAuthToken } from '@/server/auth/auth';
 import { db, migrationsReady } from '@/server/db/db';
 import { users } from '@/server/db/schema/users';
+import { withErrorHandling, ApiError } from '@/server/middleware/apiErrorHandler';
+import { validateBody } from '@/server/middleware/validateSchema';
+import { loginSchema } from '@/server/validation/schemas';
+import { logger } from '@/server/utils/logger';
+import { rateLimit, getRateLimitHeaders } from '@/server/middleware/rateLimit';
 
-export async function POST(req: NextRequest) {
+// Rate limit: 5 requests per 15 minutes
+const loginRateLimit = rateLimit(5, 15 * 60 * 1000);
+
+export const POST = withErrorHandling(async (req: NextRequest) => {
   await migrationsReady;
+
+  // Apply rate limiting
+  const rateLimitResponse = loginRateLimit(req);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   const body = await req.json().catch(() => null);
-
   if (!body || typeof body !== 'object') {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    throw new ApiError(400, 'Invalid request body');
   }
 
-  const { username, password } = body as { username?: string; password?: string };
-
-  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
-    return NextResponse.json({ error: 'Username and password are required' }, { status: 400 });
+  const validation = validateBody(loginSchema, body);
+  if (!validation.success) {
+    throw new ApiError(400, 'Validation failed', 'VALIDATION_ERROR', validation.errors);
   }
+
+  const { username, password } = validation.data;
 
   const userResult = await db
     .select({
@@ -34,13 +49,13 @@ export async function POST(req: NextRequest) {
   const user = userResult[0];
 
   if (!user || !user.password) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    throw new ApiError(401, 'Invalid credentials', 'INVALID_CREDENTIALS');
   }
 
   const valid = await bcrypt.compare(password, user.password);
 
   if (!valid) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    throw new ApiError(401, 'Invalid credentials', 'INVALID_CREDENTIALS');
   }
 
   const token = await signAuthToken({
@@ -60,6 +75,8 @@ export async function POST(req: NextRequest) {
 
   res.cookies.set({ ...authCookieOptions(), value: token });
 
+  logger.info('User logged in successfully', { userId: user.id });
+
   return res;
-}
+});
 

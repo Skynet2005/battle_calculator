@@ -319,13 +319,45 @@ function generateExplanation(
 }
 
 /**
+ * Cache for best counter ratio results
+ * Uses input hash to cache results and prevent redundant calculations
+ */
+const ratioCache = new Map<string, CounterRatioResult>();
+const MAX_CACHE_SIZE = 50;
+
+/**
+ * Create a cache key from the input
+ */
+function createCacheKey(input: CounterRatioInput): string {
+  // Create a deterministic key from the input
+  // Round values to reduce cache key variations
+  const keyParts = [
+    JSON.stringify(input.player.stats),
+    JSON.stringify(input.opponent.stats),
+    JSON.stringify(input.opponent.mix),
+    input.rallySize,
+    input.constraints?.minInfantryPct ?? DEFAULT_MIN_INFANTRY_PCT,
+    input.constraints?.minLancerPct ?? DEFAULT_MIN_LANCER_PCT,
+  ];
+  return keyParts.join('|');
+}
+
+/**
  * Find best counter ratios using two-phase search
+ * Results are cached to improve performance for repeated calculations.
  */
 export function computeBestCounterRatio(input: CounterRatioInput): CounterRatioResult {
   const { player, opponent, rallySize, constraints } = input;
 
   if (!player.stats || !opponent.stats || !opponent.mix) {
     throw new Error('Player and opponent stats and opponent mix are required');
+  }
+
+  // Check cache first
+  const cacheKey = createCacheKey(input);
+  const cached = ratioCache.get(cacheKey);
+  if (cached !== undefined) {
+    return cached;
   }
 
   // TypeScript guard: opponent.mix is now known to be non-null
@@ -350,7 +382,11 @@ export function computeBestCounterRatio(input: CounterRatioInput): CounterRatioR
       const score = scoreResult(result);
       coarseResults.push({ ratio: candidate, result, score });
     } catch (error) {
-      console.warn('Simulation failed for ratio:', candidate, error);
+      // Log warning in development only
+      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+        // eslint-disable-next-line no-console
+        console.warn('Simulation failed for ratio:', candidate, error);
+      }
       // Continue with other candidates
     }
   }
@@ -422,7 +458,7 @@ export function computeBestCounterRatio(input: CounterRatioInput): CounterRatioR
 
   const best = top3[0];
 
-  return {
+  const result: CounterRatioResult = {
     best: {
       ratio: { ...best.ratio, totalTroops: rallySize },
       score: best.score,
@@ -439,5 +475,17 @@ export function computeBestCounterRatio(input: CounterRatioInput): CounterRatioR
       explanation: generateExplanation(c.result, c.ratio, opponentMix)
     }))
   };
+
+  // Cache the result
+  if (ratioCache.size >= MAX_CACHE_SIZE) {
+    // Remove oldest entry (simple FIFO)
+    const firstKey = ratioCache.keys().next().value;
+    if (firstKey !== undefined) {
+      ratioCache.delete(firstKey);
+    }
+  }
+  ratioCache.set(cacheKey, result);
+
+  return result;
 }
 

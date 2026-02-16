@@ -29,10 +29,13 @@ import {
   getDefaultOpponentExpertSelections
 } from '@/domain/battle/index';
 import { simulateBattleFromUI } from '@/domain/combat/adapter';
-import { saveProfile } from '@/features/profile/api/profile-storage';
+import { useUpdateProfile } from '@/shared/hooks/useProfiles';
+import { migrateProfile } from '@/features/profile/api/profile-migration';
+import { toast } from '@/shared/utils/toast';
 import type { FightResult } from '@/domain/rally/combat-fight';
 import { buildFighterSnapshot, totalTroops, type FighterSnapshot } from '@/domain/rally/combat-fighter';
 import { calculateRallyBonuses, extractJoinerBonuses } from '@/domain/rally/rally-bonus-extractor';
+import { clientLogger } from '@/shared/utils/clientLogger';
 
 const isUuid = (value: string | undefined | null) =>
   typeof value === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value);
@@ -44,6 +47,9 @@ export function useBattleCalculatorState() {
   const [opponentSubTab, setOpponentSubTab] = useState<'info' | 'heroes' | 'basic' | 'research' | 'chief' | 'pets'>('info');
   const [simulationMode, setSimulationMode] = useState<BattleConfig['randomMode']>('monteCarlo');
   const [simulationCount, setSimulationCount] = useState<number>(50);
+
+  // Get the update profile mutation hook
+  const updateProfileMutation = useUpdateProfile();
 
   const { playerBaseStats, opponentBaseStats } = useMemo(() => {
     if (!currentProfile) {
@@ -307,7 +313,11 @@ export function useBattleCalculatorState() {
 
       return { attacker, defender, result, battleReport: report, error: null, player: playerContext, opponent: opponentContext };
     } catch (error) {
-      console.error('Failed to simulate fight', error);
+      clientLogger.error('Failed to simulate fight', error, {
+        component: 'useBattleCalculatorState',
+        simulationMode,
+        simulationCount
+      });
       return {
         attacker: null,
         defender: null,
@@ -361,19 +371,35 @@ export function useBattleCalculatorState() {
 
   const handleSave = async () => {
     if (currentProfile) {
-      try {
-        if (!isUuid(currentProfile.id)) {
-          alert('Please create the profile first (use the Profile modal).');
-          return;
-        }
-        const saved = await saveProfile(currentProfile);
-        if (saved.id !== currentProfile.id) setCurrentProfile(saved);
-        alert('Profile saved successfully!');
-      } catch (err) {
-        const message = (err as Error).message || '';
-        console.error('Save failed', err);
-        alert(message || 'Save failed');
+      if (!isUuid(currentProfile.id)) {
+        toast.error('Please create the profile first', 'Use the Profile modal to create a profile');
+        return;
       }
+      updateProfileMutation.mutate(
+        { id: currentProfile.id, name: currentProfile.name, data: currentProfile, setCurrent: true },
+        {
+          onSuccess: (response) => {
+            // Import migrateProfile if needed
+            const { migrateProfile } = require('@/features/profile/api/profile-migration');
+          const saved = migrateProfile({
+            ...response.data,
+            id: response.id,
+            name: response.name,
+            createdAt: response.createdAt ? new Date(response.createdAt).getTime() : response.data.createdAt,
+            updatedAt: response.updatedAt ? new Date(response.updatedAt).getTime() : response.data.updatedAt,
+          });
+          if (saved.id !== currentProfile.id) setCurrentProfile(saved);
+          toast.success('Profile saved successfully!');
+          },
+          onError: (error) => {
+            clientLogger.error('Save failed', error, {
+              component: 'useBattleCalculatorState',
+              profileId: currentProfile.id
+            });
+            toast.error('Save failed', error.message || 'Please try again');
+          },
+        }
+      );
     }
   };
 
@@ -397,13 +423,28 @@ export function useBattleCalculatorState() {
       setCurrentProfile(cleared);
       try {
         if (isUuid(cleared.id)) {
-          const saved = await saveProfile(cleared);
+          const response = await updateProfileMutation.mutateAsync({
+            id: cleared.id,
+            name: cleared.name,
+            data: cleared,
+            setCurrent: true,
+          });
+          const saved = migrateProfile({
+            ...response.data,
+            id: response.id,
+            name: response.name,
+            createdAt: response.createdAt ? new Date(response.createdAt).getTime() : response.data.createdAt,
+            updatedAt: response.updatedAt ? new Date(response.updatedAt).getTime() : response.data.updatedAt,
+          });
           if (saved.id !== cleared.id) setCurrentProfile(saved);
         }
-        alert('Player data cleared and saved.');
+        toast.success('Player data cleared and saved.');
       } catch (err) {
-        console.error('Clear player save failed', err);
-        alert('Failed to save cleared player data');
+        clientLogger.error('Clear player save failed', err as Error, {
+          component: 'useBattleCalculatorState',
+          profileId: cleared.id
+        });
+        toast.error('Failed to save cleared player data', (err as Error).message || 'Please try again');
       }
     })();
   };
@@ -432,13 +473,28 @@ export function useBattleCalculatorState() {
       setCurrentProfile(nextProfile);
       try {
         if (isUuid(nextProfile.id)) {
-          const saved = await saveProfile(nextProfile);
+          const response = await updateProfileMutation.mutateAsync({
+            id: nextProfile.id,
+            name: nextProfile.name,
+            data: nextProfile,
+            setCurrent: true,
+          });
+          const saved = migrateProfile({
+            ...response.data,
+            id: response.id,
+            name: response.name,
+            createdAt: response.createdAt ? new Date(response.createdAt).getTime() : response.data.createdAt,
+            updatedAt: response.updatedAt ? new Date(response.updatedAt).getTime() : response.data.updatedAt,
+          });
           if (saved.id !== nextProfile.id) setCurrentProfile(saved);
         }
-        alert('Opponent data cleared and saved.');
+        toast.success('Opponent data cleared and saved.');
       } catch (err) {
-        console.error('Clear opponent save failed', err);
-        alert('Failed to save cleared opponent data');
+        clientLogger.error('Clear opponent save failed', err as Error, {
+          component: 'useBattleCalculatorState',
+          profileId: nextProfile.id
+        });
+        toast.error('Failed to save cleared opponent data', (err as Error).message || 'Please try again');
       }
     })();
   };
@@ -674,16 +730,37 @@ export function useBattleCalculatorState() {
 
       isSavingRef.current = true;
       try {
-        console.log('Auto-saving profile to database...', currentProfile.id);
-        const saved = await saveProfile(currentProfile, false);
-        console.log('Auto-save successful', saved.id);
+        clientLogger.debug('Auto-saving profile to database...', {
+          component: 'useBattleCalculatorState',
+          profileId: currentProfile.id
+        });
+        const response = await updateProfileMutation.mutateAsync({
+          id: currentProfile.id,
+          name: currentProfile.name,
+          data: currentProfile,
+          setCurrent: false,
+        });
+        const saved = migrateProfile({
+          ...response.data,
+          id: response.id,
+          name: response.name,
+          createdAt: response.createdAt ? new Date(response.createdAt).getTime() : response.data.createdAt,
+          updatedAt: response.updatedAt ? new Date(response.updatedAt).getTime() : response.data.updatedAt,
+        });
+        clientLogger.debug('Auto-save successful', {
+          component: 'useBattleCalculatorState',
+          profileId: saved.id
+        });
         lastSavedProfileIdRef.current = saved.id;
         // Update profile if ID changed (shouldn't happen, but just in case)
         if (saved.id !== currentProfile.id) {
           setCurrentProfile(saved);
         }
       } catch (err) {
-        console.error('Auto-save failed', err);
+        clientLogger.error('Auto-save failed', err, {
+          component: 'useBattleCalculatorState',
+          profileId: currentProfile.id
+        });
         // Don't show alert for auto-save failures, just log
       } finally {
         isSavingRef.current = false;

@@ -14,6 +14,8 @@
  * Step B: X_final% = ( X_base% × (1 + BuffSum%/100) + FlatBuff% - FlatDebuff% ) / (1 + DebuffSum%/100)
  */
 
+import { memoizedCalculateFinalStats as _memoizedCalculateFinalStats } from './calculations-cache';
+
 export type TroopType = 'infantry' | 'lancer' | 'marksman';
 export type TroopScope = TroopType | 'all_troops' | 'rally_troops';
 export type StatType = 'attack' | 'defense' | 'lethality' | 'health';
@@ -497,6 +499,8 @@ export function calculateFinalStatValue(
  *
  * IMPORTANT: enemy debuffs are not optional if you want faithful comparisons.
  * Combat modifiers (Damage Up, Damage Taken Down) are NOT applied here - they affect damage step.
+ *
+ * NOTE: This function is memoized via calculateFinalStatsMemoized wrapper for performance.
  */
 export function calculateFinalStats(
   basicBonuses: BasicBonuses,
@@ -524,14 +528,36 @@ export function calculateFinalStats(
 }
 
 /**
+ * Memoized wrapper for calculateFinalStats
+ * Use this for better performance when the same inputs are calculated multiple times.
+ */
+export function calculateFinalStatsMemoized(
+  basicBonuses: BasicBonuses,
+  additiveBonuses: AdditiveBonuses,
+  selfMultipliers: MultiplicativeBonuses,
+  troopType: TroopType,
+  enemyMultipliers?: MultiplicativeBonuses
+): FinalStats {
+  return _memoizedCalculateFinalStats(
+    calculateFinalStats,
+    basicBonuses,
+    additiveBonuses,
+    selfMultipliers,
+    troopType,
+    enemyMultipliers
+  );
+}
+
+/**
  * Convenience: compute final stats for both sides with proper cross-application of debuffs.
+ * Uses memoized version for better performance.
  */
 export function calculateFinalStatsForSide(
   side: CombatSideBonuses,
   troopType: TroopType,
   enemy?: CombatSideBonuses
 ): FinalStats {
-  return calculateFinalStats(side.basic, side.additive, side.multipliers, troopType, enemy?.multipliers);
+  return calculateFinalStatsMemoized(side.basic, side.additive, side.multipliers, troopType, enemy?.multipliers);
 }
 
 /**

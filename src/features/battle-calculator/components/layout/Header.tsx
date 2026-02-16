@@ -7,6 +7,13 @@ interface HeaderProps {
   onSave: () => void;
   authEmail?: string | null;
   authUsername?: string | null;
+  gameData?: {
+    roleId: string;
+    gameId: string;
+    state: string | null;
+    furnaceLevel: number | null;
+    profilePicture: string | null;
+  } | null;
   onLogout?: () => void;
   onDeleteAccount?: () => void;
   onProfileOpen?: () => void;
@@ -17,6 +24,7 @@ export default function Header({
   onSave,
   authEmail,
   authUsername,
+  gameData,
   onLogout,
   onDeleteAccount,
   onProfileOpen,
@@ -50,8 +58,29 @@ export default function Header({
           >
             💾 Save Profile
           </button>
-          {(authEmail || authUsername || onLogout || onDeleteAccount) && (
+          {(authEmail || authUsername || gameData || onLogout || onDeleteAccount) && (
             <div className="flex flex-col sm:flex-row items-center gap-2 text-sm">
+              {gameData && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-lg border border-slate-700">
+                  {gameData.profilePicture && (
+                    <img
+                      src={gameData.profilePicture}
+                      alt="Profile"
+                      className="w-8 h-8 rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <div className="text-gray-300 text-xs">
+                    <div className="font-semibold">{authUsername || `ID: ${gameData.roleId}`}</div>
+                    <div className="text-gray-400">
+                      {gameData.state && `State: ${gameData.state}`}
+                      {gameData.furnaceLevel && ` • Furnace: ${gameData.furnaceLevel}`}
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="text-gray-300">
                 Signed in{authUsername ? ` as ${authUsername}` : ''}{authEmail ? ` (${authEmail})` : ''}
               </div>

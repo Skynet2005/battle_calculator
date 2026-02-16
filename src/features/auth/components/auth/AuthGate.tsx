@@ -1,92 +1,114 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { Loader2, Gamepad2 } from 'lucide-react';
 import { FormField } from '@/shared/ui';
+import { useAuthUser, useLogin, useRegister, useGameLogin } from '@/shared/hooks/useAuth';
+import { toast } from '@/shared/utils/toast';
 
 interface AuthGateProps {
   onAuthSuccess: (user: { email: string; username: string }) => void;
 }
 
 export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
-  const [authStatus, setAuthStatus] = useState<'checking' | 'unauthorized' | 'authorized'>('checking');
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [authSubmitting, setAuthSubmitting] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'game'>('login');
   const [authForm, setAuthForm] = useState({
     email: '',
     username: '',
     password: '',
+    roleId: '',
   });
-  const [authUser, setAuthUser] = useState<{ email: string; username: string } | null>(null);
-  void authUser;
 
+  // Track if we've already called onAuthSuccess for the current user
+  const lastAuthUserIdRef = useRef<string | null>(null);
+
+  // Use React Query hooks
+  const { data: authUser, isLoading: isCheckingAuth } = useAuthUser();
+  const loginMutation = useLogin();
+  const registerMutation = useRegister();
+  const gameLoginMutation = useGameLogin();
+
+  // Store onAuthSuccess in a ref to avoid dependency issues
+  const onAuthSuccessRef = useRef(onAuthSuccess);
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me', { credentials: 'include' });
-        if (res.ok) {
-          const user = await res.json().catch(() => null);
-          if (user) {
-            const userData = { email: user.email, username: user.username };
-            setAuthUser(userData);
-            setAuthStatus('authorized');
-            setAuthError(null);
-            onAuthSuccess(userData);
-          } else {
-            setAuthUser(null);
-            setAuthStatus('unauthorized');
-          }
-        } else {
-          setAuthUser(null);
-          setAuthStatus('unauthorized');
-        }
-      } catch (err) {
-        console.error('Auth check failed', err);
-        setAuthUser(null);
-        setAuthStatus('unauthorized');
-      }
-    };
-    checkAuth();
+    onAuthSuccessRef.current = onAuthSuccess;
   }, [onAuthSuccess]);
+
+  // Determine auth status from React Query state
+  const authStatus = isCheckingAuth ? 'checking' : authUser ? 'authorized' : 'unauthorized';
+  const authSubmitting = loginMutation.isPending || registerMutation.isPending || gameLoginMutation.isPending;
+  const authError = loginMutation.error?.message || registerMutation.error?.message || gameLoginMutation.error?.message || null;
+
+  // Call onAuthSuccess when user is authenticated (only once per user)
+  useEffect(() => {
+    if (authUser && authUser.id !== lastAuthUserIdRef.current) {
+      lastAuthUserIdRef.current = authUser.id;
+      const userData = { email: authUser.email, username: authUser.username };
+      onAuthSuccessRef.current(userData);
+    } else if (!authUser) {
+      // Reset ref when user logs out
+      lastAuthUserIdRef.current = null;
+    }
+  }, [authUser?.id]); // Only depend on user ID
+
+  // Clear errors when switching modes
+  useEffect(() => {
+    loginMutation.reset();
+    registerMutation.reset();
+    gameLoginMutation.reset();
+    setAuthForm({ email: '', username: '', password: '', roleId: '' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authMode]); // Only depend on authMode, not mutation objects
+
+  // No need for separate error handling useEffects - errors are handled in mutation callbacks
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthSubmitting(true);
-    setAuthError(null);
-    try {
-      const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
-      const payload =
-        authMode === 'login'
-          ? { username: authForm.username || authForm.email, password: authForm.password }
-          : { email: authForm.email, username: authForm.username, password: authForm.password };
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setAuthError(body?.error || 'Authentication failed');
-        setAuthStatus('unauthorized');
-        setAuthUser(null);
-      } else {
-        const user = await fetch('/api/profile', { credentials: 'include' }).then((r) => r.json()).catch(() => null);
-        if (user) {
-          const userData = { email: user.email, username: user.username };
-          setAuthUser(userData);
-          setAuthStatus('authorized');
-          setAuthError(null);
-          onAuthSuccess(userData);
-        }
+
+    if (authMode === 'game') {
+      if (!authForm.roleId.trim()) {
+        toast.error('Role ID required', 'Please enter your game Role ID');
+        return;
       }
-    } catch (err) {
-      console.error('Auth submit failed', err);
-      setAuthError('Something went wrong, please try again.');
-      setAuthStatus('unauthorized');
-      setAuthUser(null);
-    } finally {
-      setAuthSubmitting(false);
+      gameLoginMutation.mutate(authForm.roleId.trim(), {
+        onSuccess: () => {
+          toast.success('Game login successful!', 'Welcome');
+        },
+        onError: (error) => {
+          toast.error('Game login failed', error.message || 'Invalid Role ID');
+        },
+      });
+    } else if (authMode === 'login') {
+      loginMutation.mutate(
+        {
+          username: authForm.username || authForm.email,
+          password: authForm.password,
+        },
+        {
+          onSuccess: () => {
+            toast.success('Login successful!', 'Welcome back');
+          },
+          onError: (error) => {
+            toast.error('Login failed', error.message || 'Invalid credentials');
+          },
+        }
+      );
+    } else {
+      registerMutation.mutate(
+        {
+          email: authForm.email,
+          username: authForm.username,
+          password: authForm.password,
+        },
+        {
+          onSuccess: () => {
+            toast.success('Registration successful!', 'Account created');
+          },
+          onError: (error) => {
+            toast.error('Registration failed', error.message || 'Failed to create account');
+          },
+        }
+      );
     }
   };
 
@@ -112,70 +134,152 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
         <div className="w-full max-w-md bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700">
           <h1 className="text-2xl font-bold mb-2 text-center">Expedition Battle Calculator</h1>
           <p className="text-sm text-slate-300 mb-6 text-center">
-            Please {authMode === 'login' ? 'sign in' : 'create an account'} to continue.
+            {authMode === 'game'
+              ? 'Login with your game Role ID'
+              : authMode === 'login'
+              ? 'Please sign in to continue'
+              : 'Create an account to continue'}
           </p>
+
+          {/* Mode selector tabs */}
+          <div className="flex gap-2 mb-4 border-b border-slate-700">
+            <button
+              type="button"
+              onClick={() => setAuthMode('login')}
+              className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                authMode === 'login'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode('register')}
+              className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                authMode === 'register'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              Register
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode('game')}
+              className={`flex-1 py-2 text-sm font-medium transition-colors flex items-center justify-center gap-1 ${
+                authMode === 'game'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              <Gamepad2 className="w-4 h-4" />
+              Game Login
+            </button>
+          </div>
+
           <form className="space-y-4" onSubmit={handleAuthSubmit}>
-            {authMode === 'register' && (
-              <FormField label="Email" htmlFor="email" required>
+            {authMode === 'game' ? (
+              <FormField label="Game Role ID" htmlFor="roleId" required error={authError || undefined}>
                 <input
-                  id="email"
-                  type="email"
+                  id="roleId"
+                  type="text"
                   required
-                  value={authForm.email}
-                  onChange={(e) => setAuthForm((f) => ({ ...f, email: e.target.value }))}
+                  value={authForm.roleId}
+                  onChange={(e) => setAuthForm((f) => ({ ...f, roleId: e.target.value }))}
                   className="w-full px-4 py-2.5 border-2 border-slate-700 rounded-lg text-base bg-slate-900/50 text-slate-100 transition-all duration-200 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 hover:border-slate-500"
-                  placeholder="you@example.com"
+                  placeholder="100579922"
                 />
+                <p className="text-xs text-slate-400 mt-1">
+                  Enter your in-game Role ID (found in your profile)
+                </p>
               </FormField>
+            ) : (
+              <>
+                {authMode === 'register' && (
+                  <FormField label="Email" htmlFor="email" required>
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={authForm.email}
+                      onChange={(e) => setAuthForm((f) => ({ ...f, email: e.target.value }))}
+                      className="w-full px-4 py-2.5 border-2 border-slate-700 rounded-lg text-base bg-slate-900/50 text-slate-100 transition-all duration-200 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 hover:border-slate-500"
+                      placeholder="you@example.com"
+                    />
+                  </FormField>
+                )}
+                <FormField label="Username" htmlFor="username" required>
+                  <input
+                    id="username"
+                    type="text"
+                    required
+                    value={authForm.username}
+                    onChange={(e) => setAuthForm((f) => ({ ...f, username: e.target.value }))}
+                    className="w-full px-4 py-2.5 border-2 border-slate-700 rounded-lg text-base bg-slate-900/50 text-slate-100 transition-all duration-200 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 hover:border-slate-500"
+                    placeholder="username"
+                  />
+                </FormField>
+                <FormField label="Password" htmlFor="password" required error={authError || undefined}>
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    minLength={8}
+                    value={authForm.password}
+                    onChange={(e) => setAuthForm((f) => ({ ...f, password: e.target.value }))}
+                    className="w-full px-4 py-2.5 border-2 border-slate-700 rounded-lg text-base bg-slate-900/50 text-slate-100 transition-all duration-200 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 hover:border-slate-500"
+                    placeholder="********"
+                  />
+                </FormField>
+              </>
             )}
-            <FormField label="Username" htmlFor="username" required>
-              <input
-                id="username"
-                type="text"
-                required
-                value={authForm.username}
-                onChange={(e) => setAuthForm((f) => ({ ...f, username: e.target.value }))}
-                className="w-full px-4 py-2.5 border-2 border-slate-700 rounded-lg text-base bg-slate-900/50 text-slate-100 transition-all duration-200 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 hover:border-slate-500"
-                placeholder="username"
-              />
-            </FormField>
-            <FormField label="Password" htmlFor="password" required error={authError || undefined}>
-              <input
-                id="password"
-                type="password"
-                required
-                minLength={8}
-                value={authForm.password}
-                onChange={(e) => setAuthForm((f) => ({ ...f, password: e.target.value }))}
-                className="w-full px-4 py-2.5 border-2 border-slate-700 rounded-lg text-base bg-slate-900/50 text-slate-100 transition-all duration-200 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 hover:border-slate-500"
-                placeholder="********"
-              />
-            </FormField>
             <button
               type="submit"
               disabled={authSubmitting}
-              className="button w-full"
+              className="button w-full flex items-center justify-center gap-2"
+              aria-busy={authSubmitting}
             >
-              {authSubmitting ? 'Please wait...' : authMode === 'login' ? 'Login' : 'Register'}
+              {authSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Please wait...
+                </>
+              ) : (
+                authMode === 'game' ? (
+                  <>
+                    <Gamepad2 className="w-4 h-4" />
+                    Login with Game
+                  </>
+                ) : authMode === 'login' ? 'Login' : 'Register'
+              )}
             </button>
-          </form>
-          <div className="mt-4 text-sm text-center text-slate-300">
-            {authMode === 'login' ? (
-              <>
-                No account?{' '}
-                <button className="text-blue-400 hover:underline" onClick={() => setAuthMode('register')}>
-                  Register
-                </button>
-              </>
-            ) : (
-              <>
-                Have an account?{' '}
-                <button className="text-blue-400 hover:underline" onClick={() => setAuthMode('login')}>
-                  Login
-                </button>
-              </>
+            {authError && (
+              <div className="text-sm text-red-400 text-center mt-2" role="alert">
+                {authError}
+              </div>
             )}
-          </div>
+          </form>
+          {authMode !== 'game' && (
+            <div className="mt-4 text-sm text-center text-slate-300">
+              {authMode === 'login' ? (
+                <>
+                  No account?{' '}
+                  <button className="text-blue-400 hover:underline" onClick={() => setAuthMode('register')}>
+                    Register
+                  </button>
+                </>
+              ) : (
+                <>
+                  Have an account?{' '}
+                  <button className="text-blue-400 hover:underline" onClick={() => setAuthMode('login')}>
+                    Login
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );

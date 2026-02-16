@@ -2,6 +2,7 @@
 
 import HamburgerNav from '@/shared/ui/HamburgerNav';
 import { useEffect, useState } from 'react';
+import { toast } from '@/shared/utils/toast';
 
 interface RallyLead {
   id: string;
@@ -168,7 +169,7 @@ export default function RallyMarchTimes() {
     // Check if all rally leads have names and march times
     const allFilled = rallyLeads.every(lead => lead.name.trim() && lead.marchTime.trim());
     if (!allFilled) {
-      alert('Please fill in all rally lead names and march times (in seconds or MM:SS format) before starting countdown.');
+      toast.error('Validation Error', 'Please fill in all rally lead names and march times (in seconds or MM:SS format) before starting countdown.');
       return;
     }
 

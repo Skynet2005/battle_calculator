@@ -1,18 +1,29 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import AuthGate from '@/features/auth/components/auth/AuthGate';
 import Header from '@/features/battle-calculator/components/layout/Header';
 import TabBar, { type TabKey } from '@/features/battle-calculator/components/layout/TabBar';
 import ProfileGate, { type ProfileGateRef } from '@/features/profile/components/profile/ProfileGate';
-import HowToUseGuideTab from '@/features/battle-calculator/tabs/how_to/HowToUseGuideTab';
 import OpponentTab from '@/features/battle-calculator/tabs/player-and-opponent/OpponentTab';
 import PlayerTab from '@/features/battle-calculator/tabs/player-and-opponent/PlayerTab';
 import RallyTab from '@/features/battle-calculator/tabs/rally_config/RallyTab';
-import ResultsTab from '@/features/battle-calculator/tabs/results/ResultsTab';
-import { EmptyState, PageShell, SectionCard, StatTile } from '@/shared/ui';
+import { EmptyState, PageShell, SectionCard, StatTile, LoadingSkeleton } from '@/shared/ui';
+
+// Lazy load heavy components for code splitting
+const ResultsTab = dynamic(() => import('@/features/battle-calculator/tabs/results/ResultsTab'), {
+  loading: () => <LoadingSkeleton lines={8} />,
+});
+
+const HowToUseGuideTab = dynamic(() => import('@/features/battle-calculator/tabs/how_to/HowToUseGuideTab'), {
+  loading: () => <LoadingSkeleton lines={10} />,
+});
 import { useBattleCalculatorState } from '@/features/battle-calculator/hooks/useBattleCalculatorState';
-import { getCurrentProfile } from '@/features/profile/api/profile-storage';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useAuthUser, useLogout, useDeleteAccount } from '@/shared/hooks/useAuth';
+import { useProfileState } from '@/shared/hooks/useProfileState';
+import { useProfile } from '@/shared/hooks/useProfiles';
+import { useMemo, useRef, useState, useEffect, Suspense } from 'react';
+import { toast } from '@/shared/utils/toast';
 
 const tabCopy: Record<TabKey, { title: string; description: string }> = {
   profile: { title: 'Player Setup', description: 'Configure your commander, heroes, pets, and base stats.' },
@@ -23,9 +34,15 @@ const tabCopy: Record<TabKey, { title: string; description: string }> = {
 };
 
 export default function BattleCalculatorPage() {
-  const [authUser, setAuthUser] = useState<{ email: string; username: string } | null>(null);
   const [authSessionVersion, setAuthSessionVersion] = useState(0);
   const profileGateRef = useRef<ProfileGateRef>(null);
+
+  // Use React Query hooks
+  const { data: authUser, isLoading: isAuthLoading } = useAuthUser();
+  const { data: profileState } = useProfileState();
+  const { data: currentProfileData, isLoading: isProfileLoading } = useProfile(profileState?.currentProfileId ?? null);
+  const logoutMutation = useLogout();
+  const deleteAccountMutation = useDeleteAccount();
 
   const {
     currentProfile,
@@ -62,6 +79,13 @@ export default function BattleCalculatorPage() {
     handleTroopMixChange
   } = useBattleCalculatorState();
 
+  // Sync React Query profile data with local state
+  useEffect(() => {
+    if (currentProfileData) {
+      handleProfileChange(currentProfileData);
+    }
+  }, [currentProfileData, handleProfileChange]);
+
   const tabStatuses: Partial<Record<TabKey, 'ready' | 'warning' | 'error'>> = useMemo(
     () => ({
       profile: playerReady ? 'ready' : 'warning',
@@ -73,69 +97,36 @@ export default function BattleCalculatorPage() {
     [fightReady, fightSimulationError, opponentReady, playerReady, rallyReady]
   );
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    } catch (err) {
-      console.error('Logout failed', err);
-    } finally {
-      setAuthUser(null);
-      setCurrentProfile(null);
-      setActiveTab('rally');
-      setAuthSessionVersion((v) => v + 1);
-    }
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        setCurrentProfile(null);
+        setActiveTab('rally');
+        setAuthSessionVersion((v) => v + 1);
+        toast.success('Logged out successfully');
+      },
+      onError: (error) => {
+        toast.error('Logout failed', error.message || 'Please try again');
+      },
+    });
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     const confirmDelete = window.confirm('Delete your account and all associated data? This cannot be undone.');
     if (!confirmDelete) return;
-    try {
-      const res = await fetch('/api/profile', { method: 'DELETE', credentials: 'include' });
-      if (!res.ok) {
-        console.error('Delete failed');
-        return;
-      }
-    } catch (err) {
-      console.error('Delete failed', err);
-    } finally {
-      setAuthUser(null);
-      setCurrentProfile(null);
-      setActiveTab('rally');
-      setAuthSessionVersion((v) => v + 1);
-    }
+
+    deleteAccountMutation.mutate(undefined, {
+      onSuccess: () => {
+        setCurrentProfile(null);
+        setActiveTab('rally');
+        setAuthSessionVersion((v) => v + 1);
+        toast.success('Account deleted successfully');
+      },
+      onError: (error) => {
+        toast.error('Delete account failed', error.message || 'Please try again');
+      },
+    });
   };
-
-  // Load current profile from server on auth success and on mount
-  useEffect(() => {
-    if (!authUser) return;
-    const loadCurrent = async () => {
-      try {
-        const profile = await getCurrentProfile();
-        if (profile) {
-          handleProfileChange(profile);
-        }
-      } catch (err) {
-        console.error('Failed to load current profile', err);
-      }
-    };
-    void loadCurrent();
-  }, [authUser, handleProfileChange]);
-
-  // Load current profile when switching to Player tab
-  useEffect(() => {
-    if (!authUser || activeTab !== 'profile') return;
-    const loadProfile = async () => {
-      try {
-        const profile = await getCurrentProfile();
-        if (profile) {
-          handleProfileChange(profile);
-        }
-      } catch (err) {
-        console.error('Failed to load current profile', err);
-      }
-    };
-    void loadProfile();
-  }, [activeTab, authUser, handleProfileChange]);
 
   const headerSummary = (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -167,6 +158,11 @@ export default function BattleCalculatorPage() {
   );
 
   const renderActiveTab = () => {
+    // Show loading skeleton while checking auth or loading profile
+    if (isAuthLoading || isProfileLoading) {
+      return <LoadingSkeleton lines={5} />;
+    }
+
     if (!currentProfile) {
       return (
         <EmptyState
@@ -220,52 +216,63 @@ export default function BattleCalculatorPage() {
 
     if (activeTab === 'results') {
       return (
-        <ResultsTab
-          player={simulatedPlayerContext}
-          opponent={simulatedOpponentContext}
-          fightResult={simulatedFightResult}
-          battleReport={simulatedBattleReport}
-          errorMessage={fightSimulationError}
-          simulationMode={simulationMode}
-          setSimulationModeAction={setSimulationModeAction}
-          simulationCount={simulationCount}
-          setSimulationCountAction={setSimulationCountAction}
-          onMixChange={handleTroopMixChange}
-          playerCapacity={playerCapacityReport}
-          opponentCapacity={opponentCapacityReport}
-          playerMixInput={currentProfile.rally.troopMix?.player}
-          opponentMixInput={currentProfile.rally.troopMix?.opponent}
-        />
+        <Suspense fallback={<LoadingSkeleton lines={8} />}>
+          <ResultsTab
+            player={simulatedPlayerContext}
+            opponent={simulatedOpponentContext}
+            fightResult={simulatedFightResult}
+            battleReport={simulatedBattleReport}
+            errorMessage={fightSimulationError}
+            simulationMode={simulationMode}
+            setSimulationModeAction={setSimulationModeAction}
+            simulationCount={simulationCount}
+            setSimulationCountAction={setSimulationCountAction}
+            onMixChange={handleTroopMixChange}
+            playerCapacity={playerCapacityReport}
+            opponentCapacity={opponentCapacityReport}
+            playerMixInput={currentProfile.rally.troopMix?.player}
+            opponentMixInput={currentProfile.rally.troopMix?.opponent}
+          />
+        </Suspense>
       );
     }
 
     return (
-      <HowToUseGuideTab
-        profileLoaded={profileLoaded}
-        playerReady={playerReady}
-        opponentReady={opponentReady}
-        rallyReady={rallyReady}
-        fightReady={fightReady}
-        hasError={Boolean(fightSimulationError)}
-        errorMessage={fightSimulationError}
-        playerCapacity={playerCapacityReport?.rally.total ?? null}
-        opponentCapacity={opponentCapacityReport?.rally.total ?? null}
-        roundsSimulated={roundsSimulated}
-      />
+      <Suspense fallback={<LoadingSkeleton lines={10} />}>
+        <HowToUseGuideTab
+          profileLoaded={profileLoaded}
+          playerReady={playerReady}
+          opponentReady={opponentReady}
+          rallyReady={rallyReady}
+          fightReady={fightReady}
+          hasError={Boolean(fightSimulationError)}
+          errorMessage={fightSimulationError}
+          playerCapacity={playerCapacityReport?.rally.total ?? null}
+          opponentCapacity={opponentCapacityReport?.rally.total ?? null}
+          roundsSimulated={roundsSimulated}
+        />
+      </Suspense>
     );
   };
 
+  // Convert authUser to the format expected by ProfileGate
+  const authUserForGate = authUser
+    ? { email: authUser.email, username: authUser.username }
+    : null;
+
   return (
     <>
-      <AuthGate key={authSessionVersion} onAuthSuccess={setAuthUser} />
-      {authUser && (
+      <AuthGate key={authSessionVersion} onAuthSuccess={() => {}} />
+      {authUser && !isAuthLoading && (
         <ProfileGate
           ref={profileGateRef}
           currentProfile={currentProfile}
           onProfileChange={handleProfileChange}
-          authUser={authUser}
+          authUser={authUserForGate}
+          gameData={authUser?.gameData || null}
           onLogout={handleLogout}
           onDeleteAccount={handleDeleteAccount}
+          onAuthUserUpdate={() => {}}
         >
           <PageShell
             header={
@@ -275,6 +282,7 @@ export default function BattleCalculatorPage() {
                   onSave={handleSave}
                   authEmail={authUser?.email}
                   authUsername={authUser?.username}
+                  gameData={authUser?.gameData || null}
                   onLogout={handleLogout}
                   onDeleteAccount={handleDeleteAccount}
                   onProfileOpen={() => profileGateRef.current?.openProfileModal()}
