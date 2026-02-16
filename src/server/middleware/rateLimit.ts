@@ -78,7 +78,7 @@ function getClientIdentifier(req: NextRequest): string {
   // Try to get IP from various headers (for proxies/load balancers)
   const forwardedFor = req.headers.get('x-forwarded-for');
   const realIp = req.headers.get('x-real-ip');
-  const ip = forwardedFor?.split(',')[0]?.trim() || realIp || req.ip || 'unknown';
+  const ip = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
 
   // For authenticated requests, you could use user ID instead
   // const authHeader = req.headers.get('authorization');

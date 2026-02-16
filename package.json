@@ -50,7 +50,8 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.22",
-    "drizzle-kit": "^0.31.8",
+    "baseline-browser-mapping": "^2.9.19",
+    "drizzle-kit": "^0.18.1",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.10",
     "kill-port": "^2.0.1",
@@ -59,5 +60,8 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
+  },
+  "overrides": {
+    "esbuild": ">=0.25.0"
   }
 }
