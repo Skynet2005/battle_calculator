@@ -68,7 +68,11 @@ export function useRegister() {
       });
       if (!res.ok) {
         const error = await res.json().catch(() => ({ error: 'Failed to register' }));
-        throw new Error(error.error || 'Failed to register');
+        const details = Array.isArray(error.details) ? error.details as string[] : null;
+        const message = details?.length
+          ? details.join(' ')
+          : (error.error || 'Failed to register');
+        throw new Error(message);
       }
       return res.json();
     },
