@@ -6,16 +6,14 @@
  * events that significantly affected battle outcome.
  */
 
-import type { TurnLog } from '@/domain/combat/types';
-import { extractKeyMoments, type KeyMoment } from '../utils/keyMoments';
+import type { KeyMoment } from '../utils/keyMoments';
 
 interface RallyKeyMomentsProps {
-  turns: TurnLog[];
-  playerIsAttacker: boolean;
+  keyMoments: KeyMoment[];
 }
 
-export function RallyKeyMoments({ turns, playerIsAttacker }: RallyKeyMomentsProps) {
-  const moments = extractKeyMoments(turns, playerIsAttacker);
+export function RallyKeyMoments({ keyMoments }: RallyKeyMomentsProps) {
+  const moments = keyMoments;
 
   if (moments.length === 0) return null;
 

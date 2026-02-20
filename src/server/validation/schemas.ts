@@ -84,6 +84,19 @@ export const joinerSearchQuerySchema = z.object({
   heroClass: z.enum(['infantry', 'lancer', 'marksman']).optional(),
 });
 
+/**
+ * Battle result schemas
+ */
+export const saveBattleResultSchema = z.object({
+  inputHash: z.string().min(1, 'Input hash is required').max(256),
+  requestJson: z.record(z.unknown()),
+  responseSummaryJson: z.record(z.unknown()).optional(),
+  timelineJson: z.record(z.unknown()).optional(),
+  metricsJson: z.record(z.unknown()).optional(),
+  rationaleJson: z.record(z.unknown()).optional(),
+  reportJson: z.record(z.unknown()).optional(),
+});
+
 // Re-export for backward compatibility (if used elsewhere)
 export { joinerSearchQuerySchema as JoinerSearchQuerySchema };
 

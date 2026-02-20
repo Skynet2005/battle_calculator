@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/server/utils/logger';
 
 /**
  * Custom API error class for structured error handling
@@ -51,8 +52,7 @@ export function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  // Log unexpected errors but don't expose details to client
-  console.error('Unexpected API error:', error);
+  logger.error('Unexpected API error', error);
 
   return NextResponse.json(
     { error: 'Internal server error' },

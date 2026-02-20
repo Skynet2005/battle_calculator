@@ -1,4 +1,4 @@
-import { ZodSchema, ZodTypeAny } from 'zod';
+import { ZodSchema } from 'zod';
 
 type ValidationSuccess<T> = { success: true; data: T };
 type ValidationFailure = { success: false; errors: string[] };
@@ -21,14 +21,14 @@ export function validateBody<T>(
   return { success: true, data: result.data };
 }
 
-export function validateQuery<T extends ZodTypeAny>(
-  schema: T,
+export function validateQuery<T>(
+  schema: ZodSchema<T>,
   query: Record<string, unknown>
-): ValidationResult<ReturnType<T['parse']>> {
+): ValidationResult<T> {
   const result = schema.safeParse(query);
   if (!result.success) {
     const errors = result.error.issues.map((issue) => issue.message);
     return formatErrors(errors);
   }
-  return { success: true, data: result.data };
+  return { success: true, data: result.data as T };
 }

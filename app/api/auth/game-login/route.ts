@@ -6,13 +6,10 @@ import { authCookieOptions, signAuthToken } from '@/server/auth/auth';
 import { db, migrationsReady } from '@/server/db/db';
 import { users, userSettings } from '@/server/db/schema';
 import { ApiError, withErrorHandling } from '@/server/middleware/apiErrorHandler';
-import { rateLimit } from '@/server/middleware/rateLimit';
+import { authLoginLimiter } from '@/server/middleware/rateLimit';
 import { validateBody } from '@/server/middleware/validateSchema';
 import { logger } from '@/server/utils/logger';
 import { z } from 'zod';
-
-// Rate limit: 5 requests per 15 minutes
-const gameLoginRateLimit = rateLimit(5, 15 * 60 * 1000);
 
 const gameLoginSchema = z.object({
   role_id: z.string().min(1, 'Role ID is required'),
@@ -22,17 +19,16 @@ const GAME_API_BASE_URL = 'https://cg-vip-mall-wos.centurygame.com';
 const GAME_ID = '20121';
 
 /**
- * Generate auth token for game login
- * Based on the game's authentication mechanism
+ * Generate auth token for game login.
+ * Uses HMAC-SHA256 with the format: game_id:role_id:timestamp
  *
- * Found secret from giftcode website: 'tB87#kPtkxqOS2'
- * The game uses HMAC-SHA256 with the format: game_id:role_id:timestamp
- *
- * Add to .env.local: GAME_AUTH_SECRET=tB87#kPtkxqOS2
+ * Requires GAME_AUTH_SECRET to be set in .env.local
  */
 function generateGameAuth(roleId: string, timestamp: number, languageCode: string = 'EN', webVersion: string = 'v1.7.2'): string {
-  // Found in store website code: 'frpSTDbHmApb4CyZ'
-  const secret = process.env.GAME_AUTH_SECRET || 'frpSTDbHmApb4CyZ';
+  const secret = process.env.GAME_AUTH_SECRET;
+  if (!secret) {
+    throw new ApiError(500, 'GAME_AUTH_SECRET environment variable is not configured', 'CONFIG_ERROR');
+  }
 
   // Create query string with sorted keys (matching store website format)
   // The store website includes ALL fields in the hash: game_id, language_code, login_type, role_id, ts, webVersion
@@ -64,13 +60,8 @@ function generateGameAuth(roleId: string, timestamp: number, languageCode: strin
  * This calls the game's API to authenticate and get user data
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
+  authLoginLimiter(req);
   await migrationsReady;
-
-  // Apply rate limiting
-  const rateLimitResponse = gameLoginRateLimit(req);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== 'object') {

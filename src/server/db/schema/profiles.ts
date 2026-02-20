@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   jsonb,
   pgTable,
@@ -26,9 +27,12 @@ export const profiles = pgTable(
       .default(sql`now()`)
       .$onUpdate(() => new Date()),
     deletedAt: timestamp({ withTimezone: false }).default(sql`null`),
+    isPublic: boolean().notNull().default(false),
   },
   (table) => ({
     userIdx: index("profiles_user_idx").on(table.userId),
+    updatedAtIdx: index("profiles_updated_at_idx").on(table.updatedAt),
+    deletedAtIdx: index("profiles_deleted_at_idx").on(table.deletedAt),
   })
 );
 

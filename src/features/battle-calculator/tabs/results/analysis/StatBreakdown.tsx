@@ -1,4 +1,4 @@
-import type { EffectiveStatSnapshot } from '@/domain/combat/types';
+import type { EffectiveStatSnapshot } from '@/domain/battle/engine/types';
 import { formatNumber } from '../utils/format';
 
 interface StatBreakdownProps {

@@ -85,90 +85,62 @@ export function getChiefCharmBonuses(charmLevels: Record<string, number[]>): {
   return bonuses;
 }
 
+/** Map research node key patterns to troop type(s) and stat. */
+function parseResearchKey(key: string): { troopTypes: readonly TroopType[]; stat: StatType } | null {
+  const troopTypes: TroopType[] = [];
+  if (key.includes('Infantry')) troopTypes.push('infantry');
+  if (key.includes('Lancer')) troopTypes.push('lancer');
+  if (key.includes('Marksman')) troopTypes.push('marksman');
+  if (key.includes('Troop') && troopTypes.length === 0) {
+    troopTypes.push('infantry', 'lancer', 'marksman');
+  }
+  if (troopTypes.length === 0) return null;
+
+  let stat: StatType | null = null;
+  if (key.includes('Attack')) stat = 'attack';
+  else if (key.includes('Defense')) stat = 'defense';
+  else if (key.includes('Lethality')) stat = 'lethality';
+  else if (key.includes('Health')) stat = 'health';
+  if (!stat) return null;
+
+  return { troopTypes, stat };
+}
+
 /**
  * Extract Research bonuses
  * researchLevels: { category: { tierLabel: level } }
  */
 export function getResearchBonuses(
-  researchLevels: Record<string, Record<string, number>>,
-  troopType: TroopType
+  researchLevels: Record<string, Record<string, number>>
 ): { troopTypeBonus: Record<TroopType, Record<StatType, number>>; totalTroopBonus: Record<StatType, number> } {
   const troopTypeBonus: Record<TroopType, Record<StatType, number>> = {
     infantry: { attack: 0, defense: 0, lethality: 0, health: 0 },
     lancer: { attack: 0, defense: 0, lethality: 0, health: 0 },
     marksman: { attack: 0, defense: 0, lethality: 0, health: 0 },
   };
-
-  const totalTroopBonus: Record<StatType, number> = {
-    attack: 0,
-    defense: 0,
-    lethality: 0,
-    health: 0,
-  };
-
+  const totalTroopBonus: Record<StatType, number> = { attack: 0, defense: 0, lethality: 0, health: 0 };
   const research = BATTLE_RESEARCH['Battle Research'];
 
   for (const [category, tiers] of Object.entries(researchLevels)) {
     const categoryData = research[category];
     if (!categoryData) continue;
-
     for (const [tierLabel, level] of Object.entries(tiers)) {
       const tierData = categoryData[tierLabel];
       if (!tierData) continue;
-
-      const node = tierData.find(n => n.level === level);
+      const node = tierData.find((n) => n.level === level);
       if (!node) continue;
-
-      // Check each stat field
       for (const [key, value] of Object.entries(node)) {
         if (key === 'level' || key === 'power' || typeof value === 'string') continue;
-
+        const parsed = parseResearchKey(key);
+        if (!parsed) continue;
         const statValue = value as number;
-
-        // Handle troop-specific stats
-        if (key.includes('Infantry')) {
-          if (key.includes('Attack')) troopTypeBonus.infantry.attack += statValue;
-          else if (key.includes('Defense')) troopTypeBonus.infantry.defense += statValue;
-          else if (key.includes('Lethality')) troopTypeBonus.infantry.lethality += statValue;
-          else if (key.includes('Health')) troopTypeBonus.infantry.health += statValue;
-        } else if (key.includes('Lancer')) {
-          if (key.includes('Attack')) troopTypeBonus.lancer.attack += statValue;
-          else if (key.includes('Defense')) troopTypeBonus.lancer.defense += statValue;
-          else if (key.includes('Lethality')) troopTypeBonus.lancer.lethality += statValue;
-          else if (key.includes('Health')) troopTypeBonus.lancer.health += statValue;
-        } else if (key.includes('Marksman')) {
-          if (key.includes('Attack')) troopTypeBonus.marksman.attack += statValue;
-          else if (key.includes('Defense')) troopTypeBonus.marksman.defense += statValue;
-          else if (key.includes('Lethality')) troopTypeBonus.marksman.lethality += statValue;
-          else if (key.includes('Health')) troopTypeBonus.marksman.health += statValue;
-        } else if (key.includes('Troop')) {
-          // Applies to all troop types
-          if (key.includes('Attack')) {
-            totalTroopBonus.attack += statValue;
-            troopTypeBonus.infantry.attack += statValue;
-            troopTypeBonus.lancer.attack += statValue;
-            troopTypeBonus.marksman.attack += statValue;
-          } else if (key.includes('Defense')) {
-            totalTroopBonus.defense += statValue;
-            troopTypeBonus.infantry.defense += statValue;
-            troopTypeBonus.lancer.defense += statValue;
-            troopTypeBonus.marksman.defense += statValue;
-          } else if (key.includes('Lethality')) {
-            totalTroopBonus.lethality += statValue;
-            troopTypeBonus.infantry.lethality += statValue;
-            troopTypeBonus.lancer.lethality += statValue;
-            troopTypeBonus.marksman.lethality += statValue;
-          } else if (key.includes('Health')) {
-            totalTroopBonus.health += statValue;
-            troopTypeBonus.infantry.health += statValue;
-            troopTypeBonus.lancer.health += statValue;
-            troopTypeBonus.marksman.health += statValue;
-          }
+        if (parsed.troopTypes.length === 3) totalTroopBonus[parsed.stat] += statValue;
+        for (const t of parsed.troopTypes) {
+          troopTypeBonus[t][parsed.stat] += statValue;
         }
       }
     }
   }
-
   return { troopTypeBonus, totalTroopBonus };
 }
 

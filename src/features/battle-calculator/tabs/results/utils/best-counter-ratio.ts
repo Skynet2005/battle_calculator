@@ -5,7 +5,7 @@
  * No separate damage model - calls the same simulation function as the UI.
  */
 
-import { simulateBattleFromUI } from '@/domain/combat/adapter';
+import { simulateBattleFromUI } from '@/domain/battle/engine/adapter';
 import { totalTroops } from '@/domain/rally/combat-fighter';
 import type { RallySideConfig } from '@/domain/rally/combat-types';
 import { computeCountsFromMix } from '@/domain/rally/mix-utils';

@@ -8,6 +8,7 @@ import HeroGearSelectorPanel, {
   createDefaultLoadout,
   type GearComputed,
   type GearPiece,
+  type GearProgress,
   type GearSelection,
   type HeroGearLoadout,
   type HeroGearRegistry,
@@ -46,14 +47,27 @@ function clampInt(n: number, min: number, max: number): number {
 // Legacy Conversion Functions
 // ============================================================================
 
+/** Legacy piece config (level 1-200, empowermentLevel) from stored profile. */
+interface LegacyGearPieceConfig {
+  level?: number;
+  masteryForged?: boolean;
+  masteryLevel?: number;
+  essenceLevel?: number;
+  empowermentLevel?: number;
+  stacking?: string;
+}
+
+/** Legacy selections shape: troop -> piece -> config. */
+type LegacySelectionsByTroop = Partial<Record<GearPiece, LegacyGearPieceConfig>>;
+
 /**
  * Map legacy HeroGearSelections (level 1-200, empowermentLevel) to the new loadout model.
  */
 function legacyToLoadout(sel?: OldHeroGearSelections): HeroGearLoadout {
   const base = createDefaultLoadout();
-  if (!sel) return base;
+  if (!sel || typeof sel !== 'object') return base;
 
-  const mapPiece = (cfg: any): GearSelection => {
+  const mapPiece = (cfg: LegacyGearPieceConfig | undefined): GearSelection => {
     const level = clampInt(cfg?.level ?? 1, 1, 200);
     const masteryForged = Boolean(cfg?.masteryForged);
     const masteryLevel = clampInt(cfg?.masteryLevel ?? 0, 0, 20);
@@ -78,20 +92,30 @@ function legacyToLoadout(sel?: OldHeroGearSelections): HeroGearLoadout {
 
   const next = createDefaultLoadout();
   for (const t of TROOPS) {
-    const troopCfg = (sel as any)[t];
-    if (!troopCfg) continue;
+    const troopCfg = (sel as Partial<Record<TroopType, LegacySelectionsByTroop>>)[t];
+    if (!troopCfg || typeof troopCfg !== 'object') continue;
     for (const p of PIECES) {
-      next[t][p] = mapPiece((troopCfg as any)[p]);
+      next[t][p] = mapPiece(troopCfg[p]);
     }
   }
   return next;
+}
+
+/** Legacy piece output for storage. */
+interface LegacyPieceOutput {
+  level: number;
+  masteryForged: boolean;
+  masteryLevel: number;
+  essenceLevel: number;
+  empowermentLevel: number;
+  stacking: string;
 }
 
 /**
  * Map new loadout back to legacy HeroGearSelections for storage.
  */
 function loadoutToLegacy(loadout: HeroGearLoadout): OldHeroGearSelections {
-  const out: any = {};
+  const out = {} as Record<TroopType, Record<GearPiece, LegacyPieceOutput>>;
 
   const empowermentFromPlus = (plus: number): number => {
     if (plus >= 100) return 100;
@@ -103,12 +127,13 @@ function loadoutToLegacy(loadout: HeroGearLoadout): OldHeroGearSelections {
   };
 
   for (const t of TROOPS) {
-    out[t] = {};
+    out[t] = {} as Record<GearPiece, LegacyPieceOutput>;
     for (const p of PIECES) {
       const sel = loadout[t][p];
-      const isMythic = sel.progress.rarity === "mythic";
-      const mythicLevel = isMythic ? clampInt((sel.progress as any).level, 0, 100) : 0;
-      const legendaryPlus = !isMythic ? clampInt((sel.progress as any).plus, 1, 100) : 0;
+      const progress: GearProgress = sel.progress;
+      const mythicLevel = progress.rarity === "mythic" ? clampInt(progress.level, 0, 100) : 0;
+      const legendaryPlus = progress.rarity === "legendary" ? clampInt(progress.plus, 1, 100) : 0;
+      const isMythic = progress.rarity === "mythic";
       const level = isMythic ? Math.max(1, mythicLevel) : 100 + legendaryPlus;
       const empowermentLevel = isMythic ? 0 : empowermentFromPlus(legendaryPlus);
 
@@ -122,7 +147,7 @@ function loadoutToLegacy(loadout: HeroGearLoadout): OldHeroGearSelections {
       };
     }
   }
-  return out as OldHeroGearSelections;
+  return out as unknown as OldHeroGearSelections;
 }
 
 // ============================================================================
@@ -137,9 +162,9 @@ function computeHeroGearBonuses(loadout: HeroGearLoadout, registry: typeof heroG
   };
 
   const computedPieces: Record<TroopType, Record<GearPiece, GearComputed>> = {
-    infantry: { belt: null as any, boots: null as any, gloves: null as any, goggles: null as any },
-    lancer: { belt: null as any, boots: null as any, gloves: null as any, goggles: null as any },
-    marksman: { belt: null as any, boots: null as any, gloves: null as any, goggles: null as any }
+    infantry: {} as Record<GearPiece, GearComputed>,
+    lancer: {} as Record<GearPiece, GearComputed>,
+    marksman: {} as Record<GearPiece, GearComputed>
   };
 
   for (const t of TROOPS) {

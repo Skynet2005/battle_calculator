@@ -7,3 +7,4 @@ export { default as PageShell } from './PageShell';
 export { default as SectionCard } from './SectionCard';
 export { default as StatTile } from './StatTile';
 export { default as ThemeToggle } from './ThemeToggle';
+export { default as Tooltip } from './Tooltip';

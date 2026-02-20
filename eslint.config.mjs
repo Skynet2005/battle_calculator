@@ -14,6 +14,8 @@ export default defineConfig([
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "temp/**",
+      "scripts/**",
     ],
   },
   ...nextVitals,
@@ -21,38 +23,58 @@ export default defineConfig([
   {
     rules: {
       "react-compiler/react-compiler": "off",
-      "react-hooks/rules-of-hooks": "off",
-      "react-hooks/exhaustive-deps": "off",
-      "react-hooks/set-state-in-effect": "off",
-      "react-hooks/immutability": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/immutability": "warn",
+      "react-hooks/preserve-manual-memoization": "off",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
       "@typescript-eslint/no-require-imports": "off",
       "react/no-unescaped-entities": "off",
+      "no-restricted-imports": "off",
+    },
+  },
+  {
+    files: ["src/domain/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "react", message: "Domain code cannot import React or Next.js. Keep domain logic pure." },
+            { name: "react-dom", message: "Domain code cannot import React or Next.js. Keep domain logic pure." },
+          ],
+          patterns: [
+            { group: ["next/*"], message: "Domain code cannot import Next.js. Keep domain logic pure." },
+            { group: ["@/features/*", "@/features/**"], message: "Domain code cannot import features or server code." },
+            { group: ["@/server/*", "@/server/**"], message: "Domain code cannot import features or server code." },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/server/**"],
+    rules: {
       "no-restricted-imports": [
         "error",
         {
           patterns: [
-            {
-              group: ["react", "react-dom", "next/*"],
-              message: "Domain code cannot import React or Next.js. Keep domain logic pure.",
-              from: "src/domain/**",
-            },
-            {
-              group: ["src/features/**", "src/server/**"],
-              message: "Domain code cannot import features or server code.",
-              from: "src/domain/**",
-            },
-            {
-              group: ["src/features/**"],
-              message: "Server code cannot import features.",
-              from: "src/server/**",
-            },
-            {
-              group: ["src/server/**"],
-              message: "Features cannot import server code directly (use API routes instead).",
-              from: "src/features/**",
-            },
+            { group: ["@/features/*", "@/features/**"], message: "Server code cannot import features." },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/features/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            { group: ["@/server/*", "@/server/**"], message: "Features cannot import server code directly (use API routes instead)." },
           ],
         },
       ],

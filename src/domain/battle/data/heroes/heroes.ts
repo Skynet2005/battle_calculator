@@ -1,3 +1,4 @@
+// Data verified: 2026-02-17 | Generations 1-11 covered | 43 heroes total
 import type {
   Hero,
   HeroClass

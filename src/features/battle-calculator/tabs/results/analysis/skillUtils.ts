@@ -4,7 +4,7 @@
  */
 
 import type { NormalizedSkillEffect } from '@/domain/battle';
-import type { TurnLog } from '@/domain/combat/types';
+import type { TurnLog } from '@/domain/battle/engine/types';
 import { formatEffectStat } from '../utils/format';
 
 export function collectSkillActivations(turnLog: TurnLog | undefined, role: 'attacker' | 'defender'): {

@@ -8,7 +8,7 @@ type StatKeys = 'attack' | 'defense' | 'lethality' | 'health';
 export type LeaderboardRow = {
   profileId: string;
   profileName: string | null;
-  updatedAt: Date | null;
+  updatedAt: Date | string | null;
   attack: number;
   defense: number;
   lethality: number;
@@ -47,8 +47,9 @@ export default function LeaderboardTable({ rows, sortLabel }: LeaderboardTablePr
   };
 
   return (
+    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
     <div className="overflow-hidden rounded-lg border border-slate-800 shadow-xl bg-slate-900/60">
-      <table className="min-w-full divide-y divide-slate-800">
+      <table className="min-w-full divide-y divide-slate-800" aria-label={`Player leaderboard sorted by ${sortLabel}`}>
         <thead className="bg-slate-900/80">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wide">#</th>
@@ -183,6 +184,7 @@ export default function LeaderboardTable({ rows, sortLabel }: LeaderboardTablePr
           )}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

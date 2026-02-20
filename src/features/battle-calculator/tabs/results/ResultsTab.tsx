@@ -1,4 +1,4 @@
-import type { BattleConfig, BattleReport } from '@/domain/combat/types';
+import type { BattleConfig, BattleReport } from '@/domain/battle/engine/types';
 import { DEFAULT_TROOP_MIX } from '@/domain/rally/rally-config';
 import type { TroopMixConfig } from '@/shared/types';
 import type { FightResult } from '@/domain/rally/combat-fight';
@@ -13,6 +13,7 @@ interface ResultsTabProps {
   opponent: BattleSideContext | null;
   fightResult: FightResult | null;
   battleReport: BattleReport | null;
+  previousBattleReport?: BattleReport | null;
   errorMessage: string | null;
   simulationMode: BattleConfig['randomMode'];
   setSimulationModeAction: (mode: BattleConfig['randomMode']) => void;
@@ -30,6 +31,7 @@ export default function ResultsTab({
   opponent,
   fightResult,
   battleReport,
+  previousBattleReport,
   errorMessage,
   simulationMode,
   setSimulationModeAction,
@@ -48,6 +50,7 @@ export default function ResultsTab({
         opponent={opponent}
         fightResult={fightResult}
         battleReport={battleReport}
+        previousBattleReport={previousBattleReport}
         errorMessage={errorMessage}
         simulationMode={simulationMode}
         setSimulationModeAction={setSimulationModeAction}

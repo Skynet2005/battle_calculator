@@ -1,4 +1,4 @@
-import type { TroopCounts as CombatTroopCounts } from '@/domain/combat/types';
+import type { TroopCounts as CombatTroopCounts } from '@/domain/battle/engine/types';
 import type { CasualtySeriesEntry } from '@/features/battle-calculator/utils/turn-analytics';
 import { formatBigNumber } from '../utils/format';
 

@@ -1,3 +1,4 @@
+// Data verified: 2026-02-17 | 8 pets covered | Max level 10 (Titan Roc max level 7)
 export interface PetLevel {
   [level: string]: number;
 }

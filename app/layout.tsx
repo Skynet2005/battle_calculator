@@ -62,9 +62,14 @@ export default function RootLayout({
         <meta name="theme-color" content="#0f172a" />
       </head>
       <body>
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-slate-900 focus:text-white focus:top-0 focus:left-0">
+          Skip to main content
+        </a>
         <Providers>
           <ThemeProvider>
-            {children}
+            <main id="main-content">
+              {children}
+            </main>
           </ThemeProvider>
           <Toaster position="top-right" richColors />
         </Providers>

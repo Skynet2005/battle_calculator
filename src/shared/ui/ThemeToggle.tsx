@@ -10,6 +10,7 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       className="theme-toggle"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+      aria-pressed={theme === 'dark'}
       title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
     >
       {theme === 'light' ? (

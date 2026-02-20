@@ -1,4 +1,4 @@
-import type { TroopCounts as CombatTroopCounts, TurnLog } from '@/domain/combat/types';
+import type { TroopCounts as CombatTroopCounts, TurnLog } from '@/domain/battle/engine/types';
 
 export function totalCounts(counts?: CombatTroopCounts): number {
   if (!counts) return 0;
@@ -67,7 +67,7 @@ export function buildCasualtySeries(turns: TurnLog[]): CasualtySeriesEntry[] {
   return series;
 }
 
-import type { BattleReport } from '@/domain/combat/types';
+import type { BattleReport } from '@/domain/battle/engine/types';
 
 export function computeCasualtiesByType(report: BattleReport, playerIsAttacker: boolean) {
   const normalize = (c: Partial<CombatTroopCounts> | undefined | null): CombatTroopCounts => ({

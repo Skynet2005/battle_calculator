@@ -54,9 +54,25 @@ export type LevelSkill = {
   "target_damage_taken_duration_turns"?: number;
   "reduction_duration_turns"?: number;
 
+  /** Used by troop skills and some hero skills for heuristic mapping in hero-skill-converter. */
+  "trigger_every_n_strikes"?: number | HeroSkillLevelPercent;
+  skill_effects?: SkillEffectEntry[];
+
   // ===== Allow scoped variants (all_troops_, infantry_, lancer_, marksman_, rally_troops_, defender_troops_, enemy_) =====
-  [key: string]: string | number | HeroSkillLevelPercent | undefined;
+  [key: string]: string | number | HeroSkillLevelPercent | SkillEffectEntry[] | undefined;
 } | null;
+
+/** Shape used by LevelSkill.skill_effects for fallback mapping in hero-skill-converter. */
+export interface SkillEffectEntry {
+  effect_values?: Record<string, number>;
+  effect_is_chance?: boolean;
+  effect_probabilities?: Record<string, number>;
+  effect_type?: string;
+  effect_op?: number;
+  affects_opponent?: boolean;
+  trigger_types?: { trigger_vs?: string };
+  benefit_types?: { benefit_vs?: string };
+}
 
 export type ExclusiveWeaponLevel = {
   level: number;

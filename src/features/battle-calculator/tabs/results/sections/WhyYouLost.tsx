@@ -5,20 +5,23 @@
  * This is the centerpiece of the results page.
  */
 
+import { useMemo } from 'react';
 import type { FightResult } from '@/domain/rally/combat-fight';
+import type { BattleReport } from '@/domain/battle/engine/types';
 import { resolveOutcome } from '@/features/battle-calculator/utils/rally-outcome';
-import type { BattleSideContext } from '@/features/battle-calculator/model/types';
-import { buildOutcomeSummary } from '../utils/outcomeSummary';
+import type { BattleSideContext, CapacityReport } from '@/features/battle-calculator/model/types';
+import type { TroopMixConfig } from '@/shared/types';
+import { buildOutcomeSummary } from '@/features/battle-calculator/utils/outcomeSummary';
 
 interface WhyYouLostProps {
   player: BattleSideContext;
   opponent: BattleSideContext;
   fightResult: FightResult;
-  battleReport: any;
-  playerCapacity?: any;
-  opponentCapacity?: any;
-  playerMix: any;
-  opponentMix: any;
+  battleReport: BattleReport | null;
+  playerCapacity?: CapacityReport | null;
+  opponentCapacity?: CapacityReport | null;
+  playerMix: TroopMixConfig;
+  opponentMix: TroopMixConfig;
 }
 
 export function WhyYouLost({
@@ -32,7 +35,7 @@ export function WhyYouLost({
   opponentMix
 }: WhyYouLostProps) {
   const { winner } = resolveOutcome(player.role, fightResult);
-  const summary = buildOutcomeSummary({
+  const summary = useMemo(() => buildOutcomeSummary({
     player,
     opponent,
     fightResult,
@@ -41,7 +44,7 @@ export function WhyYouLost({
     opponentCapacity,
     playerMix,
     opponentMix
-  });
+  }), [player, opponent, fightResult, battleReport, playerCapacity, opponentCapacity, playerMix, opponentMix]);
 
   if (winner === 'player') {
     // Show "Why you won" instead

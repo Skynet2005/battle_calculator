@@ -3,6 +3,16 @@ export * from './calculations';
 export * from './data-extractors';
 export * from './data-selectors';
 
+// Engine (simulation system) — formerly src/domain/combat/
+export * from './engine';
+
+/**
+ * TroopType naming: use StatTroopType (lowercase) for stat pipeline and rally;
+ * use SimTroopType (PascalCase) for the simulation engine. Constants: STAT_TROOP_TYPES (calculations), TROOP_TYPE_VALUES (engine/types).
+ */
+export type { TroopType as StatTroopType } from './calculations';
+export type { TroopType as SimTroopType } from './engine/types';
+
 // Heroes
 export * from './data/heroes/hero-defaults';
 export * from './data/heroes/hero-extractor';

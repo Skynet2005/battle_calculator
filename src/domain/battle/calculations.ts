@@ -17,8 +17,25 @@
 import { memoizedCalculateFinalStats as _memoizedCalculateFinalStats } from './calculations-cache';
 
 export type TroopType = 'infantry' | 'lancer' | 'marksman';
+
+/** Single source of truth for stat-pipeline troop types (lowercase). Use for calculations and rally. */
+export const STAT_TROOP_TYPES: readonly TroopType[] = ['infantry', 'lancer', 'marksman'] as const;
+
 export type TroopScope = TroopType | 'all_troops' | 'rally_troops';
 export type StatType = 'attack' | 'defense' | 'lethality' | 'health';
+
+const STAT_KEYS: StatType[] = ['attack', 'defense', 'lethality', 'health'];
+
+function addBasicContrib(
+  result: Record<StatType, number>,
+  values: Partial<Record<StatType, number>>,
+  caps?: Partial<Record<StatType, number>>
+): void {
+  for (const stat of STAT_KEYS) {
+    const v = values[stat] ?? 0;
+    result[stat] += caps?.[stat] !== undefined ? Math.min(v, caps[stat]) : v;
+  }
+}
 
 export interface BasicBonuses {
   combatTech: {
@@ -147,6 +164,14 @@ export interface FinalStats {
   health: number;
 }
 
+/** Base stat line shared across domain modules */
+export interface TroopStatLine {
+  attack: number;
+  defense: number;
+  health: number;
+  lethality: number;
+}
+
 export interface CombatSideBonuses {
   basic: BasicBonuses;
   additive: AdditiveBonuses;
@@ -172,6 +197,7 @@ export function roundFinalStats(stats: FinalStats, decimals = 2): FinalStats {
 
 /**
  * Calculate Basic Bonus (permanent additives)
+ * Table-driven: uniform sources use addBasicContrib; special cases applied after.
  */
 export function calculateBasicBonus(
   bonuses: BasicBonuses,
@@ -179,127 +205,68 @@ export function calculateBasicBonus(
 ): Record<StatType, number> {
   const result: Record<StatType, number> = { attack: 0, defense: 0, lethality: 0, health: 0 };
 
-  // Combat Tech - Troop-Type Bonus
-  result.attack += bonuses.combatTech.troopTypeBonus[troopType]?.attack || 0;
-  result.defense += bonuses.combatTech.troopTypeBonus[troopType]?.defense || 0;
-  result.lethality += bonuses.combatTech.troopTypeBonus[troopType]?.lethality || 0;
-  result.health += bonuses.combatTech.troopTypeBonus[troopType]?.health || 0;
+  addBasicContrib(result, bonuses.combatTech.troopTypeBonus[troopType] ?? {});
+  addBasicContrib(result, bonuses.combatTech.totalTroopBonus);
+  addBasicContrib(
+    result,
+    {
+      attack: bonuses.allianceTech.attack ?? 0,
+      defense: bonuses.allianceTech.defense ?? 0,
+      lethality: bonuses.allianceTech.lethality ?? 0,
+      health: bonuses.allianceTech.health ?? 0,
+    },
+    { attack: 10, defense: 10, lethality: 10, health: 10 }
+  );
+  addBasicContrib(result, bonuses.experts);
 
-  // Combat Tech - Total Troop Bonus
-  result.attack += bonuses.combatTech.totalTroopBonus.attack || 0;
-  result.defense += bonuses.combatTech.totalTroopBonus.defense || 0;
-  result.lethality += bonuses.combatTech.totalTroopBonus.lethality || 0;
-  result.health += bonuses.combatTech.totalTroopBonus.health || 0;
-
-  // Alliance Tech (max +10%)
-  result.attack += Math.min(bonuses.allianceTech.attack || 0, 10);
-  result.defense += Math.min(bonuses.allianceTech.defense || 0, 10);
-  result.lethality += Math.min(bonuses.allianceTech.lethality || 0, 10);
-  result.health += Math.min(bonuses.allianceTech.health || 0, 10);
-
-  // Experts
-  result.attack += bonuses.experts.attack || 0;
-  result.defense += bonuses.experts.defense || 0;
-  result.lethality += bonuses.experts.lethality || 0;
-  result.health += bonuses.experts.health || 0;
-
-  // Daybreak Island troop-type ATK/DEF
   if (bonuses.daybreakIsland && troopType in bonuses.daybreakIsland) {
-    const island = bonuses.daybreakIsland[troopType as keyof typeof bonuses.daybreakIsland] as any;
-    result.attack += island?.attack || 0;
-    result.defense += island?.defense || 0;
+    const island = bonuses.daybreakIsland[troopType as keyof typeof bonuses.daybreakIsland] as { attack?: number; defense?: number } | undefined;
+    addBasicContrib(result, { attack: island?.attack ?? 0, defense: island?.defense ?? 0 });
   }
-
-  // Daybreak Island global troops bonuses
   if (bonuses.daybreakIsland?.troops) {
-    result.attack += bonuses.daybreakIsland.troops.attack || 0;
-    result.defense += bonuses.daybreakIsland.troops.defense || 0;
-    result.lethality += bonuses.daybreakIsland.troops.lethality || 0;
-    result.health += bonuses.daybreakIsland.troops.health || 0;
+    addBasicContrib(result, bonuses.daybreakIsland.troops);
   }
 
-  // Pets
-  result.attack += bonuses.pets.attack || 0;
-  result.defense += bonuses.pets.defense || 0;
-  result.lethality += bonuses.pets.lethality || 0;
-  result.health += bonuses.pets.health || 0;
+  addBasicContrib(result, bonuses.pets);
+  addBasicContrib(result, bonuses.stackedSkins);
+  addBasicContrib(result, bonuses.hero);
+  addBasicContrib(result, bonuses.chiefGear);
 
-  // Stacked Skins
-  result.attack += bonuses.stackedSkins.attack || 0;
-  result.defense += bonuses.stackedSkins.defense || 0;
-  result.lethality += bonuses.stackedSkins.lethality || 0;
-  result.health += bonuses.stackedSkins.health || 0;
-
-  // Hero (Leader) - Rally lead only
-  result.attack += bonuses.hero.attack || 0;
-  result.defense += bonuses.hero.defense || 0;
-  result.lethality += bonuses.hero.lethality || 0;
-  result.health += bonuses.hero.health || 0;
-
-  // Chief Gear (ATK/DEF only)
-  result.attack += bonuses.chiefGear.attack || 0;
-  result.defense += bonuses.chiefGear.defense || 0;
-
-  // Charms (LETH/HP only, troop-type specific)
   if (bonuses.charms && troopType in bonuses.charms) {
-    const troopCharms = bonuses.charms[troopType as keyof typeof bonuses.charms] as any;
-    result.lethality += troopCharms?.lethality || 0;
-    result.health += troopCharms?.health || 0;
+    const troopCharms = bonuses.charms[troopType as keyof typeof bonuses.charms] as { lethality?: number; health?: number } | undefined;
+    addBasicContrib(result, { lethality: troopCharms?.lethality ?? 0, health: troopCharms?.health ?? 0 });
   }
-
-  // Hero Gear (LETH/HP from gear, ATK/DEF from empowerment bonuses)
   if (bonuses.heroGear && troopType in bonuses.heroGear) {
-    const gear = bonuses.heroGear[troopType as keyof typeof bonuses.heroGear];
-    result.lethality += gear.lethality || 0;
-    result.health += gear.health || 0;
-    result.attack += gear.attack || 0;
-    result.defense += gear.defense || 0;
+    addBasicContrib(result, bonuses.heroGear[troopType as keyof typeof bonuses.heroGear]);
   }
 
-  // Alliance Facilities (ATK/DEF only, up to +13%)
-  result.attack += Math.min(bonuses.allianceFacilities.attack || 0, 13);
-  result.defense += Math.min(bonuses.allianceFacilities.defense || 0, 13);
+  addBasicContrib(
+    result,
+    { attack: bonuses.allianceFacilities.attack ?? 0, defense: bonuses.allianceFacilities.defense ?? 0 },
+    { attack: 13, defense: 13 }
+  );
 
-  // Pet Refinement (troop-type LETH/HP + global ATK/DEF)
   if (bonuses.petRefinement && troopType in bonuses.petRefinement) {
-    const refinement = bonuses.petRefinement[troopType as keyof typeof bonuses.petRefinement] as any;
-    result.lethality += refinement?.lethality || 0;
-    result.health += refinement?.health || 0;
+    const refinement = bonuses.petRefinement[troopType as keyof typeof bonuses.petRefinement] as { lethality?: number; health?: number } | undefined;
+    addBasicContrib(result, { lethality: refinement?.lethality ?? 0, health: refinement?.health ?? 0 });
   }
   if (bonuses.petRefinement?.troops) {
-    result.attack += bonuses.petRefinement.troops.attack || 0;
-    result.defense += bonuses.petRefinement.troops.defense || 0;
+    addBasicContrib(result, bonuses.petRefinement.troops);
   }
 
-  // War Academy
   if (bonuses.warAcademy?.[troopType]) {
-    result.attack += bonuses.warAcademy[troopType].attack || 0;
-    result.defense += bonuses.warAcademy[troopType].defense || 0;
-    result.lethality += bonuses.warAcademy[troopType].lethality || 0;
-    result.health += bonuses.warAcademy[troopType].health || 0;
+    addBasicContrib(result, bonuses.warAcademy[troopType]);
   }
 
-  // Special Heroes
   if (bonuses.specialHeroes.jeronimo) {
-    result.lethality += 15;
-    result.health += 15;
+    addBasicContrib(result, { lethality: 15, health: 15 });
   }
   if (bonuses.specialHeroes.natalia) {
-    result.attack += 10;
-    result.defense += 10;
+    addBasicContrib(result, { attack: 10, defense: 10 });
   }
 
-  // VIP Prestige
-  result.attack += bonuses.vipPrestige.attack || 0;
-  result.defense += bonuses.vipPrestige.defense || 0;
-  result.lethality += bonuses.vipPrestige.lethality || 0;
-  result.health += bonuses.vipPrestige.health || 0;
-
-  // Globe
-  result.attack += bonuses.globe.attack || 0;
-  result.defense += bonuses.globe.defense || 0;
-  result.lethality += bonuses.globe.lethality || 0;
-  result.health += bonuses.globe.health || 0;
+  addBasicContrib(result, bonuses.vipPrestige);
+  addBasicContrib(result, bonuses.globe);
 
   return result;
 }

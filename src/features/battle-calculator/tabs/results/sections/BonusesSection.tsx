@@ -32,7 +32,6 @@ function BonusesSectionComponent({
   opponentJoinerAdditive
 }: BonusesSectionProps) {
   const [showOnlyNonZero, setShowOnlyNonZero] = useState(true);
-  const [showRaw, setShowRaw] = useState(false);
 
   const statRows = useMemo(() => {
     if (!playerStats || !opponentStats) return [];
@@ -92,15 +91,6 @@ function BonusesSectionComponent({
               className="h-3 w-3 accent-rose-400"
             />
             Only non-zero
-          </label>
-          <label className="flex items-center gap-2 text-gray-300">
-            <input
-              type="checkbox"
-              checked={showRaw}
-              onChange={(e) => setShowRaw(e.target.checked)}
-              className="h-3 w-3 accent-rose-400"
-            />
-            Show raw values
           </label>
         </div>
 

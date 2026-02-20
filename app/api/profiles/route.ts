@@ -7,14 +7,11 @@ import { containsProfanity } from '@/shared/utils/utils';
 import { profiles, userSettings } from '@/server/db/schema';
 import { requireAuth } from '@/server/middleware/auth';
 import { withErrorHandling, ApiError } from '@/server/middleware/apiErrorHandler';
+import { profileMutationLimiter } from '@/server/middleware/rateLimit';
 import { validateBody } from '@/server/middleware/validateSchema';
 import { createProfileSchema } from '@/server/validation/schemas';
 import { logger } from '@/server/utils/logger';
 import { getCachedProfilesWithCurrent } from '@/server/db/cache';
-import { rateLimit } from '@/server/middleware/rateLimit';
-
-// Rate limit: 10 requests per minute for profile creation
-const createProfileRateLimit = rateLimit(10, 60 * 1000);
 
 export const GET = withErrorHandling(async (req: NextRequest) => {
   await migrationsReady;
@@ -74,14 +71,9 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
 });
 
 export const POST = withErrorHandling(async (req: NextRequest) => {
+  profileMutationLimiter(req);
   await migrationsReady;
   const auth = await requireAuth(req);
-
-  // Apply rate limiting
-  const rateLimitResponse = createProfileRateLimit(req);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== 'object') {

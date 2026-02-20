@@ -1,3 +1,4 @@
+// Data verified: 2026-02-17 | 6 gear slots | Max tier: Red (Legendary) T4 Stars 2 Step 4 | GAP: T4 Stars 3 data missing
 import type { ChiefGearData } from "./chief_gear_types";
 
 export const CHIEF_GEAR_DATA: ChiefGearData = {

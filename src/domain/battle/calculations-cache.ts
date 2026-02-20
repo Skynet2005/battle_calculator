@@ -2,7 +2,7 @@
  * Memoization utilities for battle calculations
  *
  * Provides caching for expensive calculation functions to improve performance.
- * Uses a simple LRU-style cache with size limits to prevent memory leaks.
+ * Uses an LRU cache implemented with Map (insertion order) and size limits.
  */
 
 import type {
@@ -15,64 +15,60 @@ import type {
 
 // Cache configuration
 const MAX_CACHE_SIZE = 200;
-const CACHE_CLEANUP_THRESHOLD = 250; // Clean up when cache exceeds this size
+const CACHE_CLEANUP_THRESHOLD = 250;
 
 /**
- * Simple cache implementation with size limits
+ * Recursively stringify an object with sorted keys for stable cache keys.
+ */
+function stableStringify(value: unknown): string {
+  if (value === null) return 'null';
+  if (typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) {
+    return '[' + value.map(stableStringify).join(',') + ']';
+  }
+  const keys = Object.keys(value as Record<string, unknown>).sort();
+  const pairs = keys.map((k) => JSON.stringify(k) + ':' + stableStringify((value as Record<string, unknown>)[k]));
+  return '{' + pairs.join(',') + '}';
+}
+
+/**
+ * LRU cache using Map. Insertion order is used; on get we delete+set to move to end.
+ * Eviction removes oldest (first) entries when over threshold.
  */
 class CalculationCache<K, V> {
   private cache = new Map<K, V>();
-  private accessOrder: K[] = [];
 
   get(key: K): V | undefined {
     const value = this.cache.get(key);
     if (value !== undefined) {
-      // Move to end (most recently used)
-      const index = this.accessOrder.indexOf(key);
-      if (index > -1) {
-        this.accessOrder.splice(index, 1);
-      }
-      this.accessOrder.push(key);
+      this.cache.delete(key);
+      this.cache.set(key, value);
     }
     return value;
   }
 
   set(key: K, value: V): void {
     if (this.cache.has(key)) {
-      // Update existing entry
-      this.cache.set(key, value);
-      // Move to end
-      const index = this.accessOrder.indexOf(key);
-      if (index > -1) {
-        this.accessOrder.splice(index, 1);
-      }
-      this.accessOrder.push(key);
-    } else {
-      // Add new entry
-      this.cache.set(key, value);
-      this.accessOrder.push(key);
-
-      // Clean up if cache is too large
-      if (this.cache.size > CACHE_CLEANUP_THRESHOLD) {
-        this.cleanup();
-      }
+      this.cache.delete(key);
+    }
+    this.cache.set(key, value);
+    if (this.cache.size > CACHE_CLEANUP_THRESHOLD) {
+      this.cleanup();
     }
   }
 
   private cleanup(): void {
-    // Remove oldest entries (from the beginning)
     const toRemove = this.cache.size - MAX_CACHE_SIZE;
-    for (let i = 0; i < toRemove; i++) {
-      const oldestKey = this.accessOrder.shift();
-      if (oldestKey !== undefined) {
-        this.cache.delete(oldestKey);
-      }
+    const keysToDelete: K[] = [];
+    for (const key of this.cache.keys()) {
+      if (keysToDelete.length >= toRemove) break;
+      keysToDelete.push(key);
     }
+    keysToDelete.forEach((k) => this.cache.delete(k));
   }
 
   clear(): void {
     this.cache.clear();
-    this.accessOrder = [];
   }
 
   get size(): number {
@@ -81,7 +77,7 @@ class CalculationCache<K, V> {
 }
 
 /**
- * Create a stable cache key from calculation inputs
+ * Create a stable cache key from calculation inputs (sorted keys for consistency).
  */
 function createFinalStatsCacheKey(
   basicBonuses: BasicBonuses,
@@ -90,37 +86,17 @@ function createFinalStatsCacheKey(
   troopType: TroopType,
   enemyMultipliers?: MultiplicativeBonuses
 ): string {
-  // Create a deterministic key from the inputs
-  // Using JSON.stringify with sorted keys for consistency
   const keyParts = [
-    JSON.stringify(basicBonuses),
-    JSON.stringify(additiveBonuses),
-    JSON.stringify(selfMultipliers),
+    stableStringify(basicBonuses),
+    stableStringify(additiveBonuses),
+    stableStringify(selfMultipliers),
     troopType,
-    enemyMultipliers ? JSON.stringify(enemyMultipliers) : 'no-enemy',
+    enemyMultipliers ? stableStringify(enemyMultipliers) : 'no-enemy',
   ];
   return keyParts.join('|');
 }
 
-/**
- * Create a cache key for damage calculations
- */
-function createDamageCacheKey(
-  troopCount: number,
-  attackPercent: number,
-  lethalityPercent: number,
-  enemyDefensePercent: number,
-  hiddenFactor: number,
-  damageUp: number,
-  damageReduction: number
-): string {
-  // Round values to reduce cache key variations from floating point precision
-  return `${Math.round(troopCount)}|${Math.round(attackPercent * 100) / 100}|${Math.round(lethalityPercent * 100) / 100}|${Math.round(enemyDefensePercent * 100) / 100}|${hiddenFactor}|${Math.round(damageUp * 100) / 100}|${Math.round(damageReduction * 100) / 100}`;
-}
-
-// Cache instances
 const finalStatsCache = new CalculationCache<string, FinalStats>();
-const damageCache = new CalculationCache<string, number>();
 
 /**
  * Memoized version of calculateFinalStats
@@ -173,81 +149,18 @@ export function memoizedCalculateFinalStats(
 }
 
 /**
- * Memoized version of calculateDamage
- *
- * @param calculateDamageFn - The original calculateDamage function
- * @param troopCount - Troop count
- * @param attackPercent - Attack percentage
- * @param lethalityPercent - Lethality percentage
- * @param enemyDefensePercent - Enemy defense percentage
- * @param hiddenFactor - Hidden factor
- * @param damageUp - Damage up percentage
- * @param damageReduction - Damage reduction percentage
- * @returns Cached or newly calculated damage
- */
-export function memoizedCalculateDamage(
-  calculateDamageFn: (
-    troopCount: number,
-    attackPercent: number,
-    lethalityPercent: number,
-    enemyDefensePercent: number,
-    hiddenFactor: number,
-    mods: { attackerDamageUpPct: number; defenderDamageReductionPct: number }
-  ) => number,
-  troopCount: number,
-  attackPercent: number,
-  lethalityPercent: number,
-  enemyDefensePercent: number,
-  hiddenFactor: number,
-  damageUp: number,
-  damageReduction: number
-): number {
-  const cacheKey = createDamageCacheKey(
-    troopCount,
-    attackPercent,
-    lethalityPercent,
-    enemyDefensePercent,
-    hiddenFactor,
-    damageUp,
-    damageReduction
-  );
-
-  const cached = damageCache.get(cacheKey);
-  if (cached !== undefined) {
-    return cached;
-  }
-
-  const result = calculateDamageFn(
-    troopCount,
-    attackPercent,
-    lethalityPercent,
-    enemyDefensePercent,
-    hiddenFactor,
-    { attackerDamageUpPct: damageUp, defenderDamageReductionPct: damageReduction }
-  );
-
-  damageCache.set(cacheKey, result);
-  return result;
-}
-
-/**
  * Clear all calculation caches
  * Useful for testing or when memory needs to be freed
  */
 export function clearCalculationCaches(): void {
   finalStatsCache.clear();
-  damageCache.clear();
 }
 
 /**
  * Get cache statistics for monitoring
  */
-export function getCacheStats(): {
-  finalStatsCacheSize: number;
-  damageCacheSize: number;
-} {
+export function getCacheStats(): { finalStatsCacheSize: number } {
   return {
     finalStatsCacheSize: finalStatsCache.size,
-    damageCacheSize: damageCache.size,
   };
 }

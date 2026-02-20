@@ -101,7 +101,7 @@ export default function TabBar({
       <div
         className="tabs"
         role="tablist"
-        aria-label="Main navigation"
+        aria-label="Battle calculator sections"
       >
         {tabs.map((tab, index) => (
           <button

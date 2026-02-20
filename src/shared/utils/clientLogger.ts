@@ -3,6 +3,7 @@
  *
  * Provides structured logging for client-side code.
  * In production, these logs can be sent to a logging service.
+ * Do not log sensitive data (passwords, tokens, PII) with this logger.
  */
 
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';

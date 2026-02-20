@@ -22,6 +22,20 @@
       "when": 1768157922396,
       "tag": "0008_gifted_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1771372800000,
+      "tag": "0009_add_profiles_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1771459200000,
+      "tag": "0010_add_profiles_public",
+      "breakpoints": true
     }
   ]
 }

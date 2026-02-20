@@ -1,14 +1,9 @@
 import type { TroopType as BaseTroopType } from "@/shared/types";
-import type { HeroSelection, NormalizedSkillEffect } from "../battle";
+import type { HeroSelection, NormalizedSkillEffect, TroopStatLine } from "../battle";
 
 export type TroopType = BaseTroopType;
 
-export interface TroopStatLine {
-  attack: number;
-  defense: number;
-  health: number;
-  lethality: number;
-}
+export type { TroopStatLine };
 
 export type SideBaseStats = Record<TroopType, TroopStatLine>;
 

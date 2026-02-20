@@ -7,7 +7,7 @@
  * to calculate casualties per turn efficiently.
  */
 
-import type { TurnLog } from '@/domain/combat/types';
+import type { TurnLog } from '@/domain/battle/engine/types';
 
 interface RallyTurnProgressProps {
   turns: TurnLog[];

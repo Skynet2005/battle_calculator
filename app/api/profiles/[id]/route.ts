@@ -6,14 +6,11 @@ import { db, migrationsReady } from '@/server/db/db';
 import { profiles, userSettings } from '@/server/db/schema';
 import { ApiError, withErrorHandling } from '@/server/middleware/apiErrorHandler';
 import { requireAuth } from '@/server/middleware/auth';
-import { rateLimit } from '@/server/middleware/rateLimit';
+import { profileMutationLimiter } from '@/server/middleware/rateLimit';
 import { validateBody } from '@/server/middleware/validateSchema';
 import { logger } from '@/server/utils/logger';
 import { updateProfileSchema } from '@/server/validation/schemas';
 import { containsProfanity } from '@/shared/utils/utils';
-
-// Rate limit: 60 requests per minute for profile updates (allows auto-save to work smoothly)
-const updateProfileRateLimit = rateLimit(60, 60 * 1000);
 
 export const GET = withErrorHandling(async (req: NextRequest, ctx?: unknown) => {
   await migrationsReady;
@@ -51,6 +48,7 @@ export const GET = withErrorHandling(async (req: NextRequest, ctx?: unknown) => 
 });
 
 export const PUT = withErrorHandling(async (req: NextRequest, ctx?: unknown) => {
+  profileMutationLimiter(req);
   await migrationsReady;
   const params = (ctx as { params?: Promise<{ id: string }> })?.params;
   if (!params) {
@@ -58,12 +56,6 @@ export const PUT = withErrorHandling(async (req: NextRequest, ctx?: unknown) => 
   }
   const { id } = await params;
   const auth = await requireAuth(req);
-
-  // Apply rate limiting
-  const rateLimitResponse = updateProfileRateLimit(req);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== 'object') {
@@ -120,6 +112,7 @@ export const PUT = withErrorHandling(async (req: NextRequest, ctx?: unknown) => 
 });
 
 export const DELETE = withErrorHandling(async (req: NextRequest, ctx?: unknown) => {
+  profileMutationLimiter(req);
   await migrationsReady;
   const params = (ctx as { params?: Promise<{ id: string }> })?.params;
   if (!params) {

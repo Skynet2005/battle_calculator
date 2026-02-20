@@ -45,7 +45,7 @@ export function useLogin() {
       });
       if (!res.ok) {
         const error = await res.json().catch(() => ({ error: 'Invalid credentials' }));
-        throw new Error(error.error || 'Invalid credentials');
+        throw new Error((error as { error?: string }).error || 'Invalid credentials');
       }
       return res.json();
     },

@@ -1,13 +1,14 @@
 'use client';
 
-import { Check, Copy, Edit2, Loader2, Plus, Trash2, User, X } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
+import { Check, Copy, Download, Edit2, Loader2, Plus, Trash2, Upload, User, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import type { UserProfile } from '@/shared/types';
 import { createNewProfile } from '@/features/profile/api/profile-storage';
 import { useProfiles, useProfile, useCreateProfile, useUpdateProfile, useDeleteProfile } from '@/shared/hooks/useProfiles';
 import { useProfileState, useSetProfileState } from '@/shared/hooks/useProfileState';
 import { migrateProfile } from '@/features/profile/api/profile-migration';
 import { toast } from '@/shared/utils/toast';
+import { downloadJson } from '@/shared/utils/fileDownload';
 import LoadingSkeleton from '@/shared/ui/LoadingSkeleton';
 
 interface ProfileManagerProps {
@@ -187,6 +188,64 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
     );
   };
 
+  const handleExportProfile = (profile: UserProfile) => {
+    const safeName = profile.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+    downloadJson(profile, `profile-${safeName}.json`);
+    toast.success('Profile exported');
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportProfile = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleImportFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const parsed = JSON.parse(evt.target?.result as string);
+
+          if (!parsed || typeof parsed !== 'object' || !parsed.id || !parsed.name || !parsed.basicBonuses) {
+            toast.error('Invalid profile file', 'File must contain id, name, and basicBonuses fields');
+            return;
+          }
+
+          const imported: UserProfile = {
+            ...parsed,
+            id: crypto.randomUUID(),
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            name: `${parsed.name} (Imported)`,
+          };
+
+          createProfileMutation.mutate(
+            { name: imported.name, data: imported, setCurrent: false },
+            {
+              onSuccess: () => {
+                toast.success('Profile imported successfully');
+              },
+              onError: (err) => {
+                toast.error('Failed to import profile', err.message || 'Please try again');
+              },
+            }
+          );
+        } catch {
+          toast.error('Invalid file', 'Could not parse JSON file');
+        }
+      };
+      reader.readAsText(file);
+
+      // Reset so re-importing the same file fires onChange again
+      e.target.value = '';
+    },
+    [createProfileMutation]
+  );
+
   const startEditing = (profile: UserProfile) => {
     setEditingProfileId(profile.id);
     setEditingName(profile.name);
@@ -209,14 +268,33 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
           <User className="w-6 h-6" />
           Profile Manager
         </h2>
-        <button
-          className="button flex items-center gap-2"
-          onClick={() => setShowCreateDialog(true)}
-          disabled={loading}
-        >
-          <Plus className="w-4 h-4" />
-          New Profile
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            className="button flex items-center gap-2 bg-slate-700/80 hover:bg-slate-700 text-sm"
+            onClick={handleImportProfile}
+            disabled={loading}
+            title="Import profile from JSON"
+          >
+            <Upload className="w-4 h-4" />
+            Import
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleImportFileChange}
+            aria-label="Import profile JSON file"
+          />
+          <button
+            className="button flex items-center gap-2"
+            onClick={() => setShowCreateDialog(true)}
+            disabled={loading}
+          >
+            <Plus className="w-4 h-4" />
+            New Profile
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -408,6 +486,16 @@ export default function ProfileManager({ onProfileChange }: ProfileManagerProps)
                       ) : (
                         <Copy className="w-4 h-4" />
                       )}
+                    </button>
+                    <button
+                      className="p-2 text-emerald-300 hover:bg-emerald-500/20 rounded-lg transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExportProfile(profile);
+                      }}
+                      title="Export profile"
+                    >
+                      <Download className="w-4 h-4" />
                     </button>
                     <button
                       className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors disabled:opacity-50"

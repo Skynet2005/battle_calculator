@@ -1,6 +1,6 @@
 import type { AdditiveBonuses, BasicBonuses } from '@/domain/battle/calculations';
 import { extractJoinerBonuses, extractLeaderBonuses } from '@/domain/rally/rally-bonus-extractor';
-import type { RallyConfiguration } from '@/shared/types';
+import type { RallyConfiguration, RallyHero } from '@/shared/types';
 
 export type DataSelectorsSection = 'experts' | 'skins' | 'daybreakIsland' | 'specialBonuses';
 
@@ -88,14 +88,14 @@ export function computeContributingHeroes(rally?: RallyConfiguration, isOpponent
 
   const currentLeader = isOpponent ? (rally.opponentLeader || rally.leader) : (rally.playerLeader || rally.leader);
 
-  const mode =
+  const mode: 'attacking' | 'defending' =
     isOpponent ? (rally.specialWidgetBonus?.opponent || 'defending') : (rally.specialWidgetBonus?.player || 'attacking');
 
   const contributing: ContributingHero[] = [];
 
   // Leaders
   if (currentLeader?.infantry) {
-    const leaderBonuses = extractLeaderBonuses(currentLeader.infantry as any, mode as any);
+    const leaderBonuses = extractLeaderBonuses(currentLeader.infantry as RallyHero | null, mode);
     const total =
       leaderBonuses.additive.attack +
       leaderBonuses.additive.defense +
@@ -106,7 +106,7 @@ export function computeContributingHeroes(rally?: RallyConfiguration, isOpponent
   }
 
   if (currentLeader?.lancer) {
-    const leaderBonuses = extractLeaderBonuses(currentLeader.lancer as any, mode as any);
+    const leaderBonuses = extractLeaderBonuses(currentLeader.lancer as RallyHero | null, mode);
     const total =
       leaderBonuses.additive.attack +
       leaderBonuses.additive.defense +
@@ -117,7 +117,7 @@ export function computeContributingHeroes(rally?: RallyConfiguration, isOpponent
   }
 
   if (currentLeader?.marksman) {
-    const leaderBonuses = extractLeaderBonuses(currentLeader.marksman as any, mode as any);
+    const leaderBonuses = extractLeaderBonuses(currentLeader.marksman as RallyHero | null, mode);
     const total =
       leaderBonuses.additive.attack +
       leaderBonuses.additive.defense +
@@ -130,7 +130,7 @@ export function computeContributingHeroes(rally?: RallyConfiguration, isOpponent
   // Joiners
   if (rally.joiners && rally.joiners.length > 0) {
     for (const joiner of rally.joiners) {
-      const joinerBonuses = extractJoinerBonuses([joiner as any], mode as any);
+      const joinerBonuses = extractJoinerBonuses([joiner], mode);
       const total =
         joinerBonuses.additive.attack +
         joinerBonuses.additive.defense +

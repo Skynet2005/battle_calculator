@@ -5,40 +5,30 @@
  * Includes filtering and jump-to-turn functionality.
  */
 
-import type { TurnLog } from '@/domain/combat/types';
+import type { TurnLog } from '@/domain/battle/engine/types';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useEffect, useMemo, useRef } from 'react';
-import { extractKeyMoments } from '../utils/keyMoments';
-import { filterTurns, getTurnHighlights, type TurnFilterOptions } from '../utils/turnFilters';
+import type { KeyMoment } from '../utils/keyMoments';
 import { TurnCard } from './TurnCard';
 
 interface VirtualizedTurnListProps {
-  turns: TurnLog[];
-  playerIsAttacker: boolean;
-  filters: TurnFilterOptions;
+  filteredTurns: TurnLog[];
+  totalTurnCount: number;
+  keyMoments: KeyMoment[];
   onJumpToTurn?: (turnNumber: number) => void;
 }
 
 export function VirtualizedTurnList({
-  turns,
-  playerIsAttacker,
-  filters,
+  filteredTurns,
+  totalTurnCount,
+  keyMoments,
   onJumpToTurn
 }: VirtualizedTurnListProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const filteredTurns = useMemo(
-    () => filterTurns(turns, filters, playerIsAttacker),
-    [turns, filters, playerIsAttacker]
-  );
 
   const highlights = useMemo(
-    () => getTurnHighlights(turns, playerIsAttacker),
-    [turns, playerIsAttacker]
-  );
-
-  const keyMoments = useMemo(
-    () => extractKeyMoments(turns, playerIsAttacker),
-    [turns, playerIsAttacker]
+    () => new Set(keyMoments.map(m => m.turn)),
+    [keyMoments]
   );
 
   const virtualizer = useVirtualizer({
@@ -128,7 +118,7 @@ export function VirtualizedTurnList({
 
       {/* Results count */}
       <div className="text-xs text-gray-400 text-center">
-        Showing {filteredTurns.length} of {turns.length} turns
+        Showing {filteredTurns.length} of {totalTurnCount} turns
       </div>
     </div>
   );

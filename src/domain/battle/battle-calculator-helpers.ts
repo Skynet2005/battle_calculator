@@ -1,6 +1,6 @@
 import { normalizeRatios } from '@/domain/rally/mix-utils';
 import { DEFAULT_TROOP_MIX } from '@/domain/rally/rally-config';
-import type { CapacityBreakdown, CapacityReport, SpecialBonusSummary } from '@/features/battle-calculator/model/types';
+import type { CapacityBreakdown, CapacityReport, SpecialBonusSummary } from '@/shared/types';
 import type { HeroLevel, RallyConfiguration, TroopMixConfig, UserProfile } from '@/shared/types';
 import { totalTroops as countTroops } from '@/domain/rally/combat-fighter';
 import type { RallySideConfig, SideBaseStats, TroopCounts } from '../rally/combat-types';
@@ -14,6 +14,7 @@ import type {
   MultiplicativeManualOverride,
   TroopType
 } from './calculations';
+import { STAT_TROOP_TYPES } from './calculations';
 import { calculateFinalStatsForSide } from './calculations';
 import { getChiefCharmBonuses } from './data-extractors';
 import { getChiefGearTypes } from './data-selectors';
@@ -28,7 +29,8 @@ import { PETS_DATA } from './data/pets/pet_skills';
 import { TROOP_DEFINITIONS } from './data/troops/troop_levels';
 import { getWarAcademyCapacityBonuses } from './data/war_academy/war-academy-capacity';
 
-export const TROOP_TYPE_LIST: TroopType[] = ['infantry', 'lancer', 'marksman'];
+/** Re-export for backward compatibility. Prefer STAT_TROOP_TYPES from calculations. */
+export const TROOP_TYPE_LIST = STAT_TROOP_TYPES;
 
 export const defaultExpertSelections: ExpertSelections = {
   attack: 0,

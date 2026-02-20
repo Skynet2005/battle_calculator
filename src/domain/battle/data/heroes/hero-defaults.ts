@@ -22,9 +22,9 @@ export function buildMaxHeroLevels(): Record<string, HeroLevel> {
     const skillLevels: SkillLevelsByName = {};
 
     skills.forEach((skill) => {
-      const data = (skill as any).data || {};
-      const maxLevel = getMaxLevelFromSkillData(data);
-      const skillName = (skill as any)['skill-name'] || (skill as any).name || 'skill';
+      const data = skill.data ?? {};
+      const maxLevel = getMaxLevelFromSkillData(data as Record<string, unknown>);
+      const skillName = (skill.name || skill.data?.['skill-name']) ?? 'skill';
       skillLevels[skillName] = maxLevel;
     });
 

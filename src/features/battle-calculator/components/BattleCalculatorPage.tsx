@@ -62,6 +62,7 @@ export default function BattleCalculatorPage() {
     simulatedPlayerContext,
     simulatedOpponentContext,
     simulatedBattleReport,
+    previousBattleReport,
     simulationMode,
     setSimulationModeAction,
     simulationCount,
@@ -222,6 +223,7 @@ export default function BattleCalculatorPage() {
             opponent={simulatedOpponentContext}
             fightResult={simulatedFightResult}
             battleReport={simulatedBattleReport}
+            previousBattleReport={previousBattleReport}
             errorMessage={fightSimulationError}
             simulationMode={simulationMode}
             setSimulationModeAction={setSimulationModeAction}

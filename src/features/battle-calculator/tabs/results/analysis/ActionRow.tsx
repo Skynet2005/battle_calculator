@@ -1,4 +1,4 @@
-import type { ActionLogEntry, TurnLog } from '@/domain/combat/types';
+import type { ActionLogEntry, TurnLog } from '@/domain/battle/engine/types';
 import { memo, useState } from 'react';
 import { formatNumber } from '../utils/format';
 import { ModifierList } from './ModifierList';
@@ -46,8 +46,28 @@ function ActionDetail({ action, turn }: { action: ActionLogEntry; turn: TurnLog 
   const keptIncoming = incoming.filter((m) => m.kept !== false);
   const discarded = [...outgoing, ...incoming].filter((m) => m.kept === false);
 
+  // Separate modifiers by scope for skill actions
+  const isSkillAction = action.actionType === 'Skill';
+  const normalAttackMods = isSkillAction ? keptOutgoing.filter((m) => m.scope === 'NormalAttack' || m.scope === 'Any' || !m.scope) : keptOutgoing;
+  const skillMods = isSkillAction ? keptOutgoing.filter((m) => m.scope === 'Skill' || m.scope === 'Any' || !m.scope) : [];
+  const normalAttackIncomingMods = isSkillAction ? keptIncoming.filter((m) => m.scope === 'NormalAttackReceived' || m.scope === 'Any' || !m.scope) : keptIncoming;
+  const skillIncomingMods = isSkillAction ? keptIncoming.filter((m) => m.scope === 'SkillReceived' || m.scope === 'Any' || !m.scope) : [];
+
   return (
     <div className="border-t border-white/5 px-3 py-3 space-y-3 text-xs text-slate-200 bg-slate-950/40">
+      {isSkillAction && (
+        <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 p-2 mb-2">
+          <div className="text-[11px] uppercase tracking-wide text-violet-300 mb-1">Skill Damage Breakdown</div>
+          <div className="text-xs text-slate-300 space-y-0.5">
+            <div>Skill damage is calculated from normal damage as extra damage.</div>
+            <div>• Normal Attack modifiers apply to normal damage base</div>
+            <div>• Skill modifiers + Damage Dealt modifiers apply to skill damage</div>
+            <div>• Skill-specific chance to double normal damage (extra damage, no modifiers)</div>
+            <div className="text-violet-200 text-[10px] mt-0.5">Chance varies by skill source (default: 25%)</div>
+            <div className="text-violet-200 mt-1">Total = Normal + Skill + Extra</div>
+          </div>
+        </div>
+      )}
       <div className="text-[11px] uppercase tracking-wide text-gray-500">Formula</div>
       <div className="space-y-1 text-slate-300">
         <div>baseKills = K({formatNumber(comp?.k)}) · N^alpha({formatNumber(comp?.nTerm)}) · ratio({formatNumber(comp?.ratio)}) · matchup({formatNumber(comp?.matchupMultiplier)}) · action({formatNumber(comp?.actionMultiplier)})</div>
@@ -60,10 +80,31 @@ function ActionDetail({ action, turn }: { action: ActionLogEntry; turn: TurnLog 
         <StatBreakdown title="Defender stats" detail={action.stats?.defender} />
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <ModifierList title="Outgoing modifiers" items={keptOutgoing} multiplier={comp?.outgoingMultiplier} />
-        <ModifierList title="Incoming modifiers" items={keptIncoming} multiplier={comp?.incomingMultiplier} />
-      </div>
+      {isSkillAction ? (
+        <div className="grid gap-3 md:grid-cols-2">
+          <div>
+            <div className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">Normal Attack Modifiers</div>
+            <ModifierList title="" items={normalAttackMods} multiplier={undefined} />
+          </div>
+          <div>
+            <div className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">Skill Modifiers</div>
+            <ModifierList title="" items={skillMods} multiplier={undefined} />
+          </div>
+          <div>
+            <div className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">Normal Attack Incoming</div>
+            <ModifierList title="" items={normalAttackIncomingMods} multiplier={undefined} />
+          </div>
+          <div>
+            <div className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">Skill Incoming</div>
+            <ModifierList title="" items={skillIncomingMods} multiplier={undefined} />
+          </div>
+        </div>
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          <ModifierList title="Outgoing modifiers" items={keptOutgoing} multiplier={comp?.outgoingMultiplier} />
+          <ModifierList title="Incoming modifiers" items={keptIncoming} multiplier={comp?.incomingMultiplier} />
+        </div>
+      )}
 
       {discarded.length > 0 && (
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">

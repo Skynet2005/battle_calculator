@@ -1,6 +1,7 @@
 'use client';
 
-import type { StatType, TroopType } from '@/domain/battle/calculations';
+import { useState } from 'react';
+import type { AdditiveBonuses, AdditiveManualOverride, StatType, TroopType } from '@/domain/battle/calculations';
 import { extractJoinerBonuses, extractLeaderBonuses } from '@/domain/rally/rally-bonus-extractor';
 
 import type { RallyHero, UserProfile } from '@/shared/types';
@@ -10,24 +11,27 @@ import ManualAdditiveOverride from '@/features/battle-calculator/tabs/player-and
 import { STAT_LIST } from '../playerInfo.constants';
 import type { Stat } from '../playerInfo.types';
 
+/** Charm bonuses by troop type (from BasicBonuses.charms) */
+type CharmBonusesByTroop = Partial<Record<TroopType, { lethality: number; health: number }>>;
+
 interface AdditiveBonusesCardProps {
   troopTypes: readonly TroopType[];
   currentProfile: UserProfile;
   playerJoinerInfo: ReturnType<typeof extractJoinerBonuses> | null;
-  additiveBonuses: any;
+  additiveBonuses: AdditiveBonuses;
   expertBonuses: Record<Stat, number>;
-  charmBonuses: any;
+  charmBonuses: CharmBonusesByTroop;
   chiefGearBonuses: { attack: number; defense: number };
-  onManualOverrideChange: (manualOverrideTotals?: any) => void;
+  onManualOverrideChange: (manualOverrideTotals?: AdditiveManualOverride) => void;
 }
 
 interface AdditiveTroopSectionProps {
   troopType: TroopType;
   currentProfile: UserProfile;
   playerJoinerInfo: ReturnType<typeof extractJoinerBonuses> | null;
-  additiveBonuses: any;
+  additiveBonuses: AdditiveBonuses;
   expertBonuses: Record<Stat, number>;
-  charmBonuses: any;
+  charmBonuses: CharmBonusesByTroop;
   chiefGearBonuses: { attack: number; defense: number };
 }
 
@@ -185,9 +189,9 @@ function useBonusBreakdown({
   troopType: TroopType;
   currentProfile: UserProfile;
   expertBonuses: Record<Stat, number>;
-  charmBonuses: any;
+  charmBonuses: CharmBonusesByTroop;
   chiefGearBonuses: { attack: number; defense: number };
-  additiveBonuses: any;
+  additiveBonuses: AdditiveBonuses;
 }): BonusBreakdown {
   const basicBonuses = currentProfile.basicBonuses;
   const playerMode = currentProfile.rally.specialWidgetBonus?.player || 'attacking';
@@ -198,7 +202,9 @@ function useBonusBreakdown({
   const heroBonusesForTroop = extractHeroBonuses(matchingLeader, playerMode as 'attacking' | 'defending', currentProfile);
   const daybreakIsland = basicBonuses.daybreakIsland;
   const heroGearByTroop = basicBonuses.heroGear as Record<TroopType, Record<Stat, number>>;
-  const petRefinementByTroop = basicBonuses.petRefinement as any;
+  const petRefinementByTroop = basicBonuses.petRefinement as Record<TroopType, { lethality?: number; health?: number }> & {
+    troops?: { attack?: number; defense?: number; lethality?: number; health?: number };
+  };
   const warAcademyByTroop = basicBonuses.warAcademy as Record<TroopType, Record<StatType, number>>;
 
   const createStatRecord = (values: Partial<Record<Stat, number>>): Record<Stat, number> => ({
@@ -281,8 +287,8 @@ function extractHeroBonuses(
   };
 }
 
-function isManualOverrideActive(manualOverrideTotals: any): boolean {
-  if (!manualOverrideTotals) return false;
+function isManualOverrideActive(manualOverrideTotals: Partial<Record<StatType, number>> | undefined): boolean {
+  if (!manualOverrideTotals || typeof manualOverrideTotals !== 'object') return false;
 
   return Object.values(manualOverrideTotals).some((v) => {
     const num = Number(v);
@@ -290,7 +296,7 @@ function isManualOverrideActive(manualOverrideTotals: any): boolean {
   });
 }
 
-function convertToStatRecord(manualOverrideTotals: any): Record<Stat, number> {
+function convertToStatRecord(manualOverrideTotals: Partial<Record<StatType, number>> | undefined): Record<Stat, number> {
   return {
     attack: Number(manualOverrideTotals?.attack ?? 0),
     defense: Number(manualOverrideTotals?.defense ?? 0),
@@ -497,6 +503,11 @@ function buildAdditiveItems({
 }
 
 function BonusSection({ title, items }: { title: string; items: BonusItem[] }) {
+  const [showZeros, setShowZeros] = useState(false);
+
+  const zeroCount = items.filter((item) => item.value === 0 && !item.alwaysShow).length;
+  const hasHiddenZeros = !showZeros && zeroCount > 0;
+
   return (
     <div className="mb-4 sm:mb-5 last:mb-0">
       <div className="text-sm sm:text-base font-bold text-bonus-section-header mb-3 pb-2 border-b-2 border-slate-700/60 [data-theme='light']:border-gray-300 flex items-center gap-2">
@@ -506,9 +517,11 @@ function BonusSection({ title, items }: { title: string; items: BonusItem[] }) {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-2.5 text-xs sm:text-sm">
         {items.map((item) => {
           const isZero = item.value === 0;
-          const showZeroState = isZero && !item.alwaysShow;
+          const isZeroItem = isZero && !item.alwaysShow;
 
-          if (showZeroState) {
+          if (isZeroItem && !showZeros) return null;
+
+          if (isZeroItem && showZeros) {
             return (
               <div key={item.label} className="flex justify-between items-center py-2 px-3 rounded-lg opacity-40 hover:opacity-60 transition-opacity">
                 <span className="text-bonus-zero truncate pr-2 font-medium">{item.label}:</span>
@@ -545,6 +558,15 @@ function BonusSection({ title, items }: { title: string; items: BonusItem[] }) {
           );
         })}
       </div>
+      {zeroCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowZeros((prev) => !prev)}
+          className="mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors [data-theme='light']:text-blue-600 [data-theme='light']:hover:text-blue-700"
+        >
+          {hasHiddenZeros ? `Show all (${zeroCount} hidden)` : 'Hide zeros'}
+        </button>
+      )}
     </div>
   );
 }

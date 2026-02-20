@@ -1,4 +1,4 @@
-import type { ModifierComponentLog } from '@/domain/combat/types';
+import type { ModifierComponentLog } from '@/domain/battle/engine/types';
 import { formatNumber } from '../utils/format';
 
 interface ModifierListProps {

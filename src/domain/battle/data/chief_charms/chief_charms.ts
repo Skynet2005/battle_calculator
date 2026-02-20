@@ -1,4 +1,4 @@
-// Chief Charms data
+// Data verified: 2026-02-17 | 16 charm levels covered (Level 1-16) | Stats: Lethality + Health
 import type { ChiefCharmData } from "./chief_charm_types";
 
 export const CHIEF_CHARMS_DATA: ChiefCharmData[] = [

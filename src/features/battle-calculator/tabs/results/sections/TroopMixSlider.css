@@ -36,3 +36,13 @@
 .troop-mix-slider::-moz-range-track {
   background: transparent;
 }
+
+.troop-mix-slider {
+  background: linear-gradient(
+    to right,
+    rgb(244 63 94) 0%,
+    rgb(244 63 94) var(--slider-progress, 0%),
+    rgb(51 65 85 / 0.5) var(--slider-progress, 0%),
+    rgb(51 65 85 / 0.5) 100%
+  ) !important;
+}

@@ -12,7 +12,8 @@ export default function LoadingSkeleton({
   showCard = true
 }: LoadingSkeletonProps) {
   const content = (
-    <div className={`animate-pulse space-y-4 ${className}`}>
+    <div role="status" aria-live="polite" aria-busy="true" className={`animate-pulse space-y-4 ${className}`}>
+      <span className="sr-only">Loading...</span>
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}

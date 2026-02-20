@@ -7,7 +7,7 @@
  * normalizes for display, and renders SVG line charts with hover tooltips.
  */
 
-import type { TroopCounts as CombatTroopCounts, TurnLog } from '@/domain/combat/types';
+import type { TroopCounts as CombatTroopCounts, TurnLog } from '@/domain/battle/engine/types';
 import { buildCasualtySeries, totalCounts, type CasualtySeriesEntry } from '@/features/battle-calculator/utils/turn-analytics';
 import { useCallback, useMemo, useState } from 'react';
 import { formatBigNumber, formatTroopCounts } from '../utils/format';

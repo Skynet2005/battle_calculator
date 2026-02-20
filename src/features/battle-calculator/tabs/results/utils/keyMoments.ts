@@ -4,7 +4,7 @@
  * Extracts critical battle events from turn logs for annotation and display.
  */
 
-import type { TurnLog } from '@/domain/combat/types';
+import type { TurnLog } from '@/domain/battle/engine/types';
 
 export type KeyMoment = {
   turn: number;
@@ -14,28 +14,56 @@ export type KeyMoment = {
 
 export function extractKeyMoments(turns: TurnLog[], playerIsAttacker: boolean): KeyMoment[] {
   const moments: KeyMoment[] = [];
+  if (turns.length === 0) return moments;
 
-  // Calculate average kills per action to identify unusually high damage
-  const allKills = turns.flatMap(t => t.actions.map(a => a.components.finalKills)).filter(k => k > 0);
-  const avgKills = allKills.length > 0 ? allKills.reduce((a, b) => a + b, 0) / allKills.length : 0;
-  const highKillThreshold = Math.max(5000, avgKills * 2); // At least 2x average or 5000, whichever is higher
+  // Build O(1) lookup map for previous turns (replaces O(n) turns.find calls)
+  const turnByNumber = new Map(turns.map(t => [t.turn, t]));
 
-  // Find big hits (skill hits or high-damage normal attacks)
-  turns.forEach((turn) => {
-    turn.actions.forEach((action) => {
+  // Pre-compute average kills in a single pass (avoid flatMap + filter + reduce)
+  let killSum = 0;
+  let killCount = 0;
+  for (const turn of turns) {
+    for (const action of turn.actions) {
+      const k = action.components.finalKills;
+      if (k > 0) { killSum += k; killCount++; }
+    }
+  }
+  const avgKills = killCount > 0 ? killSum / killCount : 0;
+  // Use higher thresholds to only show truly significant moments
+  const significantKillThreshold = Math.max(10000, avgKills * 3); // Must be 3x average or 10k+
+  const veryHighMultiplierThreshold = 4.0; // Only show multipliers of 4x or higher
+
+  // Helper: compute total damage reduction from modifier list
+  const sumDamageReduction = (mods: unknown) => {
+    if (!mods || !Array.isArray(mods)) return 0;
+    let total = 0;
+    for (const m of mods as Array<{ magnitude: number; subject: string }>) {
+      if (m.magnitude < 0 && (m.subject === 'incoming' || m.subject === 'enemyOutgoing')) {
+        total += Math.abs(m.magnitude);
+      }
+    }
+    return total * 100;
+  };
+
+  for (const turn of turns) {
+    // Only show truly significant big hits
+    for (const action of turn.actions) {
       const kills = action.components.finalKills;
       const isSkill = action.actionType === 'Skill';
-      const hasHighMultiplier = (action.components.actionMultiplier ?? 1) >= 2.5;
-      const isHighKill = kills > highKillThreshold;
+      const multiplier = action.components.actionMultiplier ?? 1;
+      const hasVeryHighMultiplier = multiplier >= veryHighMultiplierThreshold;
+      const isSignificantKill = kills > significantKillThreshold;
 
-      // Detect big hits: skills, high multipliers, or unusually high kills
-      if (isSkill || hasHighMultiplier || isHighKill) {
+      // Only show if it's a significant skill hit OR a very high multiplier attack with significant kills
+      // Skills must have significant kills to be shown (not just any skill)
+      const isSignificantSkill = isSkill && isSignificantKill;
+      const isSignificantAttack = hasVeryHighMultiplier && isSignificantKill;
+
+      if (isSignificantSkill || isSignificantAttack) {
         const side = action.side === 'attacker' ? (playerIsAttacker ? 'Rally' : 'Defender') : (playerIsAttacker ? 'Defender' : 'Rally');
         const actionDesc = isSkill
           ? 'Skill'
-          : hasHighMultiplier
-            ? `Attack × ${((action.components.actionMultiplier ?? 1) * 100).toFixed(0)}%`
-            : 'High-damage attack';
+          : `Attack × ${(multiplier * 100).toFixed(0)}%`;
 
         moments.push({
           turn: turn.turn,
@@ -43,65 +71,45 @@ export function extractKeyMoments(turns: TurnLog[], playerIsAttacker: boolean): 
           message: `Turn ${turn.turn}: ${actionDesc} removed ${kills.toLocaleString()} troops from ${side}`
         });
       }
-    });
+    }
 
-    // Check for damage reduction active (check all turns, not just turn 1)
+    // Damage reduction checks - only show significant reductions (15%+)
     const rallyMods = playerIsAttacker ? turn.startModifiers?.attacker : turn.startModifiers?.defender;
     const defenderMods = playerIsAttacker ? turn.startModifiers?.defender : turn.startModifiers?.attacker;
+    const prevTurn = turnByNumber.get(turn.turn - 1);
 
-    const rallyDamageReduction = rallyMods?.filter(m =>
-      m.magnitude < 0 && (m.subject === 'incoming' || m.subject === 'enemyOutgoing')
-    ) || [];
-    const defenderDamageReduction = defenderMods?.filter(m =>
-      m.magnitude < 0 && (m.subject === 'incoming' || m.subject === 'enemyOutgoing')
-    ) || [];
-
-    // Only log damage reduction if it's significant (>5%) and either on turn 1 or newly applied
-    if (rallyDamageReduction.length > 0) {
-      const totalReduction = rallyDamageReduction.reduce((sum, m) => sum + Math.abs(m.magnitude), 0) * 100;
-      const prevTurn = turns.find(t => t.turn === turn.turn - 1);
-      const prevModifiers = prevTurn ? (playerIsAttacker ? prevTurn.startModifiers?.attacker : prevTurn.startModifiers?.defender) : undefined;
-      const prevRallyReduction = prevModifiers
-        ? prevModifiers.filter(m =>
-            m.magnitude < 0 && (m.subject === 'incoming' || m.subject === 'enemyOutgoing')
-          ).reduce((sum, m) => sum + Math.abs(m.magnitude), 0) * 100
-        : 0;
-
-      // Log if significant and either first turn or newly applied
-      if (totalReduction > 5 && (turn.turn === 1 || totalReduction > prevRallyReduction + 1)) {
+    const rallyReduction = sumDamageReduction(rallyMods);
+    // Only show if reduction is significant (15%+) and either first turn or increased substantially (5%+)
+    if (rallyReduction >= 15) {
+      const prevRallyMods = prevTurn ? (playerIsAttacker ? prevTurn.startModifiers?.attacker : prevTurn.startModifiers?.defender) : undefined;
+      const prevRallyReduction = sumDamageReduction(prevRallyMods);
+      if (turn.turn === 1 || rallyReduction > prevRallyReduction + 5) {
         moments.push({
           turn: turn.turn,
           type: 'damageReduction',
-          message: `Turn ${turn.turn}: Damage reduction active reduced incoming damage to Rally by ~${totalReduction.toFixed(0)}%`
-        });
-      }
-    }
-    if (defenderDamageReduction.length > 0) {
-      const totalReduction = defenderDamageReduction.reduce((sum, m) => sum + Math.abs(m.magnitude), 0) * 100;
-      const prevTurn = turns.find(t => t.turn === turn.turn - 1);
-      const prevDefenderModifiers = prevTurn ? (playerIsAttacker ? prevTurn.startModifiers?.defender : prevTurn.startModifiers?.attacker) : undefined;
-      const prevDefenderReduction = prevDefenderModifiers
-        ? prevDefenderModifiers.filter(m =>
-            m.magnitude < 0 && (m.subject === 'incoming' || m.subject === 'enemyOutgoing')
-          ).reduce((sum, m) => sum + Math.abs(m.magnitude), 0) * 100
-        : 0;
-
-      // Log if significant and either first turn or newly applied
-      if (totalReduction > 5 && (turn.turn === 1 || totalReduction > prevDefenderReduction + 1)) {
-        moments.push({
-          turn: turn.turn,
-          type: 'damageReduction',
-          message: `Turn ${turn.turn}: Damage reduction active reduced incoming damage to Defender by ~${totalReduction.toFixed(0)}%`
+          message: `Turn ${turn.turn}: Damage reduction active reduced incoming damage to Rally by ~${rallyReduction.toFixed(0)}%`
         });
       }
     }
 
-    // Check for front line collapse (Infantry reaches very low or zero)
-    const rallyInfantry = playerIsAttacker ? turn.attackerTroops?.Infantry ?? 0 : turn.defenderTroops?.Infantry ?? 0;
-    const defenderInfantry = playerIsAttacker ? turn.defenderTroops?.Infantry ?? 0 : turn.attackerTroops?.Infantry ?? 0;
-    const prevTurn = turns.find(t => t.turn === turn.turn - 1);
+    const defenderReduction = sumDamageReduction(defenderMods);
+    // Only show if reduction is significant (15%+) and either first turn or increased substantially (5%+)
+    if (defenderReduction >= 15) {
+      const prevDefMods = prevTurn ? (playerIsAttacker ? prevTurn.startModifiers?.defender : prevTurn.startModifiers?.attacker) : undefined;
+      const prevDefReduction = sumDamageReduction(prevDefMods);
+      if (turn.turn === 1 || defenderReduction > prevDefReduction + 5) {
+        moments.push({
+          turn: turn.turn,
+          type: 'damageReduction',
+          message: `Turn ${turn.turn}: Damage reduction active reduced incoming damage to Defender by ~${defenderReduction.toFixed(0)}%`
+        });
+      }
+    }
 
+    // Front line collapse
     if (prevTurn) {
+      const rallyInfantry = playerIsAttacker ? turn.attackerTroops?.Infantry ?? 0 : turn.defenderTroops?.Infantry ?? 0;
+      const defenderInfantry = playerIsAttacker ? turn.defenderTroops?.Infantry ?? 0 : turn.attackerTroops?.Infantry ?? 0;
       const prevRallyInfantry = playerIsAttacker ? prevTurn.attackerTroops?.Infantry ?? 0 : prevTurn.defenderTroops?.Infantry ?? 0;
       const prevDefenderInfantry = playerIsAttacker ? prevTurn.defenderTroops?.Infantry ?? 0 : prevTurn.attackerTroops?.Infantry ?? 0;
 
@@ -120,7 +128,7 @@ export function extractKeyMoments(turns: TurnLog[], playerIsAttacker: boolean): 
         });
       }
     }
-  });
+  }
 
   return moments;
 }

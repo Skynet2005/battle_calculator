@@ -1,4 +1,7 @@
-export const TROOP_TYPES = ['infantry', 'lancer', 'marksman'] as const;
+import { STAT_TROOP_TYPES } from '../battle/calculations';
+
+/** Re-export for rally/mix usage. Source of truth: STAT_TROOP_TYPES in battle/calculations. */
+export const TROOP_TYPES = STAT_TROOP_TYPES;
 export type TroopType = (typeof TROOP_TYPES)[number];
 
 export type RallyTroopCounts = Record<TroopType, number>;
@@ -101,7 +104,7 @@ export function computeCountsFromMix(mix: TroopMixConfig): RallyTroopCounts {
   ];
 
   const floors = raw.map(r => ({ ...r, f: Math.floor(r.x), frac: r.x - Math.floor(r.x) }));
-  let used = floors.reduce((s, r) => s + r.f, 0);
+  const used = floors.reduce((s, r) => s + r.f, 0);
   let rem = total - used;
 
   floors.sort((a, b) => b.frac - a.frac); // largest fractional first

@@ -10,6 +10,36 @@ import { SectionCard } from '@/shared/ui';
 import type { BattleSideContext } from '@/features/battle-calculator/model/types';
 import { TROOP_TYPES, type TroopType } from '@/features/battle-calculator/model/types';
 
+function getFirstSkillInfo(heroName?: string | null) {
+  if (!heroName) return null;
+  const hero = getHeroByName(heroName);
+  if (!hero) return null;
+  const skills = getHeroExpeditionSkills(hero);
+  if (!skills.length) return null;
+  const first = skills[0];
+  const skillData = first.data as Record<string, unknown> | null | undefined;
+  if (!skillData || typeof skillData !== 'object') return null;
+  let maxLevel = 1;
+  Object.keys(skillData).forEach((key) => {
+    const val = skillData[key];
+    if (typeof val === 'object' && val !== null) {
+      const levels = Object.keys(val).filter((k) => !isNaN(Number(k))).map(Number);
+      if (levels.length) {
+        maxLevel = Math.max(maxLevel, Math.max(...levels));
+      }
+    }
+  });
+  const skillName = typeof skillData['skill-name'] === 'string' ? skillData['skill-name'] : first.name;
+  return { name: skillName, level: maxLevel };
+}
+
+function formatHeroMeta(hero?: HeroSelection | null) {
+  if (!hero) return null;
+  const stars = hero.starLevel !== undefined ? `★${Math.max(0, Math.round(hero.starLevel / 5 - 1))}` : null;
+  const level = `Lv ${hero.xpLevel ?? 80}`;
+  return [stars, level].filter(Boolean).join(' · ');
+}
+
 interface RallyCompositionProps {
   player: BattleSideContext;
   opponent: BattleSideContext;
@@ -40,35 +70,6 @@ function HeroColumn({
   leaders: Partial<Record<TroopType, HeroSelection | null>>;
   joiners: HeroSelection[];
 }) {
-  const getFirstSkillInfo = (heroName?: string | null) => {
-    if (!heroName) return null;
-    const hero = getHeroByName(heroName);
-    if (!hero) return null;
-    const skills = getHeroExpeditionSkills(hero);
-    if (!skills.length) return null;
-    const first = skills[0];
-    const skillData = first.data as any;
-    if (!skillData) return null;
-    let maxLevel = 1;
-    Object.keys(skillData).forEach((key) => {
-      const val = (skillData as any)[key];
-      if (typeof val === 'object' && val !== null) {
-        const levels = Object.keys(val).filter((k) => !isNaN(Number(k))).map(Number);
-        if (levels.length) {
-          maxLevel = Math.max(maxLevel, Math.max(...levels));
-        }
-      }
-    });
-    return { name: skillData['skill-name'] || first.name, level: maxLevel };
-  };
-
-  const formatHeroMeta = (hero?: HeroSelection | null) => {
-    if (!hero) return null;
-    const stars = hero.starLevel !== undefined ? `★${Math.max(0, Math.round(hero.starLevel / 5 - 1))}` : null;
-    const level = `Lv ${hero.xpLevel ?? 80}`;
-    return [stars, level].filter(Boolean).join(' · ');
-  };
-
   return (
     <div>
       <div className="text-sm font-semibold mb-2">{label}</div>

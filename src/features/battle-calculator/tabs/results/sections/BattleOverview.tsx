@@ -39,8 +39,12 @@ export function BattleOverview({
   const fallbackPlayerCounts = computeCountsFromMix(normalizeRatios(applyRallyCap(playerMix, playerCapacity?.rally.total), DEFAULT_TROOP_MIX));
   const fallbackOpponentCounts = computeCountsFromMix(normalizeRatios(applyRallyCap(opponentMix, opponentCapacity?.rally.total), DEFAULT_TROOP_MIX));
 
-  const hasCounts = (counts: any): counts is MixTroopCounts =>
-    counts && typeof counts.infantry === 'number' && typeof counts.lancer === 'number' && typeof counts.marksman === 'number';
+  const hasCounts = (counts: unknown): counts is MixTroopCounts =>
+    counts !== null &&
+    typeof counts === 'object' &&
+    typeof (counts as MixTroopCounts).infantry === 'number' &&
+    typeof (counts as MixTroopCounts).lancer === 'number' &&
+    typeof (counts as MixTroopCounts).marksman === 'number';
 
   const playerCountsSource = hasCounts(player.fighter?.troopCounts) ? player.fighter!.troopCounts : null;
   const opponentCountsSource = hasCounts(opponent.fighter?.troopCounts) ? opponent.fighter!.troopCounts : null;

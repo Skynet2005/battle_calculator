@@ -59,7 +59,8 @@ The calculator lets you:
 
 ## Configuration
 
-Create `.env.local` with:
+Copy `.env.example` to `.env.local` and fill in values. Create `.env.local` with at least:
+
 ```
 DATABASE_URL=postgres://user:pass@host:5432/dbname
 AUTH_SECRET=your-long-random-string    # or NEXTAUTH_SECRET
@@ -69,6 +70,9 @@ Notes:
 - Drizzle migrations run automatically at startup via `migrationsReady`. You can also run `npx drizzle-kit migrate` manually.
 - Auth cookies are HTTP-only (`auth_token`), signed with the secret above.
 - `npm run killports` is available if you need to free 3000/3001 on Windows.
+
+**Production / deployment:**
+- **Migrations**: If migrations fail at startup, the app currently continues and retries on the next request. For production you may want to fail deployment when migrations fail (e.g. fail fast or after a few retries) so broken DB state is not served.
 
 ## How to Use
 
@@ -174,7 +178,7 @@ public/                                 # Static assets
 
 ## Testing & Quality
 
-- **Tests**: `npm test` (Vitest; unit coverage for battle logic and UI helpers).
+- **Tests**: `npm test` (Vitest). Tests live under `__tests__/**/*.test.ts`; add unit tests for domain logic, validation, and UI helpers as needed.
 - **Lint**: `npm run lint` (ESLint with Next.js config).
 - **Types**: TypeScript is enforced; prefer strict types and Zod schemas for API payloads.
 

@@ -127,12 +127,10 @@ export function useDataSelectorsModel({
       stat: 'attack' | 'defense' | 'lethality' | 'health',
       next: number
     ) => {
+      const subsection = daybreakIsland[section];
       const updated = {
         ...daybreakIsland,
-        [section]: {
-          ...(daybreakIsland as any)[section],
-          [stat]: next
-        }
+        [section]: typeof subsection === 'object' && subsection !== null ? { ...subsection, [stat]: next } : { [stat]: next }
       };
       onBasicBonusesChange({ ...basicBonuses, daybreakIsland: updated });
     },
@@ -171,13 +169,10 @@ export function useDataSelectorsModel({
   const updateAdditive = useCallback(
     (bucket: 'temporaryEvents' | 'supremePresident', stat: StatKey, next: number) => {
       if (!onAdditiveBonusesChange) return;
-
+      const current = safeAdditiveBonuses[bucket];
       onAdditiveBonusesChange({
         ...safeAdditiveBonuses,
-        [bucket]: {
-          ...(safeAdditiveBonuses as any)[bucket],
-          [stat]: next
-        }
+        [bucket]: { ...current, [stat]: next }
       });
     },
     [onAdditiveBonusesChange, safeAdditiveBonuses]

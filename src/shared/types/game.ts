@@ -13,9 +13,9 @@ export interface GameData {
     Attack: number;
     Health: number;
   }>;
-  chiefGear: any;
-  charms: any;
-  research: any;
-  warAcademy: any;
-  experts: any;
+  chiefGear: Record<string, unknown>;
+  charms: Record<string, unknown>;
+  research: Record<string, unknown>;
+  warAcademy: Record<string, unknown>;
+  experts: Record<string, unknown>;
 }

@@ -11,8 +11,8 @@
  *   - GearBonusPercent: Combined hero gear bonus percentages
  */
 
-import type { TroopType } from '../../../combat/types';
-import { TROOP_TYPE_VALUES } from '../../../combat/types';
+import type { TroopType } from '../../engine/types';
+import { TROOP_TYPE_VALUES } from '../../engine/types';
 
 /**
  * Configuration for capacity calculation

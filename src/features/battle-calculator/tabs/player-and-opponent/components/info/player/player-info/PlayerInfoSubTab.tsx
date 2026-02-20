@@ -3,6 +3,8 @@
 import { useCallback, useMemo } from 'react';
 
 import { getExpertBonuses } from '@/domain/battle';
+import type { AdditiveManualOverride, MultiplicativeManualOverride } from '@/domain/battle/calculations';
+import type { TroopType } from '@/domain/battle/calculations';
 import {
   createDefaultAdditiveBonuses,
   createDefaultMultiplicativeBonuses,
@@ -41,8 +43,8 @@ export default function PlayerInfoSubTab({
   playerJoinerInfo: ReturnType<typeof extractJoinerBonuses> | null;
   onSave: () => void;
   onTroopMixChange: (side: 'player', mix: TroopMixConfig) => void;
-  handleManualAdditiveOverrideChange: (manualOverrideTotals?: any) => void;
-  handleManualMultiplicativeOverrideChange: (manualOverrideTotals?: any) => void;
+  handleManualAdditiveOverrideChange: (manualOverrideTotals?: AdditiveManualOverride) => void;
+  handleManualMultiplicativeOverrideChange: (manualOverrideTotals?: MultiplicativeManualOverride) => void;
 }) {
   const updateProfile = useCallback(
     (fn: (prev: UserProfile) => UserProfile) => {
@@ -75,7 +77,7 @@ export default function PlayerInfoSubTab({
   const defaultCharmLevels = useMemo(() => buildDefaultCharmLevels(maxCharmLevel), [maxCharmLevel]);
 
   const charmBonuses = useMemo(() => {
-    return getChiefCharmBonuses(currentProfile.charmLevels || defaultCharmLevels) as any;
+    return getChiefCharmBonuses(currentProfile.charmLevels || defaultCharmLevels);
   }, [currentProfile.charmLevels, defaultCharmLevels]);
 
   const chiefGearBonuses = useMemo(() => {
@@ -122,7 +124,7 @@ export default function PlayerInfoSubTab({
   );
 
   const handleTroopLevelChange = useCallback(
-    (troop: any, value?: string) => {
+    (troop: TroopType, value?: string) => {
       updateProfile((prev) => ({
         ...prev,
         troopLevels: {
@@ -172,7 +174,7 @@ export default function PlayerInfoSubTab({
       />
 
       <AdditiveBonusesCard
-        troopTypes={TROOP_TYPE_LIST as any}
+        troopTypes={TROOP_TYPE_LIST}
         currentProfile={currentProfile}
         playerJoinerInfo={playerJoinerInfo}
         additiveBonuses={additiveBonuses}
@@ -183,7 +185,7 @@ export default function PlayerInfoSubTab({
       />
 
       <MultiplicativeBonusesCard
-        troopTypes={TROOP_TYPE_LIST as any}
+        troopTypes={TROOP_TYPE_LIST}
         cityBonuses={cityBonuses}
         playerJoinerInfo={playerJoinerInfo}
         petSkillsEnabled={petSkillsEnabled}

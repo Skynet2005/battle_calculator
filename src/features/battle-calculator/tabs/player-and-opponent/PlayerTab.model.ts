@@ -4,7 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { createDefaultAdditiveBonuses, createDefaultMultiplicativeBonuses } from '@/domain/battle/battle-calculator-helpers';
 import type { AdditiveManualOverride, MultiplicativeManualOverride } from '@/domain/battle/calculations';
 import { extractJoinerBonuses } from '@/domain/rally/rally-bonus-extractor';
-import type { UserProfile } from '@/shared/types';
+import type { CapacityReport, TroopMixConfig, UserProfile } from '@/shared/types';
 
 export type SubTab = 'info' | 'heroes' | 'basic' | 'research' | 'chief' | 'pets';
 
@@ -13,10 +13,10 @@ export interface PlayerTabProps {
   setCurrentProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>;
   profileSubTab: SubTab;
   onSubTabChange: (tab: SubTab) => void;
-  playerCapacityReport: any; // keep as-is where declared (CapacityReport) in PlayerTab.tsx
+  playerCapacityReport: CapacityReport | null;
   playerJoinerInfo: ReturnType<typeof extractJoinerBonuses> | null;
   onSave: () => void;
-  onTroopMixChange: (side: 'player', mix: any) => void; // keep as-is where declared (TroopMixConfig) in PlayerTab.tsx
+  onTroopMixChange: (side: 'player', mix: TroopMixConfig) => void;
 }
 
 export function usePlayerTabModel({

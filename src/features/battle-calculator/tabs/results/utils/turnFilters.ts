@@ -4,8 +4,8 @@
  * Filters turn logs based on various criteria for the combat log.
  */
 
-import type { TurnLog } from '@/domain/combat/types';
-import { extractKeyMoments } from './keyMoments';
+import type { TurnLog } from '@/domain/battle/engine/types';
+import { extractKeyMoments, type KeyMoment } from './keyMoments';
 
 export interface TurnFilterOptions {
   onlyKeyMoments: boolean;
@@ -15,80 +15,76 @@ export interface TurnFilterOptions {
   searchText: string;
 }
 
+/**
+ * Filter turns in a single pass using all active filter conditions.
+ * Accepts optional precomputed keyMoments to avoid recomputing.
+ */
 export function filterTurns(
   turns: TurnLog[],
   options: TurnFilterOptions,
-  playerIsAttacker: boolean
+  playerIsAttacker: boolean,
+  precomputedKeyMoments?: KeyMoment[]
 ): TurnLog[] {
-  let filtered = [...turns];
+  const noFiltersActive =
+    !options.onlyKeyMoments &&
+    !options.onlySkillProcs &&
+    (options.onlyDeathsAbove === null || options.onlyDeathsAbove <= 0) &&
+    !options.onlyBuffsDebuffs &&
+    !options.searchText.trim();
 
-  // Only key moments
+  if (noFiltersActive) return turns;
+
+  // Build key turn set lazily (only if needed)
+  let keyTurnNumbers: Set<number> | null = null;
   if (options.onlyKeyMoments) {
-    const keyMoments = extractKeyMoments(turns, playerIsAttacker);
-    const keyTurnNumbers = new Set(keyMoments.map(m => m.turn));
-    filtered = filtered.filter(t => keyTurnNumbers.has(t.turn));
+    const moments = precomputedKeyMoments ?? extractKeyMoments(turns, playerIsAttacker);
+    keyTurnNumbers = new Set(moments.map(m => m.turn));
   }
 
-  // Only skill procs
-  if (options.onlySkillProcs) {
-    filtered = filtered.filter(turn => {
-      return turn.actions.some(action => action.actionType === 'Skill');
-    });
-  }
+  const searchLower = options.searchText.trim().toLowerCase();
+  const hasSearch = searchLower.length > 0;
+  const deathThreshold = options.onlyDeathsAbove;
 
-  // Only deaths above threshold
-  if (options.onlyDeathsAbove !== null && options.onlyDeathsAbove > 0) {
-    filtered = filtered.filter(turn => {
-      const totalDeaths = turn.actions.reduce((sum, action) => {
-        return sum + (action.components.finalKills ?? 0);
-      }, 0);
-      return totalDeaths >= options.onlyDeathsAbove!;
-    });
-  }
+  // Single-pass filter
+  return turns.filter(turn => {
+    if (keyTurnNumbers && !keyTurnNumbers.has(turn.turn)) return false;
 
-  // Only buffs/debuffs
-  if (options.onlyBuffsDebuffs) {
-    filtered = filtered.filter(turn => {
-      const hasModifiers =
+    if (options.onlySkillProcs) {
+      if (!turn.actions.some(a => a.actionType === 'Skill')) return false;
+    }
+
+    if (deathThreshold !== null && deathThreshold > 0) {
+      let totalDeaths = 0;
+      for (const a of turn.actions) totalDeaths += a.components.finalKills ?? 0;
+      if (totalDeaths < deathThreshold) return false;
+    }
+
+    if (options.onlyBuffsDebuffs) {
+      const hasMods =
         (turn.startModifiers?.attacker?.length ?? 0) > 0 ||
         (turn.startModifiers?.defender?.length ?? 0) > 0;
-      return hasModifiers;
-    });
-  }
+      if (!hasMods) return false;
+    }
 
-  // Search text (hero names, buff names, skill names)
-  if (options.searchText.trim()) {
-    const searchLower = options.searchText.toLowerCase().trim();
-    filtered = filtered.filter(turn => {
-      // Search in source names (from actions)
-      const sourceMatch = turn.actions.some(action => {
-        const sourceName = action.sourceName?.toLowerCase() ?? '';
-        return sourceName.includes(searchLower);
-      });
+    if (hasSearch) {
+      const matchesAction = turn.actions.some(a =>
+        (a.sourceName?.toLowerCase().includes(searchLower)) ||
+        (a.skillName?.toLowerCase().includes(searchLower))
+      );
+      if (matchesAction) return true;
 
-      // Search in skill names
-      const skillMatch = turn.actions.some(action => {
-        const skillName = action.skillName?.toLowerCase() ?? '';
-        return skillName.includes(searchLower);
-      });
-
-      // Search in modifier source names
-      const modifierMatch = [
+      const allMods = [
         ...(turn.startModifiers?.attacker ?? []),
         ...(turn.startModifiers?.defender ?? [])
-      ].some(mod => {
-        const modSource = mod.source?.toLowerCase() ?? '';
-        return modSource.includes(searchLower);
-      });
+      ];
+      const matchesMod = allMods.some(m => m.source?.toLowerCase().includes(searchLower));
+      if (!matchesMod) return false;
+    }
 
-      return sourceMatch || skillMatch || modifierMatch;
-    });
-  }
-
-  return filtered;
+    return true;
+  });
 }
 
-export function getTurnHighlights(turns: TurnLog[], playerIsAttacker: boolean): Set<number> {
-  const keyMoments = extractKeyMoments(turns, playerIsAttacker);
+export function getTurnHighlights(keyMoments: KeyMoment[]): Set<number> {
   return new Set(keyMoments.map(m => m.turn));
 }

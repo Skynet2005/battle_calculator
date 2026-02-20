@@ -11,6 +11,20 @@ import type { TroopMixConfig } from '@/shared/types';
 import { computeBestCounterRatio } from '../utils/best-counter-ratio';
 import { clientLogger } from '@/shared/utils/clientLogger';
 
+function formatRatio(ratio: TroopMixConfig) {
+  return `${ratio.infantryRatio.toFixed(1)}% / ${ratio.lancerRatio.toFixed(1)}% / ${ratio.marksmanRatio.toFixed(1)}%`;
+}
+
+function getOutcomeLabel(playerRemaining: number, opponentRemaining: number) {
+  if (playerRemaining > opponentRemaining) {
+    return { label: 'Win', color: 'text-emerald-300' };
+  } else if (opponentRemaining > playerRemaining) {
+    return { label: 'Loss', color: 'text-rose-300' };
+  } else {
+    return { label: 'Draw', color: 'text-slate-300' };
+  }
+}
+
 interface BestCounterRatioProps {
   player: BattleSideContext;
   opponent: BattleSideContext;
@@ -49,20 +63,6 @@ export function BestCounterRatio({
     return null;
   }
 
-  const formatRatio = (ratio: TroopMixConfig) => {
-    return `${ratio.infantryRatio.toFixed(1)}% / ${ratio.lancerRatio.toFixed(1)}% / ${ratio.marksmanRatio.toFixed(1)}%`;
-  };
-
-  const getOutcomeLabel = (playerRemaining: number, opponentRemaining: number) => {
-    if (playerRemaining > opponentRemaining) {
-      return { label: 'Win', color: 'text-emerald-300' };
-    } else if (opponentRemaining > playerRemaining) {
-      return { label: 'Loss', color: 'text-rose-300' };
-    } else {
-      return { label: 'Draw', color: 'text-slate-300' };
-    }
-  };
-
   return (
     <SectionCard
       title="Best Counter Ratio"
@@ -73,7 +73,7 @@ export function BestCounterRatio({
     >
       <div className="space-y-4">
         {/* Best Recommendation */}
-        <div className="bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30 rounded-lg p-4">
+        <div className="bg-linear-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30 rounded-lg p-4">
           <div className="flex items-start justify-between mb-3">
             <div>
               <div className="text-sm font-semibold text-emerald-300 mb-1">Best Recommendation</div>
@@ -92,12 +92,15 @@ export function BestCounterRatio({
             {formatRatio(result.best.ratio)}
           </div>
           <div className="flex items-center gap-4 text-xs">
-            <div>
-              <span className="text-gray-400">Outcome: </span>
-              <span className={getOutcomeLabel(result.best.playerRemaining, result.best.opponentRemaining).color}>
-                {getOutcomeLabel(result.best.playerRemaining, result.best.opponentRemaining).label}
-              </span>
-            </div>
+            {(() => {
+              const { label, color } = getOutcomeLabel(result.best.playerRemaining, result.best.opponentRemaining);
+              return (
+                <div>
+                  <span className="text-gray-400">Outcome: </span>
+                  <span className={color}>{label}</span>
+                </div>
+              );
+            })()}
             <div>
               <span className="text-gray-400">Remaining: </span>
               <span className="text-slate-200 font-medium">
@@ -120,9 +123,10 @@ export function BestCounterRatio({
                   option.playerRemaining,
                   option.opponentRemaining
                 );
+                const stableKey = `alt-${option.ratio.infantryRatio.toFixed(1)}-${option.ratio.lancerRatio.toFixed(1)}-${option.ratio.marksmanRatio.toFixed(1)}`;
                 return (
                   <div
-                    key={index}
+                    key={stableKey}
                     className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-3"
                   >
                     <div className="flex items-center justify-between mb-2">

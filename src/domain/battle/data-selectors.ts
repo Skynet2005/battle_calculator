@@ -6,7 +6,7 @@ import type { FireCrystalLevel, TroopTier, TroopType } from '@/shared/types';
 import { CHIEF_CHARMS_DATA } from './data/chief_charms/chief_charms';
 import { CHIEF_GEAR_DATA } from './data/chief_gear/chief_gear';
 import { getAllHeroes, getHeroesByClass } from './data/heroes/hero-extractor';
-import type { Hero, SkillLevel } from './data/heroes/hero_types';
+import type { Hero, LevelSkill, SkillLevel } from './data/heroes/hero_types';
 import { BATTLE_RESEARCH } from './data/research/research';
 import { TROOP_DEFINITIONS } from './data/troops/troop_levels';
 import { WAR_ACADEMY_DATA } from './data/war_academy/war_academy';
@@ -197,8 +197,8 @@ export function getAllTroopDefinitionsForType(type: TroopType) {
 /**
  * Get hero expedition skills
  */
-export function getHeroExpeditionSkills(hero: Hero) {
-  const skills: Array<{ name: string; description: string; data: any }> = [];
+export function getHeroExpeditionSkills(hero: Hero): Array<{ name: string; description: string; data: NonNullable<LevelSkill> }> {
+  const skills: Array<{ name: string; description: string; data: NonNullable<LevelSkill> }> = [];
 
   for (const key in hero.skills.expedition) {
     const skill = hero.skills.expedition[key];
@@ -217,7 +217,7 @@ export function getHeroExpeditionSkills(hero: Hero) {
 /**
  * Get hero skill level options (for joiners, only level 1)
  */
-export function getHeroSkillLevelOptions(skill: any, isJoiner: boolean = false): SkillLevel[] {
+export function getHeroSkillLevelOptions(skill: Record<string, unknown>, isJoiner: boolean = false): SkillLevel[] {
   if (isJoiner) {
     return [1];
   }

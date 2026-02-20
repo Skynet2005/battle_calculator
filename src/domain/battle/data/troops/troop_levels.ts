@@ -1,3 +1,4 @@
+// Data verified: 2026-02-17 | FC1-FC10 covered | Normal + Helios tiers (Helios FC5-FC10) | 3 troop types: Infantry, Lancer, Marksman
 // troop_definitions.ts
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 'use client';
 
-import type { TroopType } from '@/domain/battle/calculations';
+import { useState } from 'react';
+import type { MultiplicativeBonuses, MultiplicativeManualOverride, StatType, TroopType } from '@/domain/battle/calculations';
 import { extractJoinerBonuses } from '@/domain/rally/rally-bonus-extractor';
 
 import ManualMultiplicativeOverride from '@/features/battle-calculator/tabs/player-and-opponent/components/info/manual-multiplicative-override';
@@ -15,8 +16,8 @@ interface MultiplicativeBonusesCardProps {
   playerJoinerInfo: ReturnType<typeof extractJoinerBonuses> | null;
   petSkillsEnabled: boolean;
   petCalc: PetSkillCalc;
-  multiplicativeBonuses: any;
-  onManualOverrideChange: (manualOverrideTotals?: any) => void;
+  multiplicativeBonuses: MultiplicativeBonuses;
+  onManualOverrideChange: (manualOverrideTotals?: MultiplicativeManualOverride) => void;
 }
 
 interface MultiplicativeTroopSectionProps {
@@ -25,7 +26,7 @@ interface MultiplicativeTroopSectionProps {
   playerJoinerInfo: ReturnType<typeof extractJoinerBonuses> | null;
   petSkillsEnabled: boolean;
   petCalc: PetSkillCalc;
-  multiplicativeBonuses: any;
+  multiplicativeBonuses: MultiplicativeBonuses;
 }
 
 interface BonusItem {
@@ -148,8 +149,8 @@ function MultiplicativeTroopSection({
   );
 }
 
-function isManualOverrideActive(manualOverrideTotals: any): boolean {
-  if (!manualOverrideTotals) return false;
+function isManualOverrideActive(manualOverrideTotals: Partial<Record<StatType, number>> | undefined): boolean {
+  if (!manualOverrideTotals || typeof manualOverrideTotals !== 'object') return false;
 
   return Object.values(manualOverrideTotals).some((v) => {
     const num = Number(v);
@@ -157,7 +158,7 @@ function isManualOverrideActive(manualOverrideTotals: any): boolean {
   });
 }
 
-function convertToStatRecord(manualOverrideTotals: any): Record<Stat, number> {
+function convertToStatRecord(manualOverrideTotals: Partial<Record<StatType, number>> | undefined): Record<Stat, number> {
   return {
     attack: Number(manualOverrideTotals?.attack ?? 0),
     defense: Number(manualOverrideTotals?.defense ?? 0),
@@ -223,6 +224,8 @@ function StatBreakdownCard({
   manualMultiplicativeTotals,
   computedMultiplicativeTotals
 }: StatBreakdownCardProps) {
+  const [showZeros, setShowZeros] = useState(false);
+
   const petsForStat = petSkillsEnabled ? Object.entries(petContributions[stat]).filter(([_, v]) => v > 0) : [];
 
   const items: BonusItem[] = [
@@ -258,6 +261,9 @@ function StatBreakdownCard({
     }
   ];
 
+  const zeroCount = items.filter((item) => item.value === 0 && !item.alwaysShow && !item.muted).length;
+  const hasHiddenZeros = !showZeros && zeroCount > 0;
+
   return (
     <div className="bg-linear-to-br from-slate-900/40 to-slate-800/40 rounded-xl p-4 sm:p-5 border border-slate-700/40 shadow-md hover:shadow-lg transition-shadow duration-200 [data-theme='light']:from-gray-50 [data-theme='light']:to-white [data-theme='light']:border-gray-200">
       <div className="text-base sm:text-lg font-bold mb-3 sm:mb-4 capitalize text-slate-200 [data-theme='light']:text-gray-800">
@@ -266,7 +272,10 @@ function StatBreakdownCard({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs sm:text-sm">
         {items.map((item, idx) => {
-          const showItem = item.alwaysShow || item.value !== 0 || item.muted;
+          const isZeroItem = item.value === 0 && !item.alwaysShow && !item.muted;
+          if (isZeroItem && !showZeros) return null;
+
+          const showItem = item.alwaysShow || item.value !== 0 || item.muted || showZeros;
           if (!showItem) return null;
 
           const isHighlight = item.highlight;
@@ -275,7 +284,7 @@ function StatBreakdownCard({
           return (
             <div
               key={idx}
-              className={`flex justify-between items-center py-2 px-3 rounded-lg transition-all duration-150 ${isHighlight
+              className={`flex justify-between items-center py-2 px-3 rounded-lg transition-all duration-150 ${isZeroItem ? 'opacity-40' : ''} ${isHighlight
                 ? 'bg-linear-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/40 shadow-sm shadow-emerald-500/10 [data-theme=\'light\']:from-emerald-50 [data-theme=\'light\']:to-teal-50 [data-theme=\'light\']:border-emerald-400'
                 : 'hover:bg-slate-800/50 [data-theme=\'light\']:hover:bg-gray-100'
                 }`}
@@ -313,13 +322,22 @@ function StatBreakdownCard({
           );
         })}
       </div>
+      {zeroCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowZeros((prev) => !prev)}
+          className="mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors [data-theme='light']:text-blue-600 [data-theme='light']:hover:text-blue-700"
+        >
+          {hasHiddenZeros ? `Show all (${zeroCount} hidden)` : 'Hide zeros'}
+        </button>
+      )}
     </div>
   );
 }
 
 interface DebuffSectionProps {
   cityBonuses: CityBonuses;
-  combatDebuffs: any;
+  combatDebuffs: Record<Stat, number>;
   petDebuffContributions: Record<'defense' | 'health', Record<string, number>>;
 }
 

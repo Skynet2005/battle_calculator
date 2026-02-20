@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { authCookieOptions, clearAuthCookie, signAuthToken } from '@/server/auth/auth';
 import { db, migrationsReady } from '@/server/db/db';
-import { users } from '@/server/db/schema/users';
+import { users } from '@/server/db/schema';
 import { ApiError, withErrorHandling } from '@/server/middleware/apiErrorHandler';
 import { requireAuth } from '@/server/middleware/auth';
 import { validateBody } from '@/server/middleware/validateSchema';
@@ -47,16 +47,6 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
     throw new ApiError(400, 'Invalid request body');
   }
 
-  logger.info('Received update request', {
-    userId: auth.userId,
-    bodyKeys: Object.keys(body),
-    hasUsername: 'username' in body,
-    hasEmail: 'email' in body,
-    hasCurrentPassword: 'currentPassword' in body,
-    hasNewPassword: 'newPassword' in body,
-    newPasswordLength: body.newPassword?.length || 0,
-  });
-
   const validation = validateBody(updateUserSchema, body);
   if (!validation.success) {
     logger.error('Validation failed', undefined, { errors: validation.errors });
@@ -64,15 +54,6 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
   }
 
   const { username, email, currentPassword, newPassword } = validation.data;
-
-  logger.info('Validated update data', {
-    userId: auth.userId,
-    hasUsername: username !== undefined,
-    hasEmail: email !== undefined,
-    hasCurrentPassword: currentPassword !== undefined,
-    hasNewPassword: newPassword !== undefined,
-    newPasswordLength: newPassword?.length || 0,
-  });
 
   // If changing password, verify current password first
   if (newPassword && newPassword.trim().length > 0) {
@@ -283,20 +264,7 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
   // Set the auth cookie - use same pattern as login/register
   res.cookies.set({ ...authCookieOptions(), value: token });
 
-  logger.info('Auth cookie set', {
-    userId: updated.id,
-    hasToken: !!token,
-    tokenLength: token.length
-  });
-
-  logger.info('User profile updated', {
-    userId: auth.userId,
-    updatedFields: {
-      username: username !== undefined,
-      email: email !== undefined,
-      password: newPassword !== undefined
-    }
-  });
+  logger.info('User profile updated', { userId: auth.userId });
 
   return res;
 });

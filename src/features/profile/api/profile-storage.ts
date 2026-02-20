@@ -5,36 +5,61 @@
 import type { UserProfile } from '@/shared/types';
 import type { HeroGearSelections } from '@/domain/battle';
 import { buildMaxHeroLevels } from '@/domain/battle';
-import { migrateProfile } from './profile-migration';
+import { isUuid } from '@/shared/utils/validation';
+import { migrateProfile, type LegacyProfile } from './profile-migration';
 
 export type { UserProfile };
 
 const API_BASE = '/api';
 
-function isUuid(value: string | undefined | null): boolean {
-  return typeof value === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value);
+/** API error shape returned by server on non-2xx */
+export interface ApiErrorBody {
+  error?: string;
+  code?: string;
+  details?: unknown;
+}
+
+/** Extended Error with optional HTTP status for API failures */
+export class ApiClientError extends Error {
+  constructor(
+    message: string,
+    public readonly status?: number
+  ) {
+    super(message);
+    this.name = 'ApiClientError';
+  }
+}
+
+/** Profile row as returned by GET /api/profiles */
+export interface ProfileApiRow {
+  id: string;
+  name: string;
+  data: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProfilesApiResponse {
+  profiles: ProfileApiRow[];
+  currentProfileId: string | null;
 }
 
 async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const res = await fetch(input, { ...init, credentials: 'include' });
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    const message = (body as any)?.error || res.statusText;
-    const error = new Error(message);
-    (error as any).status = res.status;
-    throw error;
+    const body = await res.json().catch(() => ({})) as ApiErrorBody;
+    const message = body?.error ?? res.statusText;
+    throw new ApiClientError(message, res.status);
   }
   return res.json() as Promise<T>;
 }
 
 export async function getAllProfiles(): Promise<{ profiles: UserProfile[]; currentProfileId: string | null }> {
-  const data = await fetchJson<{ profiles: any[]; currentProfileId: string | null }>(`${API_BASE}/profiles`);
+  const data = await fetchJson<ProfilesApiResponse>(`${API_BASE}/profiles`);
   return {
     profiles: data.profiles.map((p) => {
-      // The API returns { id, name, data, createdAt, updatedAt }
-      // where 'data' contains the actual profile object
-      const profileData = p.data || p;
-      const profileToMigrate = {
+      const profileData = (p.data ?? p) as Record<string, unknown>;
+      const profileToMigrate: LegacyProfile = {
         ...profileData,
         id: p.id,
         name: p.name,
@@ -78,15 +103,15 @@ export async function saveProfile(profile: UserProfile, setCurrent = false): Pro
 
   // If the id is not a valid UUID, create instead of update.
   if (!isUuid(profile.id)) {
-    const created = await fetchJson<any>(`${API_BASE}/profiles`, {
+    const created = await fetchJson<ProfileApiRow>(`${API_BASE}/profiles`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    return migrateProfile(created);
+    return migrateProfile(created as unknown as LegacyProfile);
   }
 
-  const saved = await fetchJson<any>(`${API_BASE}/profiles/${profile.id}`, {
+  const saved = await fetchJson<ProfileApiRow>(`${API_BASE}/profiles/${profile.id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -97,7 +122,7 @@ export async function saveProfile(profile: UserProfile, setCurrent = false): Pro
     }
     throw err;
   });
-  return migrateProfile(saved);
+  return migrateProfile(saved as unknown as LegacyProfile);
 }
 
 export async function createProfile(profile: UserProfile, setCurrent = false): Promise<UserProfile> {
@@ -106,12 +131,12 @@ export async function createProfile(profile: UserProfile, setCurrent = false): P
     data: { ...profile, updatedAt: Date.now() },
     setCurrent,
   };
-  const created = await fetchJson<any>(`${API_BASE}/profiles`, {
+  const created = await fetchJson<ProfileApiRow>(`${API_BASE}/profiles`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  return migrateProfile(created);
+  return migrateProfile(created as unknown as LegacyProfile);
 }
 
 export async function deleteProfile(id: string): Promise<void> {
@@ -133,21 +158,18 @@ export async function setCurrentProfile(id: string | null): Promise<void> {
 
 export async function getProfile(id: string): Promise<UserProfile | null> {
   try {
-    const response = await fetchJson<any>(`${API_BASE}/profiles/${id}`);
+    const response = await fetchJson<ProfileApiRow>(`${API_BASE}/profiles/${id}`);
     // The API returns { id, name, data, createdAt, updatedAt }
     // where 'data' contains the actual profile object
-    const profileData = response.data || response;
-
-    // Debug logging removed - use clientLogger if needed
-    // clientLogger.debug('Raw profile data from database', { profileId: response.id });
+    const profileData = (response.data ?? response) as LegacyProfile;
 
     // Merge the response metadata with the profile data
-    const profileToMigrate = {
+    const profileToMigrate: LegacyProfile = {
       ...profileData,
       id: response.id,
       name: response.name,
-      createdAt: response.createdAt ? new Date(response.createdAt).getTime() : profileData.createdAt,
-      updatedAt: response.updatedAt ? new Date(response.updatedAt).getTime() : profileData.updatedAt,
+      createdAt: response.createdAt ? new Date(response.createdAt).getTime() : (profileData.createdAt as number | undefined),
+      updatedAt: response.updatedAt ? new Date(response.updatedAt).getTime() : (profileData.updatedAt as number | undefined),
     };
 
     const migrated = migrateProfile(profileToMigrate);

@@ -9,6 +9,6 @@ export const config: DrizzleAdminConfig = {
     users: usersTableConfig,
   },
   db: db,
-  dbDialect: "sqlite",
+  dbDialect: "pg",
   paginationOpts: { enablePageInput: true, buttonVariant: "info", perPageInputType: "text" }
 };

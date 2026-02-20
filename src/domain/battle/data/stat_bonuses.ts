@@ -1,8 +1,11 @@
 // Utility for stat bonuses per troop type
 
-// Define available unit types and stat names
-export type UnitType = "infantry" | "lancer" | "marksman";
-export const UNIT_TYPES: UnitType[] = ["infantry", "lancer", "marksman"];
+import type { TroopType } from '../calculations';
+import { STAT_TROOP_TYPES } from '../calculations';
+
+/** Re-export for backward compatibility. Source of truth: STAT_TROOP_TYPES in calculations. */
+export type UnitType = TroopType;
+export const UNIT_TYPES: readonly UnitType[] = STAT_TROOP_TYPES;
 export type StatName = "attack" | "defense" | "lethality" | "health";
 export const STAT_NAMES: StatName[] = ["attack", "defense", "lethality", "health"];
 

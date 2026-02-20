@@ -7,6 +7,7 @@
 
 import { eq } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
+import { logger } from '@/server/utils/logger';
 import { db } from './db';
 import { profiles, userSettings } from './schema';
 
@@ -55,8 +56,7 @@ export const getCachedUserSettings = unstable_cache(
 
       return result[0] ?? null;
     } catch (error) {
-      // Log error but don't expose details
-      console.error('Error in getCachedUserSettings:', error);
+      logger.error('Error in getCachedUserSettings', error);
       throw error;
     }
   },

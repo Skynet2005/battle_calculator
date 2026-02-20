@@ -1,4 +1,4 @@
-import type { TroopStatLine } from "@/domain/rally/combat-types";
+import type { TroopStatLine } from "../../calculations";
 import type {
   NormalizedSkillEffect,
   TroopTarget

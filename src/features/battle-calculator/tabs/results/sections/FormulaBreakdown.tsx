@@ -15,6 +15,16 @@ import type { BattleSideContext } from '@/features/battle-calculator/model/types
 import { SectionCard } from '@/shared/ui';
 import { useMemo } from 'react';
 
+function formatFormulaNumber(n: number, decimals = 2) {
+  if (n === 0) return '0';
+  if (Math.abs(n) < 0.01) return n.toExponential(2);
+  return n.toFixed(decimals);
+}
+
+function formatFormulaPercent(n: number) {
+  return `${n >= 0 ? '+' : ''}${formatFormulaNumber(n)}%`;
+}
+
 interface FormulaBreakdownProps {
   player: BattleSideContext;
   opponent: BattleSideContext;
@@ -131,16 +141,6 @@ export function FormulaBreakdown({ player, opponent }: FormulaBreakdownProps) {
     return null;
   }
 
-  const formatNumber = (n: number, decimals = 2) => {
-    if (n === 0) return '0';
-    if (Math.abs(n) < 0.01) return n.toExponential(2);
-    return n.toFixed(decimals);
-  };
-
-  const formatPercent = (n: number) => {
-    return `${n >= 0 ? '+' : ''}${formatNumber(n)}%`;
-  };
-
   return (
     <SectionCard
       title="Battle Calculation Formulas"
@@ -184,19 +184,19 @@ export function FormulaBreakdown({ player, opponent }: FormulaBreakdownProps) {
             <div className="space-y-2">
               <div className="text-xs font-semibold text-slate-300">{player.label} Average Stats</div>
               <div className="text-xs text-gray-400 space-y-1">
-                <div>ATK: {formatPercent(playerAvgStats.attack)}</div>
-                <div>DEF: {formatPercent(playerAvgStats.defense)}</div>
-                <div>LETH: {formatPercent(playerAvgStats.lethality)}</div>
-                <div>HP: {formatPercent(playerAvgStats.health)}</div>
+                <div>ATK: {formatFormulaPercent(playerAvgStats.attack)}</div>
+                <div>DEF: {formatFormulaPercent(playerAvgStats.defense)}</div>
+                <div>LETH: {formatFormulaPercent(playerAvgStats.lethality)}</div>
+                <div>HP: {formatFormulaPercent(playerAvgStats.health)}</div>
               </div>
             </div>
             <div className="space-y-2">
               <div className="text-xs font-semibold text-slate-300">{opponent.label} Average Stats</div>
               <div className="text-xs text-gray-400 space-y-1">
-                <div>ATK: {formatPercent(opponentAvgStats.attack)}</div>
-                <div>DEF: {formatPercent(opponentAvgStats.defense)}</div>
-                <div>LETH: {formatPercent(opponentAvgStats.lethality)}</div>
-                <div>HP: {formatPercent(opponentAvgStats.health)}</div>
+                <div>ATK: {formatFormulaPercent(opponentAvgStats.attack)}</div>
+                <div>DEF: {formatFormulaPercent(opponentAvgStats.defense)}</div>
+                <div>LETH: {formatFormulaPercent(opponentAvgStats.lethality)}</div>
+                <div>HP: {formatFormulaPercent(opponentAvgStats.health)}</div>
               </div>
             </div>
           </div>
@@ -216,24 +216,34 @@ export function FormulaBreakdown({ player, opponent }: FormulaBreakdownProps) {
             <div>• Enemy Defense divides the total damage</div>
             <div className="mt-2 text-amber-300">Important: HP does NOT belong in damage numerator/denominator. HP affects survivability across rounds, not raw hit damage.</div>
             <div className="mt-2">Combat Modifiers (applied after base damage):</div>
-            <div>• FinalDamage = BaseDamage × (1 + DamageUp%/100) × (1 + SkillDamage%/100) ÷ (1 + DamageTakenDown%/100)</div>
-            <div className="text-amber-300">Note: Damage modifiers are NOT stat multipliers - they apply at the damage step.</div>
+            <div className="space-y-1 pl-2">
+              <div><strong>Normal Attacks:</strong></div>
+              <div>• NormalDamage = BaseDamage × (1 + NormalAttackDmg%/100) × (1 + DamageDealt%/100)</div>
+              <div className="mt-1"><strong>Skill Actions:</strong></div>
+              <div>• NormalDamage = BaseDamage × (1 + NormalAttackDmg%/100) × (1 + DamageDealt%/100)</div>
+              <div>• SkillDamage = NormalDamage × (1 + SkillDamage%/100) × (1 + DamageDealt%/100)</div>
+              <div>• Skill-specific chance: ExtraDamage = NormalDamage (doubling, no modifiers)</div>
+              <div>• TotalDamage = NormalDamage + SkillDamage + ExtraDamage</div>
+              <div className="mt-1 text-amber-300">Key: NormalAttackDmg% only affects normal attacks. DamageDealt% affects all damage sources.</div>
+              <div className="text-amber-300">Doubling chance is skill-source dependent (e.g., Crystal Lance: 15%, some heroes: 25%, default: 25%)</div>
+            </div>
+            <div className="text-amber-300 mt-2">Note: Damage modifiers are NOT stat multipliers - they apply at the damage step.</div>
           </div>
           <div className="grid grid-cols-2 gap-4 mt-3">
             <div className="space-y-2">
               <div className="text-xs font-semibold text-slate-300">{player.label}</div>
               <div className="text-xs text-gray-400 space-y-1">
                 <div>Troops: {playerTroops.toLocaleString()}</div>
-                <div>√(Troops): {formatNumber(Math.sqrt(Math.max(0, playerTroops)))}</div>
-                <div>ATK × LETH: {formatNumber((1 + playerAvgStats.attack / 100) * (1 + playerAvgStats.lethality / 100), 4)}</div>
+                <div>√(Troops): {formatFormulaNumber(Math.sqrt(Math.max(0, playerTroops)))}</div>
+                <div>ATK × LETH: {formatFormulaNumber((1 + playerAvgStats.attack / 100) * (1 + playerAvgStats.lethality / 100), 4)}</div>
               </div>
             </div>
             <div className="space-y-2">
               <div className="text-xs font-semibold text-slate-300">{opponent.label}</div>
               <div className="text-xs text-gray-400 space-y-1">
                 <div>Troops: {opponentTroops.toLocaleString()}</div>
-                <div>√(Troops): {formatNumber(Math.sqrt(Math.max(0, opponentTroops)))}</div>
-                <div>DEF: {formatPercent(opponentAvgStats.defense)}</div>
+                <div>√(Troops): {formatFormulaNumber(Math.sqrt(Math.max(0, opponentTroops)))}</div>
+                <div>DEF: {formatFormulaPercent(opponentAvgStats.defense)}</div>
               </div>
             </div>
           </div>
@@ -258,7 +268,7 @@ export function FormulaBreakdown({ player, opponent }: FormulaBreakdownProps) {
               <div className="text-xs font-semibold text-slate-300 mb-2">Calculated Balance Ratio</div>
               <div className="text-lg font-bold text-center">
                 <span className={balanceRatio > 1 ? 'text-emerald-300' : balanceRatio < 1 ? 'text-rose-300' : 'text-slate-300'}>
-                  {formatNumber(balanceRatio, 4)}
+                  {formatFormulaNumber(balanceRatio, 4)}
                 </span>
               </div>
               <div className="text-xs text-gray-400 text-center mt-1">
@@ -284,7 +294,7 @@ export function FormulaBreakdown({ player, opponent }: FormulaBreakdownProps) {
                 <div className="space-y-2">
                   <div className="text-xs font-semibold text-slate-300">{player.label}</div>
                   <div className="text-xs text-gray-400">
-                    Power Index: <span className="font-mono text-slate-200">{formatNumber(playerPowerIndex, 2)}</span>
+                    Power Index: <span className="font-mono text-slate-200">{formatFormulaNumber(playerPowerIndex, 2)}</span>
                   </div>
                 </div>
               )}
@@ -292,7 +302,7 @@ export function FormulaBreakdown({ player, opponent }: FormulaBreakdownProps) {
                 <div className="space-y-2">
                   <div className="text-xs font-semibold text-slate-300">{opponent.label}</div>
                   <div className="text-xs text-gray-400">
-                    Power Index: <span className="font-mono text-slate-200">{formatNumber(opponentPowerIndex, 2)}</span>
+                    Power Index: <span className="font-mono text-slate-200">{formatFormulaNumber(opponentPowerIndex, 2)}</span>
                   </div>
                 </div>
               )}

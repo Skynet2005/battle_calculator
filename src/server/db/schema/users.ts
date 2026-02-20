@@ -5,7 +5,7 @@ export const users = pgTable(
   "users",
   {
     id: uuid().primaryKey().defaultRandom(),
-    name: text(),
+    name: text(), // username; required at registration, may be null for legacy rows
     email: text().notNull(),
     emailVerified: timestamp({ withTimezone: false }),
     image: text(),

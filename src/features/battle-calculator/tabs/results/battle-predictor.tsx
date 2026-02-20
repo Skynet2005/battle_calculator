@@ -11,19 +11,22 @@
  * This component should remain ~150-250 lines and only wire sections together.
  */
 
+import { useMemo, useCallback } from 'react';
 import type { TroopMixConfig } from '@/shared/types';
 import { EmptyState, ErrorState, SectionCard } from '@/shared/ui';
 import { useSyncedMixState } from '@/features/battle-calculator/hooks/useSyncedMixState';
-import type { BattleConfig, BattleReport } from '@/domain/combat/types';
+import type { BattleConfig, BattleReport } from '@/domain/battle/engine/types';
 import type { FightResult } from '@/domain/rally/combat-fight';
 import { DEFAULT_TROOP_MIX } from '@/domain/rally/rally-config';
 import type { BattleSideContext, CapacityReport } from '@/features/battle-calculator/model/types';
 
 // Primary Tier
 import { OutcomeHeader } from './sections/OutcomeHeader';
+import { MonteCarloStatsPanel } from './sections/MonteCarloStatsPanel';
 import { FormulaBreakdown } from './sections/FormulaBreakdown';
 import { BestCounterRatio } from './sections/BestCounterRatio';
 import { WhyYouLost } from './sections/WhyYouLost';
+import { DamageSummaryPanel } from './sections/DamageSummaryPanel';
 
 // Secondary Tier
 import { BonusesSection } from './sections/BonusesSection';
@@ -32,8 +35,11 @@ import { RallyComposition } from './sections/RallyComposition';
 
 // Tertiary Tier
 import { BattleAnalysisPanel } from './analysis/BattleAnalysisPanel';
+import { BattleComparisonPanel } from './analysis/BattleComparisonPanel';
 import { CasualtyChart } from './analysis/CasualtyChart';
 import { RallyKeyMoments } from './analysis/RallyKeyMoments';
+import { StatsEvolutionPanel } from './analysis/StatsEvolutionPanel';
+import { SkillScorecard } from './analysis/SkillScorecard';
 import { extractKeyMoments } from './utils/keyMoments';
 
 interface BattlePredictorProps {
@@ -48,6 +54,7 @@ interface BattlePredictorProps {
   playerNormalizedMix?: TroopMixConfig | null;
   opponentNormalizedMix?: TroopMixConfig | null;
   battleReport?: BattleReport | null;
+  previousBattleReport?: BattleReport | null;
   errorMessage?: string | null;
   simulationMode: BattleConfig['randomMode'];
   setSimulationModeAction: (mode: BattleConfig['randomMode']) => void;
@@ -67,6 +74,7 @@ export default function BattlePredictor({
   playerNormalizedMix,
   opponentNormalizedMix,
   battleReport,
+  previousBattleReport,
   errorMessage,
   simulationMode,
   setSimulationModeAction,
@@ -79,13 +87,24 @@ export default function BattlePredictor({
   const { mix: opponentMixLocal, setMix: setOpponentMixLocal } =
     useSyncedMixState(opponentMixInput, opponentCapacity?.rally.total, DEFAULT_TROOP_MIX);
 
-  const dataReady = Boolean(player?.fighter && opponent?.fighter && fightResult);
+  const dataReady = useMemo(
+    () => Boolean(player?.fighter && opponent?.fighter && fightResult),
+    [player?.fighter, opponent?.fighter, fightResult]
+  );
 
-  const handleSimulationCountChange = (value: number) => {
+  const playerIsAttacker = player?.role === 'attacker';
+
+  // Compute key moments once -- shared by CasualtyChart, RallyKeyMoments, VirtualizedTurnList
+  const keyMoments = useMemo(
+    () => battleReport?.turns?.length ? extractKeyMoments(battleReport.turns, playerIsAttacker ?? true) : [],
+    [battleReport?.turns, playerIsAttacker]
+  );
+
+  const handleSimulationCountChange = useCallback((value: number) => {
     if (!Number.isFinite(value)) return;
     const next = Math.max(1, Math.min(1000, Math.round(value)));
     setSimulationCountAction(next);
-  };
+  }, [setSimulationCountAction]);
 
   return (
     <div className="flex flex-col">
@@ -135,10 +154,37 @@ export default function BattlePredictor({
       </SectionCard>
 
       {!dataReady ? (
-        <EmptyState
-          title="Configuration Required"
-          message="Configure both Player and Opponent sides in the Rally tab (heroes, joiners, troop mix, and troop totals) to run a full fight simulation. The battle overview, troop comparison, and special bonus table will appear here once both sides are ready."
-        />
+        <div className="card text-center py-10 px-6 space-y-6">
+          <div className="flex justify-center text-gray-400 [data-theme='light']:text-gray-500">
+            <svg className="w-14 h-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Configure your rally to see results</h3>
+            <p className="text-sm text-gray-400 [data-theme='light']:text-gray-500 max-w-md mx-auto">
+              Complete the setup steps below, then return here for a full battle analysis.
+            </p>
+          </div>
+          <ol className="text-left text-sm max-w-sm mx-auto space-y-3">
+            <li className="flex items-start gap-3">
+              <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 [data-theme='light']:bg-rose-100 [data-theme='light']:text-rose-700 [data-theme='light']:border-rose-300">1</span>
+              <span className="text-gray-300 [data-theme='light']:text-gray-700">Set up <strong>Player</strong> and <strong>Opponent</strong> profiles with heroes and bonuses.</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 [data-theme='light']:bg-rose-100 [data-theme='light']:text-rose-700 [data-theme='light']:border-rose-300">2</span>
+              <span className="text-gray-300 [data-theme='light']:text-gray-700">Configure the <strong>Rally</strong> tab with leaders, joiners, and troop mix.</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 [data-theme='light']:bg-rose-100 [data-theme='light']:text-rose-700 [data-theme='light']:border-rose-300">3</span>
+              <span className="text-gray-300 [data-theme='light']:text-gray-700">Set <strong>troop totals</strong> for both sides so the simulator knows army sizes.</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 [data-theme='light']:bg-rose-100 [data-theme='light']:text-rose-700 [data-theme='light']:border-rose-300">4</span>
+              <span className="text-gray-300 [data-theme='light']:text-gray-700">Return here to see <strong>battle overview</strong>, casualties, and recommendations.</span>
+            </li>
+          </ol>
+        </div>
       ) : (
         <>
           {/* PRIMARY TIER */}
@@ -152,6 +198,13 @@ export default function BattlePredictor({
           />
 
           <div className="px-4 py-6 space-y-6">
+            {simulationMode === 'monteCarlo' && battleReport && battleReport.simulationsRun && (
+              <MonteCarloStatsPanel
+                battleReport={battleReport}
+                playerIsAttacker={player!.role === 'attacker'}
+              />
+            )}
+
             <FormulaBreakdown
               player={player!}
               opponent={opponent!}
@@ -177,6 +230,22 @@ export default function BattlePredictor({
               playerMix={playerMixLocal}
               opponentMix={opponentMixLocal}
             />
+
+            {battleReport && battleReport.turns?.length > 0 && (
+              <DamageSummaryPanel
+                battleReport={battleReport}
+                playerIsAttacker={player!.role === 'attacker'}
+              />
+            )}
+
+            {previousBattleReport && battleReport && (
+              <BattleComparisonPanel
+                battleA={battleReport}
+                battleB={previousBattleReport}
+                labelA="Current"
+                labelB="Previous"
+              />
+            )}
 
             {/* SECONDARY TIER */}
             <ForcesSection
@@ -219,19 +288,29 @@ export default function BattlePredictor({
                 >
                   <CasualtyChart
                     turns={battleReport.turns}
-                    keyMoments={extractKeyMoments(battleReport.turns, player!.role === 'attacker')}
-                    playerIsAttacker={player!.role === 'attacker'}
+                    keyMoments={keyMoments}
+                    playerIsAttacker={playerIsAttacker!}
                   />
                   <RallyKeyMoments
-                    turns={battleReport.turns}
-                    playerIsAttacker={player!.role === 'attacker'}
+                    keyMoments={keyMoments}
                   />
                 </SectionCard>
+
+                <SkillScorecard
+                  turns={battleReport.turns}
+                  playerIsAttacker={playerIsAttacker!}
+                />
+
+                <StatsEvolutionPanel
+                  turns={battleReport.turns}
+                  playerIsAttacker={playerIsAttacker!}
+                />
 
                 <BattleAnalysisPanel
                   player={player!}
                   opponent={opponent!}
                   battleReport={battleReport}
+                  keyMoments={keyMoments}
                 />
               </>
             )}

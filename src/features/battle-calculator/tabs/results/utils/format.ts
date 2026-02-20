@@ -1,5 +1,5 @@
 import type { NormalizedSkillEffect } from '@/domain/battle';
-import type { TroopCounts as CombatTroopCounts } from '@/domain/combat/types';
+import type { TroopCounts as CombatTroopCounts } from '@/domain/battle/engine/types';
 import type { RoundResult } from '@/domain/rally/combat-battle-round';
 
 export function formatBigNumber(value: number): string {

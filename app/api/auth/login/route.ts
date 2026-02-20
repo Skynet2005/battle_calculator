@@ -4,24 +4,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { authCookieOptions, signAuthToken } from '@/server/auth/auth';
 import { db, migrationsReady } from '@/server/db/db';
-import { users } from '@/server/db/schema/users';
+import { users } from '@/server/db/schema';
 import { withErrorHandling, ApiError } from '@/server/middleware/apiErrorHandler';
+import { authLoginLimiter } from '@/server/middleware/rateLimit';
 import { validateBody } from '@/server/middleware/validateSchema';
 import { loginSchema } from '@/server/validation/schemas';
 import { logger } from '@/server/utils/logger';
-import { rateLimit, getRateLimitHeaders } from '@/server/middleware/rateLimit';
-
-// Rate limit: 5 requests per 15 minutes
-const loginRateLimit = rateLimit(5, 15 * 60 * 1000);
 
 export const POST = withErrorHandling(async (req: NextRequest) => {
+  authLoginLimiter(req);
   await migrationsReady;
-
-  // Apply rate limiting
-  const rateLimitResponse = loginRateLimit(req);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== 'object') {

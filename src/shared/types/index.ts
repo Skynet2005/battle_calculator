@@ -36,3 +36,10 @@ export type {
 export type {
   GameData,
 } from './game';
+
+// Capacity and bonus summary (used by domain and features)
+export type {
+  CapacityBreakdown,
+  CapacityReport,
+  SpecialBonusSummary,
+} from './capacity';

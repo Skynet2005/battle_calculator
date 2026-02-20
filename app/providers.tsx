@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import ErrorBoundary from '@/shared/ui/ErrorBoundary';
 
 // Dynamically import devtools only in development to avoid build issues
 const ReactQueryDevtools = process.env.NODE_ENV === 'development'
@@ -33,7 +34,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <ErrorBoundary>
+        {children}
+      </ErrorBoundary>
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );

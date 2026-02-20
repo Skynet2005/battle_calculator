@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { totalTroops } from '@/domain/rally/combat-fighter';
 import { DEFAULT_TROOP_MIX } from '@/domain/rally/rally-config';
 import { clampCountsToCap, computeCountsFromMix, countsToMix, normalizeRatios, type TroopType as MixTroopType } from '@/domain/rally/mix-utils';
@@ -6,6 +6,8 @@ import type { TroopMixConfig } from '@/shared/types';
 import type { MixTroopCounts } from '@/features/battle-calculator/model/types';
 import { TROOP_TYPES } from '@/features/battle-calculator/model/types';
 import './TroopMixSlider.css';
+
+const MIX_DEBOUNCE_MS = 400;
 
 interface TroopMixQuickEditorProps {
   title: string;
@@ -28,39 +30,66 @@ export function TroopMixQuickEditor({
   const [editingValues, setEditingValues] = useState<Partial<Record<string, string>>>({});
   const derivedCounts: MixTroopCounts = counts && totalTroops(counts) > 0 ? counts : computeCountsFromMix(mix);
 
+  const pendingMixRef = useRef<TroopMixConfig | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flushPending = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (pendingMixRef.current !== null && onChange) {
+      onChange(pendingMixRef.current);
+      pendingMixRef.current = null;
+    }
+  }, [onChange]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, []);
+
+  const notifyMixChange = useCallback(
+    (nextMix: TroopMixConfig) => {
+      if (!onChange) return;
+      pendingMixRef.current = nextMix;
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(flushPending, MIX_DEBOUNCE_MS);
+    },
+    [onChange, flushPending]
+  );
+
   // Calculate total ratio for warning
   const totalRatio = (mix.infantryRatio || 0) + (mix.lancerRatio || 0) + (mix.marksmanRatio || 0);
   const exceeds100 = totalRatio > 100.01; // Small tolerance for floating point
 
   const handlePercentChange = (type: string, value: number) => {
-    if (!onChange) return;
     // Allow free input - don't auto-adjust other ratios
     const sanitized = Math.max(0, Number.isNaN(value) ? 0 : value);
     const ratioKey = `${type}Ratio` as keyof TroopMixConfig;
-    onChange({
+    notifyMixChange({
       ...mix,
       [ratioKey]: sanitized,
     });
   };
 
   const handleCountChange = (type: string, value: number) => {
-    if (!onChange) return;
     const sanitized = Math.max(0, Math.trunc(value || 0));
     const baseCounts = counts && totalTroops(counts) > 0 ? counts : computeCountsFromMix(mix);
     const nextCounts = { ...baseCounts, [type]: sanitized } as MixTroopCounts;
     const cappedCounts = clampCountsToCap(nextCounts, maxTotal);
-    onChange(countsToMix(cappedCounts));
+    notifyMixChange(countsToMix(cappedCounts));
   };
 
   const handleTotalChange = (value: number) => {
-    if (!onChange) return;
     const sanitized = Math.max(0, Math.trunc(value || 0));
     const capped = maxTotal ? Math.min(maxTotal, sanitized) : sanitized;
-    onChange(normalizeRatios({ ...mix, totalTroops: capped }, DEFAULT_TROOP_MIX));
+    notifyMixChange(normalizeRatios({ ...mix, totalTroops: capped }, DEFAULT_TROOP_MIX));
   };
 
   return (
-    <div className="rounded-lg border border-slate-700/50 p-5 bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-sm shadow-lg">
+    <div className="rounded-lg border border-slate-700/50 p-5 bg-linear-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-sm shadow-lg">
       <div className="flex items-start justify-between gap-3 mb-5">
         <div className="flex-1">
           <div className="text-base font-semibold text-slate-100 mb-1">{title}</div>
@@ -191,7 +220,7 @@ export function TroopMixQuickEditor({
                       }
                     }}
                     onBlur={(e) => {
-                      // Clear editing state and ensure value is set
+                      flushPending();
                       setEditingValues(prev => {
                         const next = { ...prev };
                         delete next[`${mode}-${type}`];
@@ -216,6 +245,12 @@ export function TroopMixQuickEditor({
                     placeholder={mode === 'percent' ? '0.0' : '0'}
                   />
                   <input
+                    ref={(el) => {
+                      if (el) {
+                        const progress = maxValue > 0 ? (currentValue / maxValue) * 100 : 0;
+                        el.style.setProperty('--slider-progress', `${progress}%`);
+                      }
+                    }}
                     type="range"
                     min={0}
                     max={maxValue}
@@ -223,6 +258,11 @@ export function TroopMixQuickEditor({
                     value={currentValue}
                     onChange={(e) => {
                       const parsed = parseFloat(e.target.value);
+                      // Update CSS variable for visual feedback
+                      const sliderEl = e.currentTarget;
+                      const progress = maxValue > 0 ? (parsed / maxValue) * 100 : 0;
+                      sliderEl.style.setProperty('--slider-progress', `${progress}%`);
+                      
                       setEditingValues(prev => {
                         const next = { ...prev };
                         delete next[`${mode}-${type}`];
@@ -234,10 +274,9 @@ export function TroopMixQuickEditor({
                         handleCountChange(type, parsed);
                       }
                     }}
+                    aria-label={`Adjust ${type} ${mode === 'percent' ? 'percentage' : 'count'}`}
+                    title={`Adjust ${type} ${mode === 'percent' ? 'percentage' : 'count'}`}
                     className="troop-mix-slider flex-1 h-2 bg-slate-700/50 rounded-lg appearance-none cursor-pointer"
-                    style={{
-                      background: `linear-gradient(to right, rgb(244 63 94) 0%, rgb(244 63 94) ${maxValue > 0 ? (currentValue / maxValue) * 100 : 0}%, rgb(51 65 85 / 0.5) ${maxValue > 0 ? (currentValue / maxValue) * 100 : 0}%, rgb(51 65 85 / 0.5) 100%)`
-                    }}
                   />
                 </div>
                 {mode === 'percent' && (

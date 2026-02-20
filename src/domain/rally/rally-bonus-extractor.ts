@@ -4,66 +4,19 @@
  */
 
 import type { RallyConfiguration, RallyHero } from '@/shared/types';
-import type {
-  HeroSkillLevelPercent,
-  LevelSkill,
-  SkillLevel,
-  SkillLevelKey,
-  SkillLevelsByName
-} from '../battle';
+import type { Hero, HeroSkillLevelPercent, LevelSkill, SkillLevel, SkillLevelsByName } from '../battle';
 import { getHeroByName } from '../battle';
 import type { AdditiveBonuses, BasicBonuses, MultiplicativeBonuses, TroopScope, TroopType } from '../battle/calculations';
+import { STAT_TROOP_TYPES } from '../battle/calculations';
 import { getHeroExpeditionSkills } from '../battle/data-selectors';
-
-/**
- * Extract value from skill property at a specific level
- */
-function extractSkillValue(
-  skillProperty: number | HeroSkillLevelPercent | undefined,
-  level: SkillLevel
-): number {
-  if (!skillProperty) return 0;
-
-  if (typeof skillProperty === 'number') {
-    return skillProperty;
-  }
-
-  // It's a level-based object
-  const levelValue =
-    skillProperty[level.toString() as SkillLevelKey] ??
-    skillProperty['1'];
-  if (typeof levelValue === 'number') {
-    return levelValue;
-  }
-
-  return 0;
-}
-
-/**
- * Get the maximum skill level available for a skill property
- */
-function getMaxSkillLevel(skillProperty: number | HeroSkillLevelPercent | undefined): SkillLevel {
-  if (!skillProperty) return 1;
-
-  if (typeof skillProperty === 'number') {
-    return 1; // Flat value, no levels
-  }
-
-  // It's a level-based object - find the highest level key
-  const levelKeys = Object.keys(skillProperty)
-    .filter(k => !isNaN(parseInt(k)))
-    .map(k => parseInt(k))
-    .sort((a, b) => b - a); // Sort descending
-
-  return (levelKeys.length > 0 ? levelKeys[0] : 1) as SkillLevel;
-}
+import { extractSkillValue, getMaxSkillLevel } from '../battle/data/heroes/skill-utils';
 
 /**
  * Extract bonuses from a hero's expedition skills
  * @param mode - 'attacking' or 'defending' to filter which stats apply
  */
 function extractHeroSkillBonuses(
-  hero: any,
+  hero: Hero,
   skillLevels: SkillLevelsByName,
   isJoiner: boolean = false,
   mode?: 'attacking' | 'defending'
@@ -130,7 +83,10 @@ function extractHeroSkillBonuses(
     Object.keys(skillData).forEach(key => {
       if (key === 'skill-name' || key === 'description' || key === 'trigger_chance') return;
 
-      const value = extractSkillValue(skillData[key as keyof LevelSkill] as any, level);
+      const value = extractSkillValue(
+        skillData[key as keyof LevelSkill] as number | HeroSkillLevelPercent | undefined,
+        level
+      );
       if (value === 0) return;
 
       const percentage = value * 100;
@@ -206,8 +162,6 @@ function extractHeroSkillBonuses(
   return { additive, multiplicative };
 }
 
-const TROOP_TYPES: TroopType[] = ['infantry', 'lancer', 'marksman'];
-
 /**
  * Extract exclusive weapon bonuses
  * LETH/HP bonuses go to basic bonuses
@@ -215,7 +169,7 @@ const TROOP_TYPES: TroopType[] = ['infantry', 'lancer', 'marksman'];
  * @param mode - 'attacking' or 'defending' to filter which stats apply (required)
  */
 function extractExclusiveWeaponBonuses(
-  hero: any,
+  hero: Hero,
   weaponLevel: number | undefined,
   mode: 'attacking' | 'defending' // Mode is now required
 ): {
@@ -233,12 +187,11 @@ function extractExclusiveWeaponBonuses(
 
   // Ensure mode is always defined
   if (!mode) {
-    console.warn('extractExclusiveWeaponBonuses: mode is required but was undefined, defaulting to attacking');
     mode = 'attacking';
   }
 
   const weapon = hero['exclusive-weapon'];
-  const weaponLevelData = weapon.levels.find((l: any) => l.level === weaponLevel);
+  const weaponLevelData = weapon.levels.find((l: { level: number }) => l.level === weaponLevel);
 
   if (!weaponLevelData) return { basic, additive, multiplicative };
 
@@ -419,7 +372,6 @@ export function extractLeaderBonuses(
 
   // Ensure mode is always defined
   if (!mode) {
-    console.warn('extractLeaderBonuses: mode is required but was undefined, defaulting to attacking');
     mode = 'attacking';
   }
 
@@ -638,7 +590,7 @@ export function extractJoinerBonuses(
     let maxLevel: SkillLevel = 1;
     Object.keys(skillData).forEach(key => {
       if (key === 'skill-name' || key === 'description' || key === 'trigger_chance') return;
-      const property = skillData[key as keyof LevelSkill] as any;
+      const property = skillData[key as keyof LevelSkill] as number | HeroSkillLevelPercent | undefined;
       const propMaxLevel = getMaxSkillLevel(property);
       if (propMaxLevel > maxLevel) {
         maxLevel = propMaxLevel;
@@ -677,7 +629,10 @@ export function extractJoinerBonuses(
     Object.keys(skillData).forEach(key => {
       if (key === 'skill-name' || key === 'description' || key === 'trigger_chance') return;
 
-      const value = extractSkillValue(skillData[key as keyof LevelSkill] as any, levelToUse);
+      const value = extractSkillValue(
+        skillData[key as keyof LevelSkill] as number | HeroSkillLevelPercent | undefined,
+        levelToUse
+      );
       if (value === 0) return;
 
       const scope = getScopeForKey(key);
@@ -755,7 +710,7 @@ export function extractJoinerBonuses(
     marksman: summarizeScope(bonusesByScope.marksman).multiplicative,
   };
 
-  const hasTroopSpecific = ['infantry', 'lancer', 'marksman'].some(scope => {
+  const hasTroopSpecific = STAT_TROOP_TYPES.some((scope) => {
     const bucket = bonusesByScope[scope as TroopScope];
     return Object.values(bucket).some(arr => arr.length > 0);
   });
@@ -944,16 +899,17 @@ export function calculateRallyBonuses(
   const perScopeAdditive = joinerBonuses.perScope?.additive ?? {};
   const perScopeMultiplicative = joinerBonuses.perScope?.multiplicative ?? {};
 
-  TROOP_TYPES.forEach(troop => {
+  STAT_TROOP_TYPES.forEach((troop) => {
     const additiveTarget = joinerAdditiveByTroop[troop];
     const multiplicativeTarget = joinerMultiplicativeByTroop[troop];
     if (!additiveTarget || !multiplicativeTarget) {
       return;
     }
 
-    const add = (perScopeAdditive.all_troops || {}) as any;
-    const rallyAdd = (perScopeAdditive.rally_troops || {}) as any;
-    const troopAdd = (perScopeAdditive[troop as TroopScope] || {}) as any;
+    type ScopeStatBlock = Partial<Record<'attack' | 'defense' | 'lethality' | 'health', number>>;
+    const add = (perScopeAdditive.all_troops || {}) as ScopeStatBlock;
+    const rallyAdd = (perScopeAdditive.rally_troops || {}) as ScopeStatBlock;
+    const troopAdd = (perScopeAdditive[troop as TroopScope] || {}) as ScopeStatBlock;
 
     additiveTarget.attack = (add.attack || 0) + (rallyAdd.attack || 0) + (troopAdd.attack || 0);
     additiveTarget.defense = (add.defense || 0) + (rallyAdd.defense || 0) + (troopAdd.defense || 0);

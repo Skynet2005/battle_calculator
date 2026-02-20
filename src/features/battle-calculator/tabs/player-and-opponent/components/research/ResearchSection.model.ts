@@ -70,7 +70,7 @@ export function useResearchSectionModel({
 
   // Update Research bonuses
   useEffect(() => {
-    const researchBonuses = getResearchBonuses(researchSelections, 'infantry');
+    const researchBonuses = getResearchBonuses(researchSelections);
 
     const newCombatTech = {
       ...basicBonuses.combatTech,
