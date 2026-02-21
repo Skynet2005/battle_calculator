@@ -22,7 +22,7 @@ export function renderTypeLines(
   // Consistent color scheme: Player = rose, Opponent = sky
   // Map side to player/opponent based on playerIsAttacker
   const isPlayerSide = (side === "attacker" && playerIsAttacker) || (side === "defender" && !playerIsAttacker);
-  const palette = isPlayerSide
+  const palette: Record<"Infantry" | "Lancer" | "Marksman", string> = isPlayerSide
     ? { Infantry: "rgba(251,113,133,0.95)", Lancer: "rgba(244,63,94,0.9)", Marksman: "rgba(225,29,72,0.9)" } // Rose shades (Player)
     : { Infantry: "rgba(125,211,252,0.95)", Lancer: "rgba(56,189,248,0.9)", Marksman: "rgba(14,165,233,0.9)" }; // Sky shades (Opponent)
 
@@ -46,14 +46,14 @@ export function renderTypeLines(
     const pointsStr = points.map(({ x, y }) => `${x},${y}`).join(" ");
     return (
       <g key={`${side}-${type}`}>
-        <polyline fill="none" stroke={(palette as any)[type]} strokeWidth="1.5" points={pointsStr} />
+        <polyline fill="none" stroke={palette[type]} strokeWidth="1.5" points={pointsStr} />
         {points.map((pt, idx) => (
           <circle
             key={`${side}-${type}-${idx}`}
             cx={pt.x}
             cy={pt.y}
             r={3}
-            fill={(palette as any)[type]}
+            fill={palette[type]}
             onMouseEnter={() =>
               setHover({
                 side,

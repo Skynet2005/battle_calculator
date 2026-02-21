@@ -1,8 +1,9 @@
 'use client';
 
+import { extractJoinerBonuses } from '@/domain/rally/rally-bonus-extractor';
 import type { CapacityReport } from '@/features/battle-calculator/model/types';
 import type { TroopMixConfig, UserProfile } from '@/shared/types';
-import { extractJoinerBonuses } from '@/domain/rally/rally-bonus-extractor';
+import { memo } from 'react';
 
 import PlayerSubTabs from './components/info/player/PlayerSubTabs';
 import { usePlayerTabModel, type SubTab } from './PlayerTab.model';
@@ -27,7 +28,7 @@ export interface PlayerTabProps {
   onTroopMixChange: (side: 'player', mix: TroopMixConfig) => void;
 }
 
-export default function PlayerTab({
+function PlayerTab({
   currentProfile,
   setCurrentProfile,
   profileSubTab,
@@ -87,3 +88,5 @@ export default function PlayerTab({
     </div>
   );
 }
+
+export default memo(PlayerTab);

@@ -31,7 +31,7 @@ export default function ExpertsSection({
                 type="number"
                 aria-label={label}
                 step="0.01"
-                value={(expertSelections as any)[key] || 0}
+                value={(expertSelections as unknown as Record<string, number>)[key] ?? 0}
                 onChange={(e) => onChangeStat(key, parseFloat(e.target.value) || 0)}
               />
             </div>

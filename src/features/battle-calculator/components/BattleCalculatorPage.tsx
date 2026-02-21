@@ -1,40 +1,87 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import AuthGate from '@/features/auth/components/auth/AuthGate';
 import Header from '@/features/battle-calculator/components/layout/Header';
-import TabBar, { type TabKey } from '@/features/battle-calculator/components/layout/TabBar';
-import ProfileGate, { type ProfileGateRef } from '@/features/profile/components/profile/ProfileGate';
+import TabBar, { type DecisionEnginePanel, type TabKey } from '@/features/battle-calculator/components/layout/TabBar';
+import { useBattleCalculatorState } from '@/features/battle-calculator/hooks/useBattleCalculatorState';
 import OpponentTab from '@/features/battle-calculator/tabs/player-and-opponent/OpponentTab';
 import PlayerTab from '@/features/battle-calculator/tabs/player-and-opponent/PlayerTab';
 import RallyTab from '@/features/battle-calculator/tabs/rally_config/RallyTab';
-import { EmptyState, PageShell, SectionCard, StatTile, LoadingSkeleton } from '@/shared/ui';
+import ProfileGate, { type ProfileGateRef } from '@/features/profile/components/profile/ProfileGate';
+import { useAuthUser, useDeleteAccount, useLogout } from '@/shared/hooks/useAuth';
+import { useProfileState } from '@/shared/hooks/useProfileState';
+import { useProfile } from '@/shared/hooks/useProfiles';
+import { EmptyState, LoadingSkeleton, PageShell, SectionCard, StatTile } from '@/shared/ui';
+import { toast } from '@/shared/utils/toast';
+import dynamic from 'next/dynamic';
+import { Suspense, useMemo, useRef, useState } from 'react';
 
 // Lazy load heavy components for code splitting
 const ResultsTab = dynamic(() => import('@/features/battle-calculator/tabs/results/ResultsTab'), {
   loading: () => <LoadingSkeleton lines={8} />,
 });
 
+const ScenarioRunnerTab = dynamic(
+  () => import('@/features/battle-calculator/tabs/scenario-runner/ScenarioRunnerTab'),
+  { loading: () => <LoadingSkeleton lines={6} /> }
+);
+
+const HeatmapTab = dynamic(
+  () => import('@/features/battle-calculator/tabs/heatmap/HeatmapTab'),
+  { loading: () => <LoadingSkeleton lines={6} /> }
+);
+
+const SwapLabTab = dynamic(
+  () => import('@/features/battle-calculator/tabs/swap-lab/SwapLabTab'),
+  { loading: () => <LoadingSkeleton lines={6} /> }
+);
+
+const FlipLeversTab = dynamic(
+  () => import('@/features/battle-calculator/tabs/flip-levers/FlipLeversTab'),
+  { loading: () => <LoadingSkeleton lines={6} /> }
+);
+
+const UpgradeROITab = dynamic(
+  () => import('@/features/battle-calculator/tabs/upgrade-roi/UpgradeROITab'),
+  { loading: () => <LoadingSkeleton lines={6} /> }
+);
+
+const ReportImporterTab = dynamic(
+  () => import('@/features/battle-calculator/tabs/reports/ReportImporterTab'),
+  { loading: () => <LoadingSkeleton lines={4} /> }
+);
+
+const CalibrationDashboardTab = dynamic(
+  () => import('@/features/battle-calculator/tabs/calibration/CalibrationDashboardTab'),
+  { loading: () => <LoadingSkeleton lines={4} /> }
+);
+
 const HowToUseGuideTab = dynamic(() => import('@/features/battle-calculator/tabs/how_to/HowToUseGuideTab'), {
   loading: () => <LoadingSkeleton lines={10} />,
 });
-import { useBattleCalculatorState } from '@/features/battle-calculator/hooks/useBattleCalculatorState';
-import { useAuthUser, useLogout, useDeleteAccount } from '@/shared/hooks/useAuth';
-import { useProfileState } from '@/shared/hooks/useProfileState';
-import { useProfile } from '@/shared/hooks/useProfiles';
-import { useMemo, useRef, useState, useEffect, Suspense } from 'react';
-import { toast } from '@/shared/utils/toast';
 
 const tabCopy: Record<TabKey, { title: string; description: string }> = {
   profile: { title: 'Player Setup', description: 'Configure your commander, heroes, pets, and base stats.' },
   opponent: { title: 'Opponent Setup', description: 'Mirror opponent stats to compare rally outcomes.' },
   rally: { title: 'Rally Configuration', description: 'Assign leaders, joiners, and troop mix for the rally.' },
   results: { title: 'Results', description: 'Review simulation outcomes, multipliers, and timelines.' },
+  'decision-engine': { title: 'Decision Engine', description: 'Scenario runner, heatmaps, swap lab, levers, ROI, reports, and calibration.' },
   howto: { title: 'How To', description: 'Usage guidance, readiness checklist, and troubleshooting.' }
+};
+
+const decisionEnginePanelCopy: Record<DecisionEnginePanel, string> = {
+  'scenario-runner': 'Scenario Runner',
+  heatmap: 'Troop Mix Heatmap',
+  'swap-lab': 'Swap Lab',
+  'flip-levers': 'Flip Levers',
+  'upgrade-roi': 'Upgrade ROI',
+  reports: 'Report Import',
+  calibration: 'Calibration',
 };
 
 export default function BattleCalculatorPage() {
   const [authSessionVersion, setAuthSessionVersion] = useState(0);
+  const [decisionEnginePanel, setDecisionEnginePanel] = useState<DecisionEnginePanel>('scenario-runner');
   const profileGateRef = useRef<ProfileGateRef>(null);
 
   // Use React Query hooks
@@ -67,6 +114,12 @@ export default function BattleCalculatorPage() {
     setSimulationModeAction,
     simulationCount,
     setSimulationCountAction,
+    rngSeed,
+    lockSeed,
+    setRngSeed,
+    setLockSeed,
+    rerunSameSeed,
+    newSeed,
     playerJoinerInfo,
     opponentJoinerInfo,
     profileLoaded,
@@ -78,14 +131,7 @@ export default function BattleCalculatorPage() {
     handleProfileChange,
     handleSave,
     handleTroopMixChange
-  } = useBattleCalculatorState();
-
-  // Sync React Query profile data with local state
-  useEffect(() => {
-    if (currentProfileData) {
-      handleProfileChange(currentProfileData);
-    }
-  }, [currentProfileData, handleProfileChange]);
+  } = useBattleCalculatorState({ serverProfile: currentProfileData ?? null });
 
   const tabStatuses: Partial<Record<TabKey, 'ready' | 'warning' | 'error'>> = useMemo(
     () => ({
@@ -93,6 +139,7 @@ export default function BattleCalculatorPage() {
       opponent: opponentReady ? 'ready' : 'warning',
       rally: rallyReady ? 'ready' : 'warning',
       results: fightSimulationError ? 'error' : fightReady ? 'ready' : 'warning',
+      'decision-engine': rallyReady ? 'ready' : 'warning',
       howto: fightSimulationError ? 'error' : undefined
     }),
     [fightReady, fightSimulationError, opponentReady, playerReady, rallyReady]
@@ -229,6 +276,12 @@ export default function BattleCalculatorPage() {
             setSimulationModeAction={setSimulationModeAction}
             simulationCount={simulationCount}
             setSimulationCountAction={setSimulationCountAction}
+            rngSeed={rngSeed}
+            lockSeed={lockSeed}
+            setRngSeed={setRngSeed}
+            setLockSeed={setLockSeed}
+            rerunSameSeed={rerunSameSeed}
+            newSeed={newSeed}
             onMixChange={handleTroopMixChange}
             playerCapacity={playerCapacityReport}
             opponentCapacity={opponentCapacityReport}
@@ -236,6 +289,100 @@ export default function BattleCalculatorPage() {
             opponentMixInput={currentProfile.rally.troopMix?.opponent}
           />
         </Suspense>
+      );
+    }
+
+    if (activeTab === 'decision-engine') {
+      const panel = decisionEnginePanel;
+      return (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2 border-b border-slate-700/60 pb-3">
+            {(Object.keys(decisionEnginePanelCopy) as DecisionEnginePanel[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setDecisionEnginePanel(key)}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${panel === key
+                    ? 'bg-slate-600 text-white'
+                    : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700/80 hover:text-white'
+                  }`}
+              >
+                {decisionEnginePanelCopy[key]}
+              </button>
+            ))}
+          </div>
+          <div className="min-h-0">
+            {panel === 'scenario-runner' && (
+              <Suspense fallback={<LoadingSkeleton lines={6} />}>
+                <ScenarioRunnerTab
+                  currentProfile={currentProfile}
+                  playerBaseStats={playerBaseStats}
+                  opponentBaseStats={opponentBaseStats}
+                  playerCapacityReport={playerCapacityReport}
+                  opponentCapacityReport={opponentCapacityReport}
+                  simulationMode={simulationMode}
+                  simulationCount={simulationCount}
+                />
+              </Suspense>
+            )}
+            {panel === 'heatmap' && (
+              <Suspense fallback={<LoadingSkeleton lines={6} />}>
+                <HeatmapTab
+                  currentProfile={currentProfile}
+                  playerBaseStats={playerBaseStats}
+                  opponentBaseStats={opponentBaseStats}
+                  playerCapacityReport={playerCapacityReport}
+                  opponentCapacityReport={opponentCapacityReport}
+                  simulationMode={simulationMode}
+                  simulationCount={simulationCount}
+                />
+              </Suspense>
+            )}
+            {panel === 'swap-lab' && (
+              <Suspense fallback={<LoadingSkeleton lines={6} />}>
+                <SwapLabTab
+                  currentProfile={currentProfile}
+                  playerBaseStats={playerBaseStats}
+                  opponentBaseStats={opponentBaseStats}
+                  playerCapacityReport={playerCapacityReport}
+                  opponentCapacityReport={opponentCapacityReport}
+                />
+              </Suspense>
+            )}
+            {panel === 'flip-levers' && (
+              <Suspense fallback={<LoadingSkeleton lines={6} />}>
+                <FlipLeversTab
+                  currentProfile={currentProfile}
+                  playerBaseStats={playerBaseStats}
+                  opponentBaseStats={opponentBaseStats}
+                  playerCapacityReport={playerCapacityReport}
+                  opponentCapacityReport={opponentCapacityReport}
+                />
+              </Suspense>
+            )}
+            {panel === 'upgrade-roi' && (
+              <Suspense fallback={<LoadingSkeleton lines={6} />}>
+                <UpgradeROITab
+                  currentProfile={currentProfile}
+                  playerBaseStats={playerBaseStats}
+                  opponentBaseStats={opponentBaseStats}
+                  playerCapacityReport={playerCapacityReport}
+                  opponentCapacityReport={opponentCapacityReport}
+                />
+              </Suspense>
+            )}
+            {panel === 'reports' && (
+              <Suspense fallback={<LoadingSkeleton lines={4} />}>
+                <ReportImporterTab />
+              </Suspense>
+            )}
+            {panel === 'calibration' && (
+              <Suspense fallback={<LoadingSkeleton lines={4} />}>
+                <CalibrationDashboardTab />
+              </Suspense>
+            )}
+          </div>
+        </div>
       );
     }
 
@@ -264,7 +411,7 @@ export default function BattleCalculatorPage() {
 
   return (
     <>
-      <AuthGate key={authSessionVersion} onAuthSuccess={() => {}} />
+      <AuthGate key={authSessionVersion} onAuthSuccess={() => { }} />
       {authUser && !isAuthLoading && (
         <ProfileGate
           ref={profileGateRef}
@@ -274,7 +421,7 @@ export default function BattleCalculatorPage() {
           gameData={authUser?.gameData || null}
           onLogout={handleLogout}
           onDeleteAccount={handleDeleteAccount}
-          onAuthUserUpdate={() => {}}
+          onAuthUserUpdate={() => { }}
         >
           <PageShell
             header={
@@ -288,6 +435,10 @@ export default function BattleCalculatorPage() {
                   onLogout={handleLogout}
                   onDeleteAccount={handleDeleteAccount}
                   onProfileOpen={() => profileGateRef.current?.openProfileModal()}
+                  onDecisionEngineSelect={(panel) => {
+                    setActiveTab('decision-engine');
+                    setDecisionEnginePanel(panel);
+                  }}
                 />
                 <SectionCard title="Readiness" description="Track setup completion and simulation status." tone="muted">
                   {headerSummary}

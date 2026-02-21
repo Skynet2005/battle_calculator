@@ -1,12 +1,12 @@
 import type { BattleConfig, BattleReport } from '@/domain/battle/engine/types';
-import { DEFAULT_TROOP_MIX } from '@/domain/rally/rally-config';
-import type { TroopMixConfig } from '@/shared/types';
 import type { FightResult } from '@/domain/rally/combat-fight';
-import BattlePredictor from './battle-predictor';
+import { DEFAULT_TROOP_MIX } from '@/domain/rally/rally-config';
 import type {
   BattleSideContext,
   CapacityReport,
 } from '@/features/battle-calculator/model/types';
+import type { TroopMixConfig } from '@/shared/types';
+import BattlePredictor from './battle-predictor';
 
 interface ResultsTabProps {
   player: BattleSideContext | null;
@@ -19,6 +19,12 @@ interface ResultsTabProps {
   setSimulationModeAction: (mode: BattleConfig['randomMode']) => void;
   simulationCount: number;
   setSimulationCountAction: (count: number) => void;
+  rngSeed: number;
+  lockSeed: boolean;
+  setRngSeed: (seed: number) => void;
+  setLockSeed: (lock: boolean) => void;
+  rerunSameSeed: () => void;
+  newSeed: () => void;
   onMixChange: (side: 'player' | 'opponent', mix: TroopMixConfig) => void;
   playerCapacity: CapacityReport | null;
   opponentCapacity: CapacityReport | null;
@@ -37,6 +43,12 @@ export default function ResultsTab({
   setSimulationModeAction,
   simulationCount,
   setSimulationCountAction,
+  rngSeed,
+  lockSeed,
+  setRngSeed,
+  setLockSeed,
+  rerunSameSeed,
+  newSeed,
   onMixChange,
   playerCapacity,
   opponentCapacity,
@@ -56,6 +68,12 @@ export default function ResultsTab({
         setSimulationModeAction={setSimulationModeAction}
         simulationCount={simulationCount}
         setSimulationCountAction={setSimulationCountAction}
+        rngSeed={rngSeed}
+        lockSeed={lockSeed}
+        setRngSeed={setRngSeed}
+        setLockSeed={setLockSeed}
+        rerunSameSeed={rerunSameSeed}
+        newSeed={newSeed}
         onMixChange={onMixChange}
         playerCapacity={playerCapacity}
         opponentCapacity={opponentCapacity}

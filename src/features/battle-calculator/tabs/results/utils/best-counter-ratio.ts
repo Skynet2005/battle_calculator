@@ -11,6 +11,7 @@ import type { RallySideConfig } from '@/domain/rally/combat-types';
 import { computeCountsFromMix } from '@/domain/rally/mix-utils';
 import type { BattleSideContext, TroopType } from '@/features/battle-calculator/model/types';
 import type { TroopMixConfig } from '@/shared/types';
+import { clientLogger } from '@/shared/utils/clientLogger';
 
 // ============================================================================
 // TYPES
@@ -382,10 +383,8 @@ export function computeBestCounterRatio(input: CounterRatioInput): CounterRatioR
       const score = scoreResult(result);
       coarseResults.push({ ratio: candidate, result, score });
     } catch (error) {
-      // Log warning in development only
       if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-        // eslint-disable-next-line no-console
-        console.warn('Simulation failed for ratio:', candidate, error);
+        clientLogger.warn('Simulation failed for ratio', { candidate, error: String(error) });
       }
       // Continue with other candidates
     }

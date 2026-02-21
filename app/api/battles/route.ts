@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { db, migrationsReady } from '@/server/db/db';
 import { battleResults } from '@/server/db/schema';
-import { requireAuth } from '@/server/middleware/auth';
 import { ApiError, withErrorHandling } from '@/server/middleware/apiErrorHandler';
+import { requireAuth } from '@/server/middleware/auth';
 import { createRateLimiter } from '@/server/middleware/rateLimit';
 import { validateBody } from '@/server/middleware/validateSchema';
-import { saveBattleResultSchema } from '@/server/validation/schemas';
 import { logger } from '@/server/utils/logger';
+import { saveBattleResultSchema } from '@/server/validation/schemas';
 
 const battleMutationLimiter = createRateLimiter({
   maxRequests: 30,
@@ -50,6 +50,14 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
       inputHash: battleResults.inputHash,
       requestJson: battleResults.requestJson,
       responseSummaryJson: battleResults.responseSummaryJson,
+      playerProfileId: battleResults.playerProfileId,
+      opponentProfileId: battleResults.opponentProfileId,
+      rallyConfigSnapshot: battleResults.rallyConfigSnapshot,
+      battleConfigSnapshot: battleResults.battleConfigSnapshot,
+      tags: battleResults.tags,
+      modelVersion: battleResults.modelVersion,
+      shareToken: battleResults.shareToken,
+      runType: battleResults.runType,
     })
     .from(battleResults)
     .where(and(...conditions))
@@ -95,7 +103,18 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     metricsJson,
     rationaleJson,
     reportJson,
+    playerProfileId,
+    opponentProfileId,
+    rallyConfigSnapshot,
+    battleConfigSnapshot,
+    tags,
+    modelVersion,
+    generateShareToken,
+    runType,
   } = validation.data;
+
+  const shareToken =
+    generateShareToken === true ? crypto.randomUUID().replace(/-/g, '').slice(0, 16) : null;
 
   const [row] = await db
     .insert(battleResults)
@@ -108,11 +127,20 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       metricsJson: metricsJson ?? null,
       rationaleJson: rationaleJson ?? null,
       reportJson: reportJson ?? null,
+      playerProfileId: playerProfileId ?? null,
+      opponentProfileId: opponentProfileId ?? null,
+      rallyConfigSnapshot: rallyConfigSnapshot ?? null,
+      battleConfigSnapshot: battleConfigSnapshot ?? null,
+      tags: tags ?? null,
+      modelVersion: modelVersion ?? null,
+      shareToken,
+      runType: runType ?? null,
     })
     .returning({
       id: battleResults.id,
       createdAt: battleResults.createdAt,
       inputHash: battleResults.inputHash,
+      shareToken: battleResults.shareToken,
     });
 
   if (!row) {

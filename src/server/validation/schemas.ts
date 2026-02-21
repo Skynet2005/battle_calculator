@@ -95,6 +95,42 @@ export const saveBattleResultSchema = z.object({
   metricsJson: z.record(z.unknown()).optional(),
   rationaleJson: z.record(z.unknown()).optional(),
   reportJson: z.record(z.unknown()).optional(),
+  // Decision engine: saved run snapshot + permalink
+  playerProfileId: z.string().uuid().nullable().optional(),
+  opponentProfileId: z.string().uuid().nullable().optional(),
+  rallyConfigSnapshot: z.record(z.unknown()).nullable().optional(),
+  battleConfigSnapshot: z.record(z.unknown()).nullable().optional(),
+  tags: z.array(z.string()).nullable().optional(),
+  modelVersion: z.string().nullable().optional(),
+  generateShareToken: z.boolean().optional(),
+  runType: z.enum(['single', 'batch_row', 'heatmap_cell', 'scenario_baseline']).optional(),
+});
+
+/** Share token param for by-share route */
+export const shareTokenParamSchema = z.object({
+  token: z.string().min(1, 'Share token is required').max(64),
+});
+
+/** Report import - raw paste */
+export const reportImportSchema = z.object({
+  rawText: z.string().min(1, 'Raw text is required').max(50000),
+});
+
+/** Parsed report shape (from importer) */
+export const parsedReportSchema = z.object({
+  winner: z.string().optional(),
+  troopTotals: z.record(z.number()).optional(),
+  remaining: z.record(z.unknown()).optional(),
+  turnCount: z.number().optional(),
+  lineupText: z.string().optional(),
+});
+
+/** Calibration parameter set */
+export const calibrationParamsSchema = z.object({
+  version: z.string().min(1).max(50),
+  name: z.string().min(1).max(200),
+  paramsJson: z.record(z.unknown()),
+  isActive: z.boolean().optional(),
 });
 
 // Re-export for backward compatibility (if used elsewhere)

@@ -1,6 +1,7 @@
-import ThemeToggle from '@/shared/ui/ThemeToggle';
+import type { DecisionEnginePanel } from '@/features/battle-calculator/components/layout/TabBar';
 import type { UserProfile } from '@/shared/types';
-import HamburgerNav from '@/shared/ui/HamburgerNav';
+import HamburgerNav, { type NavSection } from '@/shared/ui/HamburgerNav';
+import ThemeToggle from '@/shared/ui/ThemeToggle';
 
 interface HeaderProps {
   currentProfile: UserProfile | null;
@@ -17,7 +18,19 @@ interface HeaderProps {
   onLogout?: () => void;
   onDeleteAccount?: () => void;
   onProfileOpen?: () => void;
+  /** When provided, adds a "Decision Engine" section to the hamburger menu. */
+  onDecisionEngineSelect?: (panel: DecisionEnginePanel) => void;
 }
+
+const DECISION_ENGINE_ITEMS: { panel: DecisionEnginePanel; label: string }[] = [
+  { panel: 'scenario-runner', label: 'Scenario Runner' },
+  { panel: 'heatmap', label: 'Troop Mix Heatmap' },
+  { panel: 'swap-lab', label: 'Swap Lab' },
+  { panel: 'flip-levers', label: 'Flip Levers' },
+  { panel: 'upgrade-roi', label: 'Upgrade ROI' },
+  { panel: 'reports', label: 'Report Import' },
+  { panel: 'calibration', label: 'Calibration' },
+];
 
 export default function Header({
   currentProfile,
@@ -28,7 +41,21 @@ export default function Header({
   onLogout,
   onDeleteAccount,
   onProfileOpen,
+  onDecisionEngineSelect,
 }: HeaderProps) {
+  const sections: NavSection[] =
+    onDecisionEngineSelect == null
+      ? []
+      : [
+        {
+          label: 'Decision Engine',
+          items: DECISION_ENGINE_ITEMS.map(({ panel, label }) => ({
+            label,
+            onClick: () => onDecisionEngineSelect(panel),
+          })),
+        },
+      ];
+
   return (
     <header className="text-center mb-10 text-white relative">
       <div className="absolute top-0 left-0 z-10">
@@ -38,6 +65,7 @@ export default function Header({
             { href: '/leaderboard', label: 'Leaderboard' },
             { href: '/rally-march-times', label: 'Rally March Times' },
           ]}
+          sections={sections}
         />
       </div>
       <div className="absolute top-0 right-0 z-10 flex items-center gap-2">
@@ -105,7 +133,7 @@ export default function Header({
                   <a
                     href="https://github.com/Skynet2005/battle_calculator/issues"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="button px-3 py-2 text-xs bg-slate-800/80 hover:bg-slate-800"
                     title="Open GitHub issues to report bugs or give feedback"
                   >

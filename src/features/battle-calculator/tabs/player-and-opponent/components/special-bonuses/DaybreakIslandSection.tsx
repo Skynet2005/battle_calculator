@@ -129,7 +129,7 @@ export default function DaybreakIslandSection({
                 type="number"
                 aria-label={label}
                 step="0.1"
-                value={(daybreakIsland.troops as any)[key]}
+                value={(daybreakIsland.troops as Record<string, number>)[key]}
                 onChange={(e) => onChangeStat('troops', key as StatKey, parseFloat(e.target.value) || 0)}
               />
             </div>

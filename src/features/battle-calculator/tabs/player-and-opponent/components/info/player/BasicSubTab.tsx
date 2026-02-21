@@ -81,7 +81,7 @@ export default function PlayerBasicSubTab({
                   max="10"
                   step="0.1"
                   aria-label={`Alliance Tech - ${label} % (Max 10%)`}
-                  value={(currentProfile.basicBonuses.allianceTech as any)[stat]}
+                  value={(currentProfile.basicBonuses.allianceTech as Record<string, number>)[stat]}
                   onChange={(e) =>
                     setCurrentProfile({
                       ...currentProfile,

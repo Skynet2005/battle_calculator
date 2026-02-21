@@ -11,22 +11,24 @@
  * This component should remain ~150-250 lines and only wire sections together.
  */
 
-import { useMemo, useCallback } from 'react';
-import type { TroopMixConfig } from '@/shared/types';
-import { EmptyState, ErrorState, SectionCard } from '@/shared/ui';
-import { useSyncedMixState } from '@/features/battle-calculator/hooks/useSyncedMixState';
 import type { BattleConfig, BattleReport } from '@/domain/battle/engine/types';
 import type { FightResult } from '@/domain/rally/combat-fight';
 import { DEFAULT_TROOP_MIX } from '@/domain/rally/rally-config';
+import { useSyncedMixState } from '@/features/battle-calculator/hooks/useSyncedMixState';
 import type { BattleSideContext, CapacityReport } from '@/features/battle-calculator/model/types';
+import { buildDiscordSummaryFromReport } from '@/features/battle-calculator/utils/discordSummary';
+import type { TroopMixConfig } from '@/shared/types';
+import { ErrorState, SectionCard } from '@/shared/ui';
+import { toast } from '@/shared/utils/toast';
+import { useCallback, useMemo } from 'react';
 
 // Primary Tier
-import { OutcomeHeader } from './sections/OutcomeHeader';
-import { MonteCarloStatsPanel } from './sections/MonteCarloStatsPanel';
-import { FormulaBreakdown } from './sections/FormulaBreakdown';
 import { BestCounterRatio } from './sections/BestCounterRatio';
-import { WhyYouLost } from './sections/WhyYouLost';
 import { DamageSummaryPanel } from './sections/DamageSummaryPanel';
+import { FormulaBreakdown } from './sections/FormulaBreakdown';
+import { MonteCarloStatsPanel } from './sections/MonteCarloStatsPanel';
+import { OutcomeHeader } from './sections/OutcomeHeader';
+import { WhyYouLost } from './sections/WhyYouLost';
 
 // Secondary Tier
 import { BonusesSection } from './sections/BonusesSection';
@@ -38,8 +40,8 @@ import { BattleAnalysisPanel } from './analysis/BattleAnalysisPanel';
 import { BattleComparisonPanel } from './analysis/BattleComparisonPanel';
 import { CasualtyChart } from './analysis/CasualtyChart';
 import { RallyKeyMoments } from './analysis/RallyKeyMoments';
-import { StatsEvolutionPanel } from './analysis/StatsEvolutionPanel';
 import { SkillScorecard } from './analysis/SkillScorecard';
+import { StatsEvolutionPanel } from './analysis/StatsEvolutionPanel';
 import { extractKeyMoments } from './utils/keyMoments';
 
 interface BattlePredictorProps {
@@ -60,6 +62,12 @@ interface BattlePredictorProps {
   setSimulationModeAction: (mode: BattleConfig['randomMode']) => void;
   simulationCount: number;
   setSimulationCountAction: (count: number) => void;
+  rngSeed: number;
+  lockSeed: boolean;
+  setRngSeed: (seed: number) => void;
+  setLockSeed: (lock: boolean) => void;
+  rerunSameSeed: () => void;
+  newSeed: () => void;
 }
 
 export default function BattlePredictor({
@@ -80,6 +88,12 @@ export default function BattlePredictor({
   setSimulationModeAction,
   simulationCount,
   setSimulationCountAction,
+  rngSeed,
+  lockSeed,
+  setRngSeed,
+  setLockSeed,
+  rerunSameSeed,
+  newSeed,
 }: BattlePredictorProps) {
   const { mix: playerMixLocal, setMix: setPlayerMixLocal } =
     useSyncedMixState(playerMixInput, playerCapacity?.rally.total, DEFAULT_TROOP_MIX);
@@ -128,8 +142,8 @@ export default function BattlePredictor({
                 type="button"
                 onClick={() => setSimulationModeAction(mode)}
                 className={`px-3 py-1 rounded-full text-sm border ${simulationMode === mode
-                    ? 'border-rose-400 bg-rose-500/30 text-white'
-                    : 'border-white/10 text-gray-300 hover:border-white/20'
+                  ? 'border-rose-400 bg-rose-500/30 text-white'
+                  : 'border-white/10 text-gray-300 hover:border-white/20'
                   }`}
               >
                 {mode === 'monteCarlo' ? 'Monte Carlo' : 'Deterministic'}
@@ -149,6 +163,46 @@ export default function BattlePredictor({
                 className="w-20 rounded-md border border-white/10 bg-slate-900/60 px-2 py-1 text-sm text-white disabled:opacity-60"
               />
             </div>
+            <div className="flex flex-wrap items-center gap-2 border-l border-slate-600 pl-3">
+              <label className="text-xs text-gray-400">Seed</label>
+              <input
+                title="RNG Seed"
+                type="number"
+                min={1}
+                step={1}
+                value={rngSeed}
+                onChange={(e) => setRngSeed(Number(e.target.value) || 1)}
+                disabled={!lockSeed}
+                className="w-28 rounded-md border border-white/10 bg-slate-900/60 px-2 py-1 text-sm text-white disabled:opacity-60"
+              />
+              <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={lockSeed}
+                  onChange={(e) => setLockSeed(e.target.checked)}
+                  className="rounded border-slate-600"
+                />
+                <span className="text-xs text-gray-400">Lock seed</span>
+              </label>
+              <button type="button" onClick={rerunSameSeed} className="btn ghost text-xs py-1">
+                Rerun same seed
+              </button>
+              <button type="button" onClick={newSeed} className="btn ghost text-xs py-1">
+                New seed
+              </button>
+            </div>
+            {battleReport && (
+              <button
+                type="button"
+                onClick={() => {
+                  const text = buildDiscordSummaryFromReport(battleReport);
+                  void navigator.clipboard.writeText(text).then(() => toast.success('Discord summary copied to clipboard'));
+                }}
+                className="btn ghost text-xs py-1"
+              >
+                Copy Discord Summary
+              </button>
+            )}
           </div>
         </div>
       </SectionCard>

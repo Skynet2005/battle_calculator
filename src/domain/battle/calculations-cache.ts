@@ -13,9 +13,9 @@ import type {
   TroopType,
 } from './calculations';
 
-// Cache configuration
-const MAX_CACHE_SIZE = 200;
-const CACHE_CLEANUP_THRESHOLD = 250;
+// Cache configuration (increased for heavy repeated calculations)
+const MAX_CACHE_SIZE = 500;
+const CACHE_CLEANUP_THRESHOLD = 600;
 
 /**
  * Recursively stringify an object with sorted keys for stable cache keys.
@@ -37,14 +37,19 @@ function stableStringify(value: unknown): string {
  */
 class CalculationCache<K, V> {
   private cache = new Map<K, V>();
+  private hits = 0;
+  private misses = 0;
 
   get(key: K): V | undefined {
     const value = this.cache.get(key);
     if (value !== undefined) {
+      this.hits++;
       this.cache.delete(key);
       this.cache.set(key, value);
+      return value;
     }
-    return value;
+    this.misses++;
+    return undefined;
   }
 
   set(key: K, value: V): void {
@@ -55,6 +60,17 @@ class CalculationCache<K, V> {
     if (this.cache.size > CACHE_CLEANUP_THRESHOLD) {
       this.cleanup();
     }
+  }
+
+  getStats(): { size: number; hits: number; misses: number; hitRate: number; missRate: number } {
+    const total = this.hits + this.misses;
+    return {
+      size: this.cache.size,
+      hits: this.hits,
+      misses: this.misses,
+      hitRate: total > 0 ? this.hits / total : 0,
+      missRate: total > 0 ? this.misses / total : 0,
+    };
   }
 
   private cleanup(): void {
@@ -157,10 +173,21 @@ export function clearCalculationCaches(): void {
 }
 
 /**
- * Get cache statistics for monitoring
+ * Get cache statistics for monitoring (size and hit/miss rates).
  */
-export function getCacheStats(): { finalStatsCacheSize: number } {
+export function getCacheStats(): {
+  finalStatsCacheSize: number;
+  hitRate: number;
+  missRate: number;
+  hits: number;
+  misses: number;
+} {
+  const stats = finalStatsCache.getStats();
   return {
-    finalStatsCacheSize: finalStatsCache.size,
+    finalStatsCacheSize: stats.size,
+    hitRate: stats.hitRate,
+    missRate: stats.missRate,
+    hits: stats.hits,
+    misses: stats.misses,
   };
 }

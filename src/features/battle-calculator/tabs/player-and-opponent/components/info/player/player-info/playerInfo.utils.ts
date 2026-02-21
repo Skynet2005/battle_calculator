@@ -48,7 +48,7 @@ export function computePetSkillCalc(petSkillSelections: Record<string, unknown>)
     const levelNum = typeof level === 'number' ? level : parseInt(String(level), 10);
     if (!levelNum || levelNum === 0 || Number.isNaN(levelNum)) return;
 
-    const pet = (PETS_DATA as any)[petName];
+    const pet = (PETS_DATA as Record<string, { levels?: Record<string, number>; stat?: string }>)[petName];
     if (!pet) return;
 
     const levelValue = pet.levels?.[levelNum.toString()];

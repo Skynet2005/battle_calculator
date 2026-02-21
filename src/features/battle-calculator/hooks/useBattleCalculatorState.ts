@@ -1,9 +1,3 @@
-import type { BattleConfig, BattleReport } from '@/domain/battle/engine/types';
-import { DEFAULT_TROOP_MIX, buildConfigForSide, mixToCounts } from '@/domain/rally/rally-config';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { BattleSideContext, CapacityReport } from '@/features/battle-calculator/model/types';
-import type { RallyHero, TroopMixConfig, UserProfile } from '@/shared/types';
-import { PETS_DATA } from '@/domain/battle/data/pets/pet_skills';
 import {
   buildOpponentCapacityReport,
   buildPlayerCapacityReport,
@@ -21,32 +15,54 @@ import {
   normalizeTroopMix,
   sanitizeMix,
   sumCapacityCounts
-  } from '@/domain/battle/battle-calculator-helpers';
+} from '@/domain/battle/battle-calculator-helpers';
 import type { CombatSideBonuses } from '@/domain/battle/calculations';
+import { PETS_DATA } from '@/domain/battle/data/pets/pet_skills';
+import { simulateBattleFromUI } from '@/domain/battle/engine/adapter';
+import type { BattleConfig, BattleReport } from '@/domain/battle/engine/types';
 import {
   getDefaultOpponentBasicBonuses,
   getDefaultOpponentCommandCenterLevel,
   getDefaultOpponentExpertSelections
 } from '@/domain/battle/index';
-import { simulateBattleFromUI } from '@/domain/battle/engine/adapter';
-import { useUpdateProfile } from '@/shared/hooks/useProfiles';
-import { migrateProfile } from '@/features/profile/api/profile-migration';
-import { toast } from '@/shared/utils/toast';
 import type { FightResult } from '@/domain/rally/combat-fight';
 import { buildFighterSnapshot, totalTroops, type FighterSnapshot } from '@/domain/rally/combat-fighter';
 import { calculateRallyBonuses, extractJoinerBonuses } from '@/domain/rally/rally-bonus-extractor';
+import { DEFAULT_TROOP_MIX, buildConfigForSide, mixToCounts } from '@/domain/rally/rally-config';
+import type { BattleSideContext, CapacityReport } from '@/features/battle-calculator/model/types';
+import { migrateProfile } from '@/features/profile/api/profile-migration';
+import { useUpdateProfile } from '@/shared/hooks/useProfiles';
+import type { RallyHero, TroopMixConfig, UserProfile } from '@/shared/types';
 import { clientLogger } from '@/shared/utils/clientLogger';
+import { toast } from '@/shared/utils/toast';
 import { isUuid } from '@/shared/utils/validation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAutoSave } from './useAutoSave';
 import { useRallyBonuses } from './useRallyBonuses';
 
-export function useBattleCalculatorState() {
+export interface UseBattleCalculatorStateOptions {
+  /** Server profile from React Query (useProfile). When set, local state syncs from it. */
+  serverProfile?: UserProfile | null;
+}
+
+export function useBattleCalculatorState(options: UseBattleCalculatorStateOptions = {}) {
+  const { serverProfile } = options;
   const [currentProfile, setCurrentProfile] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'profile' | 'opponent' | 'rally' | 'results' | 'howto'>('rally');
+
+  // Sync local state from React Query when server profile is provided (single source of truth)
+  useEffect(() => {
+    if (options.serverProfile !== undefined) {
+      setCurrentProfile(options.serverProfile ?? null);
+    }
+  }, [options.serverProfile]);
+  const [activeTab, setActiveTab] = useState<'profile' | 'opponent' | 'rally' | 'results' | 'decision-engine' | 'howto'>('rally');
   const [profileSubTab, setProfileSubTab] = useState<'info' | 'heroes' | 'basic' | 'research' | 'chief' | 'pets'>('info');
   const [opponentSubTab, setOpponentSubTab] = useState<'info' | 'heroes' | 'basic' | 'research' | 'chief' | 'pets'>('info');
   const [simulationMode, setSimulationMode] = useState<BattleConfig['randomMode']>('monteCarlo');
   const [simulationCount, setSimulationCount] = useState<number>(50);
+  const [rngSeed, setRngSeed] = useState<number>(1);
+  const [lockSeed, setLockSeed] = useState<boolean>(false);
+  const [rerunKey, setRerunKey] = useState<number>(0);
   const [previousBattleReport, setPreviousBattleReport] = useState<BattleReport | null>(null);
 
   // Get the update profile mutation hook
@@ -175,12 +191,14 @@ export function useBattleCalculatorState() {
       const attackerName = playerIsAttacker ? 'Player Rally' : 'Opponent Rally';
       const defenderName = playerIsAttacker ? 'Opponent Rally' : 'Player Rally';
 
+      const effectiveSeed = lockSeed ? rngSeed : 1;
       const { legacyFight, report } = simulateBattleFromUI({
         config: { attacker: attackerSide, defender: defenderSide },
         battleConfig: {
           maxTurns: 1000, // High limit to allow battles to continue until one side reaches zero troops
           randomMode: simulationMode,
-          simulations: simulationMode === 'monteCarlo' ? simulationCount : undefined
+          simulations: simulationMode === 'monteCarlo' ? simulationCount : undefined,
+          rngSeed: effectiveSeed
         }
       });
       const result = legacyFight;
@@ -329,7 +347,7 @@ export function useBattleCalculatorState() {
         opponent: null
       };
     }
-  }, [currentProfile?.rally, playerBaseStats, opponentBaseStats, playerCapacityReport, opponentCapacityReport, simulationMode, simulationCount]);
+  }, [currentProfile?.rally, playerBaseStats, opponentBaseStats, playerCapacityReport, opponentCapacityReport, simulationMode, simulationCount, lockSeed, rngSeed, rerunKey]);
 
   const {
     result: simulatedFightResult,
@@ -338,6 +356,12 @@ export function useBattleCalculatorState() {
     player: simulatedPlayerContext,
     opponent: simulatedOpponentContext
   } = fightSimulation;
+
+  const rerunSameSeed = useCallback(() => setRerunKey((k) => k + 1), []);
+  const newSeed = useCallback(() => {
+    setRngSeed(Math.floor(Math.random() * 2147483647));
+    setLockSeed(true);
+  }, []);
 
   // Track previous battle report for comparison
   const lastReportRef = useRef<BattleReport | null>(null);
@@ -379,18 +403,16 @@ export function useBattleCalculatorState() {
     setCurrentProfile(profile);
   }, []);
 
-  const handleSave = async () => {
-    if (currentProfile) {
-      if (!isUuid(currentProfile.id)) {
-        toast.error('Please create the profile first', 'Use the Profile modal to create a profile');
-        return;
-      }
-      updateProfileMutation.mutate(
-        { id: currentProfile.id, name: currentProfile.name, data: currentProfile, setCurrent: true },
-        {
-          onSuccess: (response) => {
-            // Import migrateProfile if needed
-            const { migrateProfile } = require('@/features/profile/api/profile-migration');
+  const handleSave = useCallback(() => {
+    if (!currentProfile) return;
+    if (!isUuid(currentProfile.id)) {
+      toast.error('Please create the profile first', 'Use the Profile modal to create a profile');
+      return;
+    }
+    updateProfileMutation.mutate(
+      { id: currentProfile.id, name: currentProfile.name, data: currentProfile, setCurrent: true },
+      {
+        onSuccess: (response) => {
           const saved = migrateProfile({
             ...response.data,
             id: response.id,
@@ -400,18 +422,17 @@ export function useBattleCalculatorState() {
           });
           if (saved.id !== currentProfile.id) setCurrentProfile(saved);
           toast.success('Profile saved successfully!');
-          },
-          onError: (error) => {
-            clientLogger.error('Save failed', error, {
-              component: 'useBattleCalculatorState',
-              profileId: currentProfile.id
-            });
-            toast.error('Save failed', error.message || 'Please try again');
-          },
-        }
-      );
-    }
-  };
+        },
+        onError: (error: Error) => {
+          clientLogger.error('Save failed', error, {
+            component: 'useBattleCalculatorState',
+            profileId: currentProfile.id
+          });
+          toast.error('Save failed', error.message || 'Please try again');
+        },
+      }
+    );
+  }, [currentProfile, updateProfileMutation]);
 
   const handleClearPlayerStorage = () => {
     if (!currentProfile) return;
@@ -561,6 +582,12 @@ export function useBattleCalculatorState() {
     setSimulationModeAction: setSimulationMode,
     simulationCount,
     setSimulationCountAction: setSimulationCount,
+    rngSeed,
+    lockSeed,
+    setRngSeed,
+    setLockSeed,
+    rerunSameSeed,
+    newSeed,
     playerJoinerInfo,
     opponentJoinerInfo,
     profileLoaded,

@@ -70,11 +70,14 @@ export function buildCasualtySeries(turns: TurnLog[]): CasualtySeriesEntry[] {
 import type { BattleReport } from '@/domain/battle/engine/types';
 
 export function computeCasualtiesByType(report: BattleReport, playerIsAttacker: boolean) {
-  const normalize = (c: Partial<CombatTroopCounts> | undefined | null): CombatTroopCounts => ({
-    Infantry: c?.Infantry ?? (c as any)?.infantry ?? 0,
-    Lancer: c?.Lancer ?? (c as any)?.lancer ?? 0,
-    Marksman: c?.Marksman ?? (c as any)?.marksman ?? 0
-  });
+  const normalize = (c: Partial<CombatTroopCounts> | Record<string, number> | undefined | null): CombatTroopCounts => {
+    const n = c as Record<string, number | undefined> | undefined;
+    return {
+      Infantry: n?.Infantry ?? n?.infantry ?? 0,
+      Lancer: n?.Lancer ?? n?.lancer ?? 0,
+      Marksman: n?.Marksman ?? n?.marksman ?? 0
+    };
+  };
 
   const initialAtt = normalize(report.turns[0]?.startAttackerTroops ?? report.attacker.troops);
   const initialDef = normalize(report.turns[0]?.startDefenderTroops ?? report.defender.troops);

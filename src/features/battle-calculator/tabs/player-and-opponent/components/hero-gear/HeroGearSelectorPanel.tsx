@@ -170,8 +170,8 @@ function normalizeSelection(sel: GearSelection): GearSelection {
   const p = sel.progress;
   const progress: GearProgress =
     p.rarity === "mythic"
-      ? { rarity: "mythic", level: clampInt((p as any).level ?? 0, 0, 100) }
-      : { rarity: "legendary", plus: clampInt((p as any).plus ?? 1, 1, 100) };
+      ? { rarity: "mythic", level: clampInt("level" in p ? (p.level ?? 0) : 0, 0, 100) }
+      : { rarity: "legendary", plus: clampInt("plus" in p ? (p.plus ?? 1) : 1, 1, 100) };
 
   const masteryLevel = clampInt(sel.masteryLevel, 0, 20);
   const essenceLevel = clampInt(sel.essenceLevel, 0, 20);
@@ -195,12 +195,12 @@ function defaultSelection(): GearSelection {
 }
 
 export function createDefaultLoadout(): HeroGearLoadout {
-  const out: any = {};
-  for (const t of TROOPS) {
-    out[t] = {};
-    for (const p of PIECES) out[t][p] = defaultSelection();
-  }
-  return out as HeroGearLoadout;
+  const out: HeroGearLoadout = {
+    infantry: { belt: defaultSelection(), boots: defaultSelection(), gloves: defaultSelection(), goggles: defaultSelection() },
+    lancer: { belt: defaultSelection(), boots: defaultSelection(), gloves: defaultSelection(), goggles: defaultSelection() },
+    marksman: { belt: defaultSelection(), boots: defaultSelection(), gloves: defaultSelection(), goggles: defaultSelection() }
+  };
+  return out;
 }
 
 function setSelectionAt(
@@ -283,13 +283,9 @@ export default function HeroGearSelectorPanel(props: Props): ReactElement {
 
   // Computed values
   const computed = useMemo(() => {
-    const out: Record<TroopType, Record<GearPiece, GearComputed>> = {
-      infantry: { belt: null as any, boots: null as any, gloves: null as any, goggles: null as any },
-      lancer: { belt: null as any, boots: null as any, gloves: null as any, goggles: null as any },
-      marksman: { belt: null as any, boots: null as any, gloves: null as any, goggles: null as any }
-    };
-
+    const out = {} as Record<TroopType, Record<GearPiece, GearComputed>>;
     for (const t of TROOPS) {
+      out[t] = {} as Record<GearPiece, GearComputed>;
       for (const p of PIECES) {
         const sel = normalizeSelection(loadout[t][p]);
         out[t][p] = props.registry[t][p](sel);
@@ -535,6 +531,7 @@ export default function HeroGearSelectorPanel(props: Props): ReactElement {
                   <div className="text-xs text-white/70">{isMythic ? "Mythic Level (0–100)" : "Legendary +Level (1–100)"}</div>
                   <div className="mt-2 flex items-center gap-2">
                     <input
+                      title="Select a level"
                       className={inputClass()}
                       type="number"
                       min={isMythic ? 0 : 1}
@@ -550,6 +547,7 @@ export default function HeroGearSelectorPanel(props: Props): ReactElement {
                   </div>
                   <div className="mt-2">
                     <input
+                      title="Select a level"
                       className="w-full accent-white"
                       type="range"
                       min={isMythic ? 0 : 1}
@@ -575,6 +573,7 @@ export default function HeroGearSelectorPanel(props: Props): ReactElement {
                   <div>
                     <div className="text-xs text-white/70">Mastery Level (0–20)</div>
                     <input
+                      title="Select a mastery level"
                       className={inputClass()}
                       type="number"
                       min={0}

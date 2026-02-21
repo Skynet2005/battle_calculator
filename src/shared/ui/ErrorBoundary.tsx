@@ -1,5 +1,6 @@
 'use client';
 
+import { clientLogger } from '@/shared/utils/clientLogger';
 import React from 'react';
 import ErrorState from './ErrorState';
 
@@ -43,15 +44,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error);
-      console.error('Error info:', errorInfo);
-    }
-    // In production, forward to onError (e.g. Sentry) if provided; otherwise log so errors are visible in server/log aggregation
+    clientLogger.error('ErrorBoundary caught an error', error, {
+      componentStack: errorInfo.componentStack,
+    });
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
-    } else if (process.env.NODE_ENV === 'production') {
-      console.error('ErrorBoundary caught an error:', error?.message ?? error, errorInfo?.componentStack);
     }
   }
 

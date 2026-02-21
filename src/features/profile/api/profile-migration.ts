@@ -9,7 +9,7 @@ import type { UserProfile } from '@/shared/types';
 export type LegacyProfile = Record<string, unknown>;
 
 /** Internal mutable shape for in-place migration; avoids dozens of casts for nested access. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- legacy migration mutates arbitrary shapes
 type MutableProfile = Record<string, any>;
 
 const defaultCharms = {

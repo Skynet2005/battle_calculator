@@ -97,6 +97,7 @@ export type ExpeditionSkill =
   | {
     "skill-name"?: string;
     "description"?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- skill data has dynamic keys
     [key: string]: any;
   }
   | undefined;

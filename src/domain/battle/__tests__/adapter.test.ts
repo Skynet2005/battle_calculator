@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { simulateBattleFromUI } from '../engine/adapter';
 import type { RallyConfig, RallySideConfig, SideBaseStats } from '../../rally/combat-types';
+import { simulateBattleFromUI } from '../engine/adapter';
 
 const emptyBaseStats: SideBaseStats = {
   infantry: { attack: 0, defense: 0, health: 0, lethality: 0 },
@@ -57,5 +57,22 @@ describe('simulateBattleFromUI', () => {
     expect(result.legacyFight.rounds).toBeDefined();
     expect(result.legacyFight.attackerWon).toBeDefined();
     expect(result.legacyFight.defenderWon).toBeDefined();
+  });
+
+  it('reproduces same outcome with same rngSeed (golden / reproducibility)', () => {
+    const config: RallyConfig = {
+      attacker: minimalSide('attacker', { infantry: 50, lancer: 25, marksman: 25 }),
+      defender: minimalSide('defender', { infantry: 50, lancer: 25, marksman: 25 }),
+    };
+    const run = (seed: number) =>
+      simulateBattleFromUI({
+        config,
+        battleConfig: { maxTurns: 100, randomMode: 'monteCarlo', simulations: 1, rngSeed: seed },
+      });
+    const a = run(42);
+    const b = run(42);
+    expect(a.report.winner).toBe(b.report.winner);
+    expect(a.report.attackerRemaining).toEqual(b.report.attackerRemaining);
+    expect(a.report.defenderRemaining).toEqual(b.report.defenderRemaining);
   });
 });

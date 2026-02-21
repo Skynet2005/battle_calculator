@@ -1,7 +1,7 @@
 import type { AdditiveBonuses, BasicBonuses } from '@/domain/battle/calculations';
+import type { ContributingHero } from './DataSelectors.utils';
 import { STAT_KEYS } from './DataSelectors.utils';
 import SpecialBuffsContributors from './SpecialBuffsContributors';
-import type { ContributingHero } from './DataSelectors.utils';
 
 export default function SpecialBonusesSection({
   basicBonuses,
@@ -64,9 +64,8 @@ export default function SpecialBonusesSection({
           <p className="text-sm font-semibold text-gray-300 dark:text-gray-300 mb-2">Current Values:</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
             {(STAT_KEYS as readonly string[]).map((stat) => {
-              const s = stat as any;
-              const vipValue = (basicBonuses.vipPrestige as any)?.[s] || 0;
-              const globeValue = (basicBonuses.globe as any)?.[s] || 0;
+              const vipValue = (basicBonuses.vipPrestige as Record<string, number> | undefined)?.[stat] ?? 0;
+              const globeValue = (basicBonuses.globe as Record<string, number> | undefined)?.[stat] ?? 0;
               const totalValue = vipValue + globeValue;
               return (
                 <div key={stat} className="text-gray-400 dark:text-gray-400">

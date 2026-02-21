@@ -1,4 +1,3 @@
-import type { GearComputed, GearPiece, GearSelection, HeroGearRegistry, TroopType } from "@/features/battle-calculator/tabs/player-and-opponent/components/hero-gear/HeroGearSelectorPanel";
 import { calc_belt_infantry_ih_realistic } from "@/domain/battle/data/hero_gear/infantry_belt";
 import { calc_boot_infantry_il } from "@/domain/battle/data/hero_gear/infantry_boot";
 import { calc_glove_infantry_ih } from "@/domain/battle/data/hero_gear/infantry_glove";
@@ -11,6 +10,7 @@ import { calcBeltMarksmanMH } from "@/domain/battle/data/hero_gear/marksman_belt
 import { calc_boot_marksman_ml } from "@/domain/battle/data/hero_gear/marksman_boot";
 import { calc_glove_marksman_mh } from "@/domain/battle/data/hero_gear/marksman_glove";
 import { calcGogglesMarksmanML } from "@/domain/battle/data/hero_gear/marksman_goggles";
+import type { EmpowermentTier, GearComputed, GearPiece, GearSelection, HeroGearRegistry, TroopType } from "@/features/battle-calculator/tabs/player-and-opponent/components/hero-gear/HeroGearSelectorPanel";
 
 // ============================================================================
 // Utility Functions
@@ -60,7 +60,7 @@ function makeHealthComputed(
 ): GearComputed {
   return {
     displayLevel,
-    empowermentTier: empowermentTier as any,
+    empowermentTier: empowermentTier as EmpowermentTier,
     baseMainStatPct: baseStat,
     masteryForgeMultiplier,
     totalMainStatPct: totalStat,
@@ -87,7 +87,7 @@ function makeLethalityComputed(
 ): GearComputed {
   return {
     displayLevel,
-    empowermentTier: empowermentTier as any,
+    empowermentTier: empowermentTier as EmpowermentTier,
     baseMainStatPct: baseStat,
     masteryForgeMultiplier,
     totalMainStatPct: totalStat,

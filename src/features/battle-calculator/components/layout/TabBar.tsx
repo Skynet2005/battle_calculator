@@ -1,6 +1,16 @@
 'use client';
 
-export type TabKey = 'profile' | 'opponent' | 'rally' | 'results' | 'howto';
+export type TabKey = 'profile' | 'opponent' | 'rally' | 'results' | 'decision-engine' | 'howto';
+
+/** Sub-panels inside the Decision Engine tab (also used by hamburger menu). */
+export type DecisionEnginePanel =
+  | 'scenario-runner'
+  | 'heatmap'
+  | 'swap-lab'
+  | 'flip-levers'
+  | 'upgrade-roi'
+  | 'reports'
+  | 'calibration';
 
 type TabStatus = 'ready' | 'warning' | 'error' | 'idle';
 
@@ -24,6 +34,7 @@ const DEFAULT_TABS: Tab[] = [
   { key: 'profile', label: 'Player', shortLabel: 'Player' },
   { key: 'opponent', label: 'Opponent', shortLabel: 'Opponent' },
   { key: 'results', label: 'Results', shortLabel: 'Results' },
+  { key: 'decision-engine', label: 'Decision Engine', shortLabel: 'Tools' },
   { key: 'howto', label: 'How-to-Use', shortLabel: 'Guide' }
 ];
 
@@ -103,27 +114,34 @@ export default function TabBar({
         role="tablist"
         aria-label="Battle calculator sections"
       >
-        {tabs.map((tab, index) => (
-          <button
-            key={tab.key}
-            data-tab={tab.key}
-            role="tab"
-            aria-selected={activeTab === tab.key}
-            aria-controls={'panel-' + tab.key}
-            tabIndex={activeTab === tab.key ? 0 : -1}
-            className={`tab flex-1 min-w-0 flex flex-col items-center justify-center ${activeTab === tab.key ? 'active' : ''
-              }`}
-            onClick={() => onTabChange(tab.key)}
-            onKeyDown={(e) => handleKeyDown(e, index)}
-          >
-            <div className="flex items-center gap-1.5">
-              {tab.icon && <span className="tab-icon">{tab.icon}</span>}
-              <span className="hidden sm:inline whitespace-nowrap">{tab.label}</span>
-              <span className="sm:hidden whitespace-nowrap">{tab.shortLabel || tab.label}</span>
-            </div>
-            {renderStatusBadge(tab.key)}
-          </button>
-        ))}
+        {tabs.map((tab, index) => {
+          const isSelected = activeTab === tab.key;
+          const panelId = `panel-${tab.key}`;
+          const ariaAttrs: { 'aria-selected': 'true' | 'false'; 'aria-controls': string } = {
+            'aria-selected': isSelected ? 'true' : 'false',
+            'aria-controls': panelId
+          };
+          return (
+            <button
+              key={tab.key}
+              title={tab.label}
+              data-tab={tab.key}
+              role="tab"
+              {...ariaAttrs}
+              tabIndex={isSelected ? 0 : -1}
+              className={`tab flex-1 min-w-0 flex flex-col items-center justify-center ${isSelected ? 'active' : ''}`}
+              onClick={() => onTabChange(tab.key)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+            >
+              <div className="flex items-center gap-1.5">
+                {tab.icon && <span className="tab-icon">{tab.icon}</span>}
+                <span className="hidden sm:inline whitespace-nowrap">{tab.label}</span>
+                <span className="sm:hidden whitespace-nowrap">{tab.shortLabel || tab.label}</span>
+              </div>
+              {renderStatusBadge(tab.key)}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

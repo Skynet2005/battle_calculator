@@ -20,11 +20,11 @@ import { getChiefCharmBonuses, getChiefGearBonuses } from '@/domain/battle/data-
 import { getAllTroopDefinitionsForType } from '@/domain/battle/data-selectors';
 import { getDefaultOpponentBasicBonuses, getDefaultOpponentExpertSelections, getMaxCharmLevel } from '@/domain/battle/index';
 import { extractJoinerBonuses, extractLeaderBonuses } from '@/domain/rally/rally-bonus-extractor';
-import { useMemo } from 'react';
+import type { CapacityReport } from '@/features/battle-calculator/model/types';
 import type { HeroLevel, RallyHero, TroopMixConfig, UserProfile } from '@/shared/types';
 import { FormField, SectionCard } from '@/shared/ui';
+import { memo, useMemo } from 'react';
 import AdditiveBonusesInput from '../rally_config/additive-bonuses-input';
-import type { CapacityReport } from '@/features/battle-calculator/model/types';
 import ChiefSection from './components/chief-gear/ChiefSection';
 import HeroSelector from './components/hero/HeroSelector';
 import CapacitySummaryGrid from './components/info/capacity/capacity-summary-grid';
@@ -47,7 +47,7 @@ interface OpponentTabProps {
   onTroopMixChange: (side: 'opponent', mix: TroopMixConfig) => void;
 }
 
-export default function OpponentTab({
+function OpponentTab({
   currentProfile,
   setCurrentProfile,
   opponentSubTab,
@@ -153,7 +153,7 @@ export default function OpponentTab({
               label="Pet Skills"
               description="Include pet skills in multiplicative bonus calculations"
             >
-              <label aria-label="Pet Skills Enabled" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <label aria-label="Pet Skills Enabled" className="flex items-center gap-2 cursor-pointer">
                 <input
                   aria-label="Pet Skills Enabled"
                   type="checkbox"
@@ -170,7 +170,7 @@ export default function OpponentTab({
                       }
                     });
                   }}
-                  style={{ width: 'auto', cursor: 'pointer' }}
+                  className="w-auto cursor-pointer"
                 />
                 <span>Pet Skills Enabled</span>
               </label>
@@ -181,7 +181,7 @@ export default function OpponentTab({
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
               City bonus level for each stat (0%, 10%, or 20%)
             </p>
-            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
               {(['attack', 'defense', 'lethality', 'health'] as const).map((stat) => (
                 <FormField
                   key={stat}
@@ -297,7 +297,7 @@ export default function OpponentTab({
             collapsible
             defaultCollapsed
           >
-            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 mb-6">
               {(TROOP_TYPE_LIST as TroopType[]).map((troop) => {
                 const options = getAllTroopDefinitionsForType(troop);
                 const label = troop.charAt(0).toUpperCase() + troop.slice(1);
@@ -340,7 +340,7 @@ export default function OpponentTab({
               })}
             </div>
 
-            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 mb-6">
               <FormField
                 label="Manual Deployment Capacity Override"
                 description="Set to override calculated total (0 = use calculated)"
@@ -1189,7 +1189,7 @@ export default function OpponentTab({
               rally={currentProfile.rally}
             />
 
-            <div className="card" style={{ marginTop: '2rem' }}>
+            <div className="card mt-8">
               <h3>Additive Bonuses</h3>
               <AdditiveBonusesInput
                 bonuses={currentProfile.opponent?.additiveBonuses || createDefaultAdditiveBonuses()}
@@ -1208,7 +1208,7 @@ export default function OpponentTab({
               />
             </div>
 
-            <div className="card" style={{ marginTop: '2rem' }}>
+            <div className="card mt-8">
               <h3>Multiplicative Bonuses</h3>
               <MultiplicativeBonusesInput
                 bonuses={currentProfile.opponent?.multiplicativeBonuses || createDefaultMultiplicativeBonuses()}
@@ -1414,3 +1414,4 @@ export default function OpponentTab({
   );
 }
 
+export default memo(OpponentTab);

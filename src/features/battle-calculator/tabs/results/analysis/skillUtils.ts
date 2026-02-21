@@ -141,10 +141,10 @@ export function skillsForSide(turn: TurnLog, side: 'attacker' | 'defender') {
   });
   turn.skillsActivated?.filter((s) => s.side === side).forEach((s) => {
     const key = `${s.heroId ?? '__troop'}:${s.name}`;
-    const trigger = s.isActive ? 'Passive' : triggerMap.get(key) ?? (s as any).trigger;
+    const trigger = s.isActive ? 'Passive' : triggerMap.get(key) ?? (s as { trigger?: string }).trigger;
     push(s.name, trigger, s.succeeded, s.heroId);
   });
-  turn.skillImpacts?.filter((s) => s.side === side).forEach((s) => push(s.name, s.trigger as any, s.succeeded, s.heroId));
+  turn.skillImpacts?.filter((s) => s.side === side).forEach((s) => push(s.name, s.trigger, s.succeeded, s.heroId));
   turn.skillRolls?.filter((r) => r.side === side).forEach((r) => push(r.name, r.trigger, r.succeeded, r.heroId));
   // Dedup by name/heroId/trigger keeping first hit/miss
   const seen = new Set<string>();
