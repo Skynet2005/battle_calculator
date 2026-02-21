@@ -40,13 +40,54 @@ export function getSlotLabel(slot: SwapSlot): string {
   return SLOT_LABELS[slot];
 }
 
-/** Hero names that are valid for this slot (leader slots = same class only; joiners = all). */
-export function getCandidatesForSlot(slot: SwapSlot): string[] {
-  const requiredClass = SLOT_CLASS[slot];
-  if (requiredClass == null) {
-    return HEROES.map((h) => h['hero-name']);
+function getHeroNameInSlot(profile: UserProfile, slot: SwapSlot): string | null {
+  const rally = profile.rally;
+  if (!rally) return null;
+
+  const leaders = rally.playerLeader ?? rally.leader;
+  const joiners = rally.playerJoiners ?? rally.joiners ?? [];
+
+  if (slot === 'infantry_leader') return leaders?.infantry?.heroName ?? null;
+  if (slot === 'lancer_leader') return leaders?.lancer?.heroName ?? null;
+  if (slot === 'marksman_leader') return leaders?.marksman?.heroName ?? null;
+
+  const idx = slot === 'joiner_0' ? 0 : slot === 'joiner_1' ? 1 : slot === 'joiner_2' ? 2 : 3;
+  return joiners[idx]?.heroName ?? null;
+}
+
+function getOccupiedHeroNames(profile: UserProfile): Set<string> {
+  const occupied = new Set<string>();
+  const rally = profile.rally;
+  if (!rally) return occupied;
+
+  const leaders = rally.playerLeader ?? rally.leader;
+  const joiners = rally.playerJoiners ?? rally.joiners ?? [];
+
+  if (leaders?.infantry?.heroName) occupied.add(leaders.infantry.heroName);
+  if (leaders?.lancer?.heroName) occupied.add(leaders.lancer.heroName);
+  if (leaders?.marksman?.heroName) occupied.add(leaders.marksman.heroName);
+  for (const joiner of joiners.slice(0, 4)) {
+    if (joiner?.heroName) occupied.add(joiner.heroName);
   }
-  return HEROES_BY_CLASS[requiredClass].map((h) => h['hero-name']);
+
+  return occupied;
+}
+
+/** Hero names that are valid for this slot (leader slots = same class only; joiners = all). */
+export function getCandidatesForSlot(slot: SwapSlot, profile?: UserProfile): string[] {
+  const requiredClass = SLOT_CLASS[slot];
+  const candidates = requiredClass == null
+    ? HEROES.map((h) => h['hero-name'])
+    : HEROES_BY_CLASS[requiredClass].map((h) => h['hero-name']);
+
+  if (!profile?.rally) return candidates;
+
+  const occupied = getOccupiedHeroNames(profile);
+  const heroInCurrentSlot = getHeroNameInSlot(profile, slot);
+  if (heroInCurrentSlot) occupied.delete(heroInCurrentSlot);
+
+  // Exclude no-op swaps (same hero already in slot) and impossible duplicate lineups.
+  return candidates.filter((name) => name !== heroInCurrentSlot && !occupied.has(name));
 }
 
 const DEFAULT_HERO_LEVELS = {
@@ -100,6 +141,14 @@ export function profileWithSlotOverride(
   const heroClass = hero['hero-class'] as 'infantry' | 'lancer' | 'marksman';
   const requiredClass = SLOT_CLASS[slot];
   if (requiredClass != null && heroClass !== requiredClass) {
+    return profile;
+  }
+
+  const occupied = getOccupiedHeroNames(profile);
+  const heroInCurrentSlot = getHeroNameInSlot(profile, slot);
+  if (heroInCurrentSlot) occupied.delete(heroInCurrentSlot);
+  if (occupied.has(heroName)) {
+    // Keep lineups valid: the same hero cannot occupy two different player rally slots.
     return profile;
   }
 

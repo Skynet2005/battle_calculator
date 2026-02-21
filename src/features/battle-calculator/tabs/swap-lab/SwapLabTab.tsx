@@ -66,127 +66,134 @@ export default function SwapLabTab({
     if (!currentProfile?.rally) return;
 
     setRunning(true);
-
-    const mix = {
-      ...(currentProfile.rally.troopMix?.player ?? { infantryRatio: 33.34, lancerRatio: 33.33, marksmanRatio: 33.33 }),
-      totalTroops: capacityTotal
-    };
-
-    // Only run the selected slot unless "All slots" is chosen.
-    const slotsToRun: SwapSlot[] = selectedSlot === 'all' ? SLOTS : [selectedSlot];
-
-    const slotCandidatePairs: { slot: SwapSlot; candidate: string }[] = [];
-    for (const slot of slotsToRun) {
-      const candidates = getCandidatesForSlot(slot).slice(0, MAX_CANDIDATES_PER_SLOT);
-      for (const candidate of candidates) {
-        slotCandidatePairs.push({ slot, candidate });
-      }
-    }
-
-    const totalSwaps = slotCandidatePairs.length;
-
-    // ——— Phase 1: Fast screening ———
-    setProgress({ completed: 0, total: totalSwaps + 1, phase: 'screening' });
-
-    const baselineInput: ScenarioRunInput = {
-      profile: currentProfile,
-      playerBaseStats,
-      opponentBaseStats,
-      playerCapacityReport,
-      opponentCapacityReport,
-      playerMixOverride: {
-        ...(currentProfile.rally?.troopMix?.player ?? { infantryRatio: 33.34, lancerRatio: 33.33, marksmanRatio: 33.33 }),
+    try {
+      const mix = {
+        ...(currentProfile.rally.troopMix?.player ?? { infantryRatio: 33.34, lancerRatio: 33.33, marksmanRatio: 33.33 }),
         totalTroops: capacityTotal
+      };
+
+      // Only run the selected slot unless "All slots" is chosen.
+      const slotsToRun: SwapSlot[] = selectedSlot === 'all' ? SLOTS : [selectedSlot];
+
+      const slotCandidatePairs: { slot: SwapSlot; candidate: string }[] = [];
+      for (const slot of slotsToRun) {
+        const candidates = getCandidatesForSlot(slot, currentProfile).slice(0, MAX_CANDIDATES_PER_SLOT);
+        for (const candidate of candidates) {
+          slotCandidatePairs.push({ slot, candidate });
+        }
       }
-    };
 
-    const baselinePhase1 = runSingleScenario(baselineInput);
-    setBaselineResult(baselinePhase1);
-    const baselineWinRatePhase1 = toWinRate(baselinePhase1);
+      const totalSwaps = slotCandidatePairs.length;
+      if (totalSwaps === 0) {
+        setRows([]);
+        setProgress({ completed: 0, total: 0, phase: 'screening' });
+        return;
+      }
 
-    const results: SwapRow[] = [];
+      // ——— Phase 1: Fast screening ———
+      setProgress({ completed: 0, total: totalSwaps + 1, phase: 'screening' });
 
-    for (let i = 0; i < slotCandidatePairs.length; i++) {
-      const { slot, candidate } = slotCandidatePairs[i];
-
-      const modifiedProfile = profileWithSlotOverride(currentProfile, slot, candidate);
-
-      const input: ScenarioRunInput = {
-        profile: modifiedProfile,
+      const baselineInput: ScenarioRunInput = {
+        profile: currentProfile,
         playerBaseStats,
         opponentBaseStats,
         playerCapacityReport,
         opponentCapacityReport,
-        playerMixOverride: mix
+        playerMixOverride: {
+          ...(currentProfile.rally?.troopMix?.player ?? { infantryRatio: 33.34, lancerRatio: 33.33, marksmanRatio: 33.33 }),
+          totalTroops: capacityTotal
+        }
       };
 
-      const result = runSingleScenario(input);
-      const swapWinRatePhase1 = toWinRate(result);
+      const baselinePhase1 = runSingleScenario(baselineInput);
+      setBaselineResult(baselinePhase1);
+      const baselineWinRatePhase1 = toWinRate(baselinePhase1);
 
-      results.push({
-        slot,
-        candidate,
-        deltaWinRate: (swapWinRatePhase1 - baselineWinRatePhase1) * 100,
-        baselineWinRate: baselineWinRatePhase1,
-        swapWinRate: swapWinRatePhase1,
-        baselineWinner: baselinePhase1.summary.winner,
-        swapWinner: result.summary.winner
-      });
+      const results: SwapRow[] = [];
 
-      // Don't spam React state; update UI every few iterations.
-      if ((i + 1) % 4 === 0 || i === slotCandidatePairs.length - 1) {
-        setProgress({ completed: i + 1, total: totalSwaps + 1, phase: 'screening' });
-        setRows([...results]);
+      for (let i = 0; i < slotCandidatePairs.length; i++) {
+        const { slot, candidate } = slotCandidatePairs[i];
+
+        const modifiedProfile = profileWithSlotOverride(currentProfile, slot, candidate);
+
+        const input: ScenarioRunInput = {
+          profile: modifiedProfile,
+          playerBaseStats,
+          opponentBaseStats,
+          playerCapacityReport,
+          opponentCapacityReport,
+          playerMixOverride: mix
+        };
+
+        const result = runSingleScenario(input);
+        const swapWinRatePhase1 = toWinRate(result);
+
+        results.push({
+          slot,
+          candidate,
+          deltaWinRate: (swapWinRatePhase1 - baselineWinRatePhase1) * 100,
+          baselineWinRate: baselineWinRatePhase1,
+          swapWinRate: swapWinRatePhase1,
+          baselineWinner: baselinePhase1.summary.winner,
+          swapWinner: result.summary.winner
+        });
+
+        // Don't spam React state; update UI every few iterations.
+        if ((i + 1) % 4 === 0 || i === slotCandidatePairs.length - 1) {
+          setProgress({ completed: i + 1, total: totalSwaps + 1, phase: 'screening' });
+          setRows([...results]);
+          await new Promise((r) => setTimeout(r, 0));
+        }
+      }
+
+      results.sort((a, b) => b.deltaWinRate - a.deltaWinRate);
+      setRows(results);
+      await new Promise((r) => setTimeout(r, 0));
+
+      // ——— Phase 2: Monte Carlo refinement for top N only ———
+      const toRefine = results.slice(0, TOP_N_TO_REFINE);
+      setProgress({ completed: 0, total: toRefine.length + 1, phase: 'refining' });
+
+      const baselineRefined = await runSingleScenarioWithTrials(baselineInput, TRIALS_REFINE);
+      setBaselineResult(baselineRefined);
+      const baselineWinRate = toWinRate(baselineRefined);
+
+      for (let i = 0; i < toRefine.length; i++) {
+        const row = toRefine[i];
+
+        const modifiedProfile = profileWithSlotOverride(currentProfile, row.slot, row.candidate);
+
+        const input: ScenarioRunInput = {
+          profile: modifiedProfile,
+          playerBaseStats,
+          opponentBaseStats,
+          playerCapacityReport,
+          opponentCapacityReport,
+          playerMixOverride: mix
+        };
+
+        const result = await runSingleScenarioWithTrials(input, TRIALS_REFINE);
+        const swapWinRate = toWinRate(result);
+
+        const idx = results.findIndex((r) => r.slot === row.slot && r.candidate === row.candidate);
+        if (idx !== -1) {
+          results[idx] = {
+            ...results[idx],
+            refinedWinRate: swapWinRate,
+            refinedDelta: (swapWinRate - baselineWinRate) * 100,
+            swapWinner: result.summary.winner
+          };
+        }
+
+        setProgress({ completed: i + 1, total: toRefine.length + 1, phase: 'refining' });
+        setRows([...results].sort((a, b) => (b.refinedDelta ?? b.deltaWinRate) - (a.refinedDelta ?? a.deltaWinRate)));
         await new Promise((r) => setTimeout(r, 0));
       }
-    }
 
-    results.sort((a, b) => b.deltaWinRate - a.deltaWinRate);
-    setRows(results);
-    await new Promise((r) => setTimeout(r, 0));
-
-    // ——— Phase 2: Monte Carlo refinement for top N only ———
-    const toRefine = results.slice(0, TOP_N_TO_REFINE);
-    setProgress({ completed: 0, total: toRefine.length + 1, phase: 'refining' });
-
-    const baselineRefined = await runSingleScenarioWithTrials(baselineInput, TRIALS_REFINE);
-    setBaselineResult(baselineRefined);
-    const baselineWinRate = toWinRate(baselineRefined);
-
-    for (let i = 0; i < toRefine.length; i++) {
-      const row = toRefine[i];
-
-      const modifiedProfile = profileWithSlotOverride(currentProfile, row.slot, row.candidate);
-
-      const input: ScenarioRunInput = {
-        profile: modifiedProfile,
-        playerBaseStats,
-        opponentBaseStats,
-        playerCapacityReport,
-        opponentCapacityReport,
-        playerMixOverride: mix
-      };
-
-      const result = await runSingleScenarioWithTrials(input, TRIALS_REFINE);
-      const swapWinRate = toWinRate(result);
-
-      const idx = results.findIndex((r) => r.slot === row.slot && r.candidate === row.candidate);
-      if (idx !== -1) {
-        results[idx] = {
-          ...results[idx],
-          refinedWinRate: swapWinRate,
-          refinedDelta: (swapWinRate - baselineWinRate) * 100,
-          swapWinner: result.summary.winner
-        };
-      }
-
-      setProgress({ completed: i + 1, total: toRefine.length + 1, phase: 'refining' });
       setRows([...results].sort((a, b) => (b.refinedDelta ?? b.deltaWinRate) - (a.refinedDelta ?? a.deltaWinRate)));
-      await new Promise((r) => setTimeout(r, 0));
+    } finally {
+      setRunning(false);
     }
-
-    setRows([...results].sort((a, b) => (b.refinedDelta ?? b.deltaWinRate) - (a.refinedDelta ?? a.deltaWinRate)));
-    setRunning(false);
   }, [currentProfile, playerBaseStats, opponentBaseStats, playerCapacityReport, opponentCapacityReport, capacityTotal, selectedSlot]);
 
   return (
